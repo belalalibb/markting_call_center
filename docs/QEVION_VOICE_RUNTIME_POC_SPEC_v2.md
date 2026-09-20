@@ -1,11 +1,11 @@
 # QEVION Voice Runtime — Provider-Neutral Realtime Voice AI POC
 
-## Specification v2.0 — "SaaS-Ready, Security-Hardened, Evidence-First"
+## Specification v2.2 — "SaaS-Ready, Security-Hardened, Evidence-First"
 
 | Field | Value |
 |---|---|
 | **Document** | QEVION Voice Runtime POC Specification |
-| **Version** | 2.0 (supersedes v1.0 in its entirety) |
+| **Version** | 2.2 (supersedes v1.0 in its entirety; v2.1/v2.2 are additive revisions of v2.0) |
 | **Status** | Binding specification for the implementing agent |
 | **Date** | 2026-09-20 |
 | **Owner** | QEVION |
@@ -18,7 +18,7 @@
 
 ## ملخص تنفيذي (Executive Summary — Arabic)
 
-هذه الصياغة v2.0 تُصلح وتقوّي مواصفة الـ POC بحيث تصبح:
+هذه الصياغة v2.2 تُصلح وتقوّي مواصفة الـ POC بحيث تصبح:
 
 1. **عقود مُصدَّرة (Versioned Contracts):** كل عقد (Provider / Transport / Events / Tools / Config) له إصدار صريح `*.v1` وقواعد توافق وترحيل — لا breaking changes صامتة.
 2. **تفاوض قدرات صريح (Capability Negotiation):** الـ Core لا يفترض أن كل provider يدعم نفس الإمكانات؛ الجلسة تبدأ بمصافحة قدرات مُوثَّقة، وعدم التوافق يُنتج خطأً مصنفًا لا سلوكًا غامضًا.
@@ -32,8 +32,11 @@
 10. **عقود جاهزة للوسائط المتعددة (Multimodal-ready):** `InputEvent` وليس `TextMessage` — الصوت حالة أولى، ليس هوية العمارة.
 11. **خطة تنفيذ صارمة بمراحل وبوابات (Gates):** لا مرحلة تُغلق بدون دليل مُرفَق، وصفقة صفر تكلفة API في Phase 0.
 12. **قواعد انضباط للوكيل المنفذ:** "بدون دليل = لم يحدث" — ممنوع اختراع أرقام، ممنوع تخطي صامت للاختبارات، كل فشل يُصنَّف قبل إصلاحه.
-13. **كتالوج مخاطر غير بديهية (40+ بند):** من الـ echo الذي يكسر الـ barge-in، إلى الأرقام العربية الهندية، إلى Arabizi، إلى انقطاع الـ provider في منتصف تنفيذ أداة.
-14. **مراجع موسعة ومتحقق منها (45+ مرجعًا مصنفًا).**
+13. **بوابة قرار POC صريحة (v2.1):** لا GO/STOP ولا تغيير provider أو topology بدون عتبات ودليل إسناد موثق.
+14. **حد تكامل خارجي (v2.1):** منتجات QEVION المستقبلية تستهلك قدرة الصوت عبر عقد `integration.v1` ولا تستورد Core أو provider SDK.
+15. **كونسول اختبار للمشغّل (v2.2):** واجهة تحكم ومشاهدة لايف/سيناريوهات/حقن أعطال/Replay/تصدير أدلة فوق نفس آلة الاختبار، وليست مصدر حقيقة.
+16. **كتالوج مخاطر غير بديهية (40+ بند):** من الـ echo الذي يكسر الـ barge-in، إلى الأرقام العربية الهندية، إلى Arabizi، إلى انقطاع الـ provider في منتصف تنفيذ أداة.
+17. **مراجع موسعة ومتحقق منها (45+ مرجعًا مصنفًا).**
 
 **القاعدة الذهبية الحاكمة: صمّم للامتداد المستقبلي، ونفّذ فقط ما يثبت الـ POC. لا تحوّل إثبات مفهوم إلى مشروع Enterprise.**
 
@@ -106,7 +109,11 @@
 - **PART XI — KNOWLEDGE**
   - §43 Known Risks and Non-Obvious Problems (Catalog)
   - §44 References
-- **APPENDICES** — A: v1→v2 Change Map · B: Example Configurations · C: Repository Structure · D: Requirement-ID Index
+- **PART XII — EXTERNAL INTEGRATION BOUNDARY**
+  - §45 External Integration Boundary
+- **PART XIII — OPERATOR TEST CONSOLE**
+  - §46 Operator Test Console
+- **APPENDICES** — A: Revision History + v1→v2 Change Map · B: Example Configurations · C: Repository Structure · D: Requirement-ID Index
 
 ---
 
@@ -1279,6 +1286,21 @@ Phases are sequential. A phase closes only when its gate's evidence exists in th
 - Stop and report if a spec requirement appears impossible or contradictory (with the requirement ID) — amend via ADR, don't improvise.
 - Budget checkpoint at the end of every phase: ledger total vs budget, in the phase evidence.
 
+### POC Decision Gate
+
+The POC does not end with a vibe-based recommendation. It ends with one explicit decision, backed by the evidence pack and signed off in the final report. Thresholds are fixed before evidence collection; thresholds may be amended only by ADR before a run starts, never after seeing results.
+
+| ID | Requirement |
+|---|---|
+| **DG-01** | The final report MUST choose exactly one outcome: **GO**, **HOLD**, **CHANGE PROVIDER**, **CHANGE TOPOLOGY**, or **STOP**. It MUST NOT present an ambiguous "mostly works" conclusion. |
+| **DG-02** | The decision rubric MUST be written before Phase 4 runs begin and MUST include minimum thresholds for latency, interruption success, tool correctness, tenant isolation, security tests, stability, and cost envelope. |
+| **DG-03** | Any recommendation to change provider MUST include attribution evidence showing the limitation belongs to the provider rather than QEVION Core, the transport, configuration, prompt design, local network, or test data. |
+| **DG-04** | Any recommendation to change topology MUST include evidence that the current browser/transport/media topology, not provider behavior or Core logic, is the dominant blocker. |
+| **DG-05** | A **GO** decision MUST list remaining production gaps and MUST NOT claim production readiness, telephony readiness, legal compliance certification, or guaranteed provider parity. |
+| **DG-06** | A **HOLD** or **STOP** decision MUST preserve replayable evidence, failing fixtures, and a concise recovery plan so the work can resume without relying on memory. |
+
+The decision output is an engineering control, not a sales artifact. If the evidence is incomplete, the correct decision is **HOLD** with the missing evidence listed.
+
 ## §39. Deliverables
 
 | ID | Deliverable | Where |
@@ -1545,9 +1567,174 @@ Verified against primary sources at spec date (2026-09-20). The implementing age
 
 ---
 
+# PART XII — EXTERNAL INTEGRATION BOUNDARY
+
+## §45. External Integration Boundary
+
+This section is **design-only for the POC**. It defines how future QEVION products — social-media marketing, campaign orchestration, CRM, analytics, or operator tooling — may consume the voice runtime without importing QEVION Core internals and without depending on a specific AI provider SDK. The POC only proves that the seam is explicit and enforceable; it does not build those future products.
+
+The boundary is named `integration.v1`. It is deliberately outside the Provider and Transport contracts: providers speak to adapters, browsers speak to transports, and other QEVION products speak to the integration boundary. No caller may cross these lines for convenience.
+
+| ID | Requirement |
+|---|---|
+| **IB-01** | `integration.v1` MUST expose voice capability as stable commands, queries, and events; external QEVION products MUST NOT import Core modules, state-machine classes, provider SDK types, transport objects, prompts, or tool implementations. |
+| **IB-02** | All write-like business actions requested through the integration boundary MUST flow through the same QEVION tool pipeline, confirmation policy, idempotency ledger, trusted-field stripping, and audit events defined in §12 and §26. |
+| **IB-03** | The boundary MUST require tenant identity, actor identity, correlation identifiers, and authorization context on every command; tenant identity MUST be server-derived or verified, never accepted as a model-supplied fact. |
+| **IB-04** | Integration commands MUST be idempotent where they can create or mutate business state; retries MUST reuse the caller's idempotency key and MUST produce an observable duplicate/replay outcome rather than a second side effect. |
+| **IB-05** | Integration events MUST be normalized `event.v1` records or documented projections of them, preserving `trace_id`, `session_id`, `tenant_id`, timestamps, privacy labels, and evidence references. |
+| **IB-06** | External products MAY subscribe to session summaries, tool outcomes, handoff packets, and decision-gate reports, but they MUST NOT receive raw audio, full transcripts, or provider payloads unless an explicit privacy policy and consent event allow it. |
+| **IB-07** | The contract MUST support capability discovery so callers know which features are available for a tenant/profile/provider combination without probing implementation details. |
+| **IB-08** | Compatibility follows the repository contract-versioning policy: additive fields are allowed, breaking changes require a new version, and old consumers receive a classified compatibility error rather than a silent behavior change. |
+| **IB-09** | The POC MUST include import-boundary tests or static checks demonstrating that future integration code cannot bypass Core ownership by importing provider adapters or internal state-machine modules. |
+| **IB-10** | The POC MUST document the anti-scope: no campaign engine, CRM database, social-media scheduler, marketing analytics warehouse, or production integration gateway is built unless a later spec explicitly adds it. |
+
+### 45.1 Command/Query/Event Shape
+
+`integration.v1` is intentionally small. The minimum design surface is:
+
+```text
+IntegrationCommand
+  schema: qevion.integration_command.v1
+  command_id
+  command_type
+  tenant_id
+  actor
+  correlation_id
+  idempotency_key
+  payload
+
+IntegrationQuery
+  schema: qevion.integration_query.v1
+  query_id
+  query_type
+  tenant_id
+  actor
+  correlation_id
+  filters
+
+IntegrationEvent
+  schema: qevion.integration_event.v1
+  event_id
+  projection_of_event_id
+  tenant_id
+  trace_id
+  session_id
+  privacy_label
+  payload
+```
+
+Examples of allowed future commands include requesting a live test session for a tenant, attaching a CRM reference to a session, asking for a handoff packet, or requesting an evidence export. Examples of disallowed commands include setting prices, bypassing confirmation, injecting hidden prompts, selecting a provider by SDK object, or writing order truth directly from model output.
+
+### 45.2 Relationship to Core, Provider, and Transport
+
+The integration boundary is a **consumer-facing edge** of QEVION Core, not a new runtime brain. Core still owns policy, state transitions, tool orchestration, event normalization, privacy, cost guards, and decision gates. Provider adapters still own provider protocol mapping. Transport adapters still own browser or future telephony media concerns. Integration callers receive capabilities and evidence; they do not receive ownership of the conversation.
+
+For v2.1, acceptance is design evidence only: the spec text, a proposed schema location, an import-boundary rule, and at least one architectural test planned in §40. Implementation is intentionally deferred unless needed to prove that external QEVION products cannot tunnel through the boundary.
+
+---
+
+# PART XIII — OPERATOR TEST CONSOLE
+
+## §46. Operator Test Console
+
+The Operator Test Console is one browser cockpit for running and observing the POC. It is introduced in v2.2 because evidence collection fails when live sessions, automated scenarios, replay, failure injection, latency inspection, and exports live in separate ad-hoc scripts. The console unifies the operator experience while remaining a thin control/view layer over the same runtime and test machinery.
+
+The console is **not** the source of truth. The source of truth remains normalized events, tool ledgers, replay files, metrics records, and evidence exports. If the console disagrees with the event log, the event log wins and the console is defective.
+
+| ID | Requirement |
+|---|---|
+| **CO-01** | The console MUST run in the browser and use only documented runtime/test APIs; it MUST NOT embed provider keys, tenant secrets, privileged policy, or business truth in client-side code. |
+| **CO-02** | The console MUST support live manual sessions with tenant, voice profile, provider mode, and turn-detection mode selected from configured capabilities rather than hardcoded lists. |
+| **CO-03** | The console MUST launch the automated scenario suite and display run status, failures, classifications, and artifact links without using a separate hidden runner path. |
+| **CO-04** | The console MUST expose failure-injection controls for the POC scenarios, including provider disconnect, transport reconnect, tool timeout, malformed tool arguments, budget threshold, and replay divergence. |
+| **CO-05** | The console MUST load replay artifacts and compare replay output to the recorded baseline, highlighting event-order, state-transition, tool-result, and latency-watermark differences. |
+| **CO-06** | The console MUST show latency views for the segments defined in §27, including provider, Core, transport, client playout, and end-to-end timing with p50/p95/p99 where enough samples exist. |
+| **CO-07** | The console MUST provide evidence export as an index plus machine-readable artifacts; exports MUST reference immutable run IDs and MUST be reproducible from the underlying event and metrics stores. |
+| **CO-08** | The console MUST mark every scenario as PASS, FAIL, FLAKY, BLOCKED, or NOT RUN; NOT RUN is acceptable only with an explicit reason and must appear in the final evidence pack. |
+| **CO-09** | The console MUST distinguish observed facts from operator notes; notes may annotate evidence but MUST NOT alter normalized events, tool ledgers, replay baselines, or decision-gate metrics. |
+| **CO-10** | The console MUST enforce the same privacy posture as the runtime: recording defaults, consent status, redaction, transcript visibility, and export permissions must follow tenant policy. |
+| **CO-11** | The console MUST emit audit events for privileged actions such as starting live sessions, running failure injection, exporting evidence, changing scenario configuration, or marking a run blocked. |
+| **CO-12** | The console MUST remain optional for headless CI: every scenario, replay, failure injection, and evidence export available in the UI MUST also be runnable through scripted commands. |
+
+### 46.1 Console Views
+
+The minimal console contains these views:
+
+1. **Session cockpit** — microphone/speaker state, current tenant/profile/provider capabilities, session state, live transcript projection, tool timeline, handoff packet preview, and budget meter.
+2. **Scenario runner** — scenario selection, seed/config display, run progress, failure class, artifacts, and rerun controls.
+3. **Failure lab** — explicit injection toggles with warnings, expected outcomes, and links to the corresponding runbook entries.
+4. **Replay inspector** — event stream, state-machine trace, tool ledger, divergence view, and replay determinism summary.
+5. **Latency board** — segment histograms, watermarks, samples, clock-offset notes, and provider/QEVION/transport attribution labels.
+6. **Evidence export** — evidence index, privacy labels, hashes, environment summary, command history, and final report references.
+
+### 46.2 Console Anti-Scope
+
+The console MUST NOT become an admin panel, CRM, campaign manager, production monitoring platform, data labeling system, analytics warehouse, or prompt-editing studio. It exists to make the POC observable, repeatable, and auditable. If a feature does not help produce evidence for the gates in §38, it belongs outside this POC.
+
+### 46.3 Acceptance for v2.2
+
+For this specification revision, the console requirement is architectural and test-planning binding. The implementation phase may satisfy it incrementally: first by a minimal live-session/test-run view, then by replay and failure injection, then by latency and export panels. At every stage, the UI must drive the same commands that headless tests use so the team never has two meanings for a passing scenario.
+
+### 46.4 Evidence Export Manifest
+
+Every console export SHOULD include a manifest that can be inspected without opening the UI. The manifest is not a new evidence store; it is an index over existing artifacts. A minimal manifest shape is:
+
+```yaml
+schema: qevion.evidence_export.v1
+export_id: <uuid>
+generated_at: <iso8601>
+generated_by: <actor_id>
+tenant_id: <tenant_id>
+run_id: <run_id>
+commit_sha: <git_sha>
+scenario_set: <name>
+environment:
+  os: <value>
+  python: <value>
+  node: <value>
+  browser: <value>
+privacy:
+  recording_enabled: <bool>
+  consent_event_id: <event_id_or_null>
+  redaction_profile: <profile>
+artifacts:
+  events: evidence/runs/<run_id>/events.jsonl
+  metrics: evidence/runs/<run_id>/metrics.jsonl
+  replay: evidence/runs/<run_id>/replay.json
+  audio: evidence/runs/<run_id>/audio/
+  report: evidence/runs/<run_id>/report.md
+hashes:
+  events_sha256: <sha256>
+  metrics_sha256: <sha256>
+  replay_sha256: <sha256>
+claims:
+  - claim: <short statement>
+    evidence: <artifact path + line/span/run reference>
+```
+
+The final report may quote the manifest, but the manifest never replaces raw artifacts. If an artifact is too large for Git, the committed evidence index must state where it lives, how it was produced, and how integrity is verified.
+
+### 46.5 Manual Operator Workflow
+
+The recommended manual workflow is: select tenant/profile/provider, run budget preflight, start session, observe capability negotiation, complete or abort the scenario, export evidence, then mark the run with a classified outcome. Operators must not edit the transcript to make a run look cleaner; corrections belong in notes and follow-up fixtures.
+
+---
+
 # APPENDICES
 
-## Appendix A — v1 → v2 Change Map
+## Appendix A — Revision History and v1 → v2 Change Map
+
+### A.1 Revision History
+
+| Version | Revision intent | Binding additions |
+|---|---|---|
+| **v2.0** | Replaces v1 with a SaaS-ready, provider-neutral, security-hardened POC specification. | Versioned contracts, capability negotiation, Core-owned state, idempotent tools, replay, privacy, tenant isolation, cost accounting, security, evaluation, and evidence discipline. |
+| **v2.1** | Adds the decision discipline needed to conclude the POC honestly and the integration seam needed by future QEVION products. | Explicit POC decision gate, provider/topology-change attribution rules, and `integration.v1` as a design-only external boundary. |
+| **v2.2** | Adds a single operator cockpit for running, observing, replaying, injecting failures, inspecting latency, and exporting evidence. | Operator Test Console requirements as a control/view layer over the same runtime, tests, metrics, replay, and evidence machinery. |
+
+Revision history is intentionally kept inside this specification so PRs and future implementation work can cite the governing document rather than rely on lost branch history or chat context.
+
+### A.2 v1 → v2 Change Map
 
 | v2 addition (from the operator's 15-point review) | Where it is now binding |
 |---|---|
@@ -1675,12 +1862,12 @@ qevion/
 
 ## Appendix D — Requirement-ID Prefix Index
 
-`GR` golden rules · `SC/AS` scope · `AR` architecture · `FN` foundation · `MT` media topology · `CV` contract versioning · `EV` events · `PC` provider contract · `TC` transport contract · `TD` turn detection · `TL` tools · `HH` handoff · `VP` voice profiles · `TN` tenant config · `SM` state machines · `IN` interruption · `CM` context · `NC` natural conversation · `LG` language · `MT2` multi-tenancy · `PV` privacy · `CA` cost accounting · `SE` security · `LB` latency · `AP` adapter performance · `AQ` audio quality · `TS` test strategy · `EH` eval harness · `FC` failure classification · `RS` resilience · `OB` observability · `CG` cost guards · `CFG` config management · `AC` acceptance · `XD` execution discipline · `D-*` deliverables · `RK` risks.
+`GR` golden rules · `SC/AS` scope · `AR` architecture · `FN` foundation · `MT` media topology · `CV` contract versioning · `EV` events · `PC` provider contract · `TC` transport contract · `TD` turn detection · `TL` tools · `HH` handoff · `VP` voice profiles · `TN` tenant config · `SM` state machines · `IN` interruption · `CM` context · `NC` natural conversation · `LG` language · `MT2` multi-tenancy · `PV` privacy · `CA` cost accounting · `SE` security · `LB` latency · `AP` adapter performance · `AQ` audio quality · `TS` test strategy · `EH` eval harness · `FC` failure classification · `RS` resilience · `OB` observability · `CG` cost guards · `CFG` config management · `AC` acceptance · `DG` POC decision gate · `IB` integration boundary · `CO` operator console · `XD` execution discipline · `D-*` deliverables · `RK` risks.
 
 *(IDs are grep-able: every normative requirement in this document can be cited as `SPEC-ID` in ADRs, commits, tests, and failure reports.)*
 
 ---
 
-**END OF SPECIFICATION v2.0**
+**END OF SPECIFICATION v2.2**
 
 *The purpose of this POC is to obtain engineering evidence before committing to the next layer. Evidence, not optimism. Boundaries, not frameworks. QEVION owns the Core; everything else is replaceable.*
