@@ -408,7 +408,9 @@ class SessionLifecycle(SessionCore):
             ActivityState.COLLECTING,
             ActivityState.ENGAGED,
         ):
-            await self.activity_fire(ActivityTrigger.FIELDS_COMPLETE, "all required satisfied", authority="core:field_store")
+            await self.activity_fire(
+                ActivityTrigger.FIELDS_COMPLETE, "all required satisfied", authority="core:field_store"
+            )
         await self.refresh_instructions()
 
 
@@ -440,7 +442,9 @@ class SessionTools(SessionLifecycle):
         if out.status is not ToolOutcomeStatus.COMPLETED:
             failed = out.status in (ToolOutcomeStatus.FAILED, ToolOutcomeStatus.TIMEOUT, ToolOutcomeStatus.UNKNOWN)
             if failed and self.activity.state is ActivityState.EXECUTING:
-                await self.activity_fire(ActivityTrigger.EXECUTION_FAILED, out.status.value, authority="core:tool_pipeline")
+                await self.activity_fire(
+                    ActivityTrigger.EXECUTION_FAILED, out.status.value, authority="core:tool_pipeline"
+                )
             return
         match out.tool_id:
             case PlatformTool.RECORD_FIELD:
@@ -454,11 +458,15 @@ class SessionTools(SessionLifecycle):
                 await self.activity_fire(ActivityTrigger.AMBIGUITY, "clarify tool", authority="core:tool_pipeline")
             case PlatformTool.REQUEST_HANDOFF:
                 await self.request_handoff(
-                    str(args.get("reason", "requested")), str(args.get("destination_ref", "default")), HandoffProposer.MODEL
+                    str(args.get("reason", "requested")),
+                    str(args.get("destination_ref", "default")),
+                    HandoffProposer.MODEL,
                 )
             case PlatformTool.COLLECT_QUESTION:
                 topic = str(args.get("topic", ""))
-                self.facts.coverage_misses.append(CoverageMissEntry(ts_ms=now, topic=topic, behavior_applied="COLLECT_QUESTION"))
+                self.facts.coverage_misses.append(
+                    CoverageMissEntry(ts_ms=now, topic=topic, behavior_applied="COLLECT_QUESTION")
+                )
                 await self.emit(EventType.COVERAGE_MISS, {"topic": topic})
             case PlatformTool.SCHEDULE_CALLBACK:
                 self.facts.flags.add("callback_scheduled")
@@ -479,7 +487,12 @@ class SessionTools(SessionLifecycle):
         res = await self.deps.decision.decide(
             DecisionRequest(
                 kind=DecisionKind.VALIDATE_FIELD,
-                inputs={"value": value, "type": spec.type, "validation": spec.validation, "enum_values": spec.enum_values},
+                inputs={
+                    "value": value,
+                    "type": spec.type,
+                    "validation": spec.validation,
+                    "enum_values": spec.enum_values,
+                },
             )
         )
         await self.emit(
@@ -488,7 +501,9 @@ class SessionTools(SessionLifecycle):
         )
         if res.source is DecisionSource.UNKNOWN or res.value is None:
             self.objectives.add(ObjectiveKind.COLLECT_FIELD, name, priority=1, ts_ms=self.clock(), note=res.reason)
-            await self.activity_fire(ActivityTrigger.FIELD_NEEDED, f"{name} invalid: {res.reason}", authority="core:decision")
+            await self.activity_fire(
+                ActivityTrigger.FIELD_NEEDED, f"{name} invalid: {res.reason}", authority="core:decision"
+            )
             return
         fv = self.fields.record(
             name, res.value, out.provenance, turn_id=self.turn_id, tool_call_id=out.call_id, ts_ms=self.clock()
@@ -523,7 +538,9 @@ class SessionTools(SessionLifecycle):
                 turn_count=self.facts.turn_count,
             ),
         )
-        await self.emit(EventType.HANDOFF_REQUESTED, {"handoff_id": hid, "reason": reason, "destination": destination_ref})
+        await self.emit(
+            EventType.HANDOFF_REQUESTED, {"handoff_id": hid, "reason": reason, "destination": destination_ref}
+        )
         accepted = True
         if self.deps.handoff_sink:
             res = await self.deps.handoff_sink.handoff(req)
@@ -533,7 +550,9 @@ class SessionTools(SessionLifecycle):
             return None
         self.facts.handoff_ref = hid
         self.facts.handoff_ids.append(hid)
-        self.facts.routing_history.append(RouteEntry(ts_ms=self.clock(), target="human", ref=destination_ref, reason=reason))
+        self.facts.routing_history.append(
+            RouteEntry(ts_ms=self.clock(), target="human", ref=destination_ref, reason=reason)
+        )
         await self.emit(EventType.ROUTE_REQUESTED, {"target": "human", "ref": destination_ref})
         await self.activity_fire(ActivityTrigger.HANDOFF, reason, authority="core:handoff")
         return hid
@@ -579,9 +598,24 @@ class SessionInterruption(SessionTools):
         self.facts.interruption_count += 1
         self.interruptions.append(rec)
         t1 = rec.t1_barge_in_detected
-        self._latency("barge_in_to_cancel", Watermark.T1_BARGE_IN_DETECTED, Watermark.T2_CANCEL_SENT_TO_PROVIDER, rec.t2_cancel_sent - t1)
-        self._latency("barge_in_to_playout_stop", Watermark.T1_BARGE_IN_DETECTED, Watermark.T3_PLAYOUT_STOPPED_CLIENT, rec.t3_playout_stopped - t1)
-        self._latency("barge_in_to_reconciled", Watermark.T1_BARGE_IN_DETECTED, Watermark.T4_STATE_RECONCILED, rec.t4_state_reconciled - t1)
+        self._latency(
+            "barge_in_to_cancel",
+            Watermark.T1_BARGE_IN_DETECTED,
+            Watermark.T2_CANCEL_SENT_TO_PROVIDER,
+            rec.t2_cancel_sent - t1,
+        )
+        self._latency(
+            "barge_in_to_playout_stop",
+            Watermark.T1_BARGE_IN_DETECTED,
+            Watermark.T3_PLAYOUT_STOPPED_CLIENT,
+            rec.t3_playout_stopped - t1,
+        )
+        self._latency(
+            "barge_in_to_reconciled",
+            Watermark.T1_BARGE_IN_DETECTED,
+            Watermark.T4_STATE_RECONCILED,
+            rec.t4_state_reconciled - t1,
+        )
         await self.emit(
             EventType.LATENCY_SAMPLE,
             {
@@ -609,7 +643,9 @@ class SessionInterruption(SessionTools):
         loop = asyncio.get_running_loop()
         fut: asyncio.Future[bool | None] = loop.create_future()
         self._pending_confirm[inv.call_id] = fut
-        await self.activity_fire(ActivityTrigger.CONFIRM_NEEDED, f"tool {inv.tool_id}", authority="core:confirmation_gate")
+        await self.activity_fire(
+            ActivityTrigger.CONFIRM_NEEDED, f"tool {inv.tool_id}", authority="core:confirmation_gate"
+        )
         await self.dialog_fire("confirmation_needed")
         await self._send(
             ServerMessageType.CONFIRMATION_REQUEST,
@@ -646,11 +682,18 @@ class SessionInterruption(SessionTools):
         res = await self.confirmer.interpret(text)
         await self.emit(
             EventType.DECISION_MADE,
-            {"kind": "interpret_confirmation", "source": res.source.value, "value": res.value, "confidence": res.confidence},
+            {
+                "kind": "interpret_confirmation",
+                "source": res.source.value,
+                "value": res.value,
+                "confidence": res.confidence,
+            },
         )
         call_id = next(iter(self._pending_confirm))
         if res.ambiguous:
-            await self.activity_fire(ActivityTrigger.AMBIGUITY, "ambiguous confirmation", authority="core:confirmation_interpreter")
+            await self.activity_fire(
+                ActivityTrigger.AMBIGUITY, "ambiguous confirmation", authority="core:confirmation_interpreter"
+            )
             await self.emit(EventType.USER_SPEECH_DISCARDED, {"reason": "ambiguous confirmation; re-ask"})
             return True
         return self.resolve_confirmation(call_id, res.value)
@@ -747,12 +790,15 @@ class Session(SessionInterruption):
             case ClientMessageType.PLAYOUT_STOPPED:
                 self._playout_stopped.set()
                 await self.emit(
-                    EventType.TRANSPORT_PLAYOUT_STOPPED, {"response_id": msg.response_id, "client_ts_ms": msg.client_ts_ms}
+                    EventType.TRANSPORT_PLAYOUT_STOPPED,
+                    {"response_id": msg.response_id, "client_ts_ms": msg.client_ts_ms},
                 )
             case ClientMessageType.PLAYOUT_STARTED:
                 await self.emit(EventType.TRANSPORT_PLAYOUT_STARTED, {"response_id": msg.response_id})
             case ClientMessageType.AUDIO_COMMIT:
-                await self.handle_turn_event(TurnEvent(type=TurnEventType.END_OF_TURN, ts_ms=self.clock(), detector="client"))
+                await self.handle_turn_event(
+                    TurnEvent(type=TurnEventType.END_OF_TURN, ts_ms=self.clock(), detector="client")
+                )
             case ClientMessageType.BYE:
                 await self.close("user_bye")
             case ClientMessageType.PING:
@@ -808,11 +854,16 @@ class Session(SessionInterruption):
                     tr.cancelled = True
                 self._playout_stopped.set()
             case S2SEventType.INPUT_TRANSCRIPT:
-                await self.emit(EventType.USER_SPEECH_COMMITTED, {"transcript": True, **_digest(ev.text or "")}, source=src)
+                await self.emit(
+                    EventType.USER_SPEECH_COMMITTED, {"transcript": True, **_digest(ev.text or "")}, source=src
+                )
             case S2SEventType.ERROR:
                 await self.emit(
                     EventType.PROVIDER_ERROR,
-                    {"code": ev.error.code if ev.error else "unknown", "retryable": bool(ev.error and ev.error.retryable)},
+                    {
+                        "code": ev.error.code if ev.error else "unknown",
+                        "retryable": bool(ev.error and ev.error.retryable),
+                    },
                     source=src,
                 )
                 if not (ev.error and ev.error.retryable):
@@ -859,7 +910,11 @@ class Session(SessionInterruption):
                 await self.emit(EventType.TRANSPORT_DISCONNECTED, {"reason": "client eof"})
                 await self.close("client_disconnected")
 
-        tasks = [asyncio.create_task(pump_provider()), asyncio.create_task(pump_audio_out()), asyncio.create_task(pump_client())]
+        tasks = [
+            asyncio.create_task(pump_provider()),
+            asyncio.create_task(pump_audio_out()),
+            asyncio.create_task(pump_client()),
+        ]
         try:
             await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
             if not self._closed:
