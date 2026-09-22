@@ -1,5 +1,6 @@
 [importlinter]
 root_package = qevion
+include_external_packages = True
 
 [importlinter:contract:core-imports-contracts-only]
 name = Core imports contracts only (QV-ACC-004, ADR-0002)
