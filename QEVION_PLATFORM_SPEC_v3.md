@@ -478,3 +478,304 @@ DRAFT → DISCOVERY_IN_PROGRESS → NEEDS_INFORMATION ⇄ NEEDS_CONFIGURATION �
 | QV-VER-002 | The audit path is reconstructible: conversation → proposal → decision → Blueprint → validation → simulation → version → activation. |
 | QV-VER-003 | Approval is an explicit operator action with identity and timestamp; the Copilot cannot approve. |
 | QV-VER-004 | Quality-loop recommendations (§48) create proposals against a new draft, never mutations of an active version. |
+
+---
+
+# PART V — CONVERSATION RUNTIME CORE
+
+## §19. Runtime and State Machines
+
+**The model is never the state machine. It proposes; the Core owns, validates, and executes every transition.** Three state families are kept separate (never one blob): **transport/media state** (audio streaming, connection), **dialog state** (who is speaking, turn boundaries), **activity/business state** (what is being accomplished, fields, confirmations).
+
+### 19.1 Dialog machine (turn-level, per session; generic, fixed)
+
+```text
+IDLE ─user_speech_started→ USER_SPEAKING ─end_of_turn→ THINKING ─response_started→ SPEAKING ─response_ended→ IDLE
+THINKING ─tool_call→ WAITING_TOOL ─tool_done→ THINKING          THINKING/SPEAKING ─confirmation_gate→ WAITING_CONFIRMATION
+SPEAKING ─interruption_detected→ (cancel) → USER_SPEAKING        any ─transport_failed|provider_fatal|guard→ DEGRADED → CLOSED
+```
+
+### 19.2 Activity machine (business-level; **data-driven**)
+
+Default generic table (shipped as data, overridable per Activity):
+
+```text
+OPENING → ENGAGED ⇄ COLLECTING ⇄ RESOLVING → CONFIRMING → EXECUTING → CLOSING → ENDED
+ENGAGED/COLLECTING/RESOLVING ⇄ CLARIFYING           any → ESCALATED (handoff) | ABANDONED | BLOCKED
+```
+Phases are generic vocabulary; the *meaning* of "resolving" or "executing" comes from the Activity's fields, tools, and completion rules — never from Core code.
+
+| ID | Requirement |
+|---|---|
+| QV-RT-001 | Both machines use explicit transition tables (state × trigger → state, guards) validated at startup for totality (every state has a path to ENDED/CLOSED). Illegal transitions are rejected and logged; no undefined state. |
+| QV-RT-002 | Activity-machine tables are Activity data (`activity_machine` in the Blueprint or a referenced table). Core ships one generic default; no Activity-specific table exists in Core code. |
+| QV-RT-003 | Authorities: normalized events (dialog machine); Core-validated tool results, field-completion evaluation, policy decisions, confirmation interpreter (activity machine). Model text alone never transitions the activity machine. |
+| QV-RT-004 | Entry to `CLARIFYING` only via Core ambiguity policy or the `clarify` tool; entry to `CONFIRMING` only via the confirmation gate; `EXECUTING` only after granted confirmation for write tools; `ENDED` only when completion/failure/exit rules evaluate true. |
+| QV-RT-005 | Every transition emits `state.changed{machine, from, to, reason, authority}`. |
+| QV-RT-006 | Activity state (phase + FieldStore summary + pending objectives) is passed to the provider as structured data so the model is *informed*, never able to *set* it. |
+| QV-RT-007 | Optional `constrained_flow` mode executes declared steps in order while retaining all guards; it is configuration, never Core default. |
+| QV-RT-008 | Core decisions depend only on events + config + injected clock + seeded RNG (replay determinism, §45). |
+
+### 19.3 FieldStore with provenance
+
+| ID | Requirement |
+|---|---|
+| QV-FLD-001 | `FieldStore = map<field_name, {value, provenance, source_event_ref, ts, version}>`; field names come from the Activity. |
+| QV-FLD-002 | Provenance upgrades happen ONLY via tool results (`TOOL_VERIFIED`) or Core logic (`SYSTEM_DERIVED`, `KNOWLEDGE_APPROVED`). A customer saying "أنا محمد ورقم حسابي ١٢٣٤" stays `USER_STATED` until a lookup tool verifies it. Model text never upgrades provenance. |
+| QV-FLD-003 | Fields have versions; corrections create new versions (rollback available); confirmation binds to a FieldStore version (no confirmation loops; re-confirm only if bound fields changed). |
+| QV-FLD-004 | **Nothing-is-lost:** information mentioned beyond required fields goes to `observations[]` with event refs; retained per retention policy. |
+| QV-FLD-005 | Completion rules evaluate against FieldStore + provenance (e.g., `required_fields_satisfied(customer_reference: TOOL_VERIFIED)`). |
+
+## §20. Context, Memory, Reference Resolution
+
+| ID | Requirement |
+|---|---|
+| QV-CTX-001 | Context units: `system` (instructions composed from Blueprint + locale pack + voice profile), `tools_schema`, `activity_state` (phase, FieldStore, pending objectives, entity focus), `knowledge_snippets` (approved, bounded, delimited), `recent_turns` (bounded verbatim), `long_summary` (compactor hook; default truncation + reliance on structured state). |
+| QV-CTX-002 | Full history is never resent every turn; a per-provider context budget bounds `recent_turns`; overflow goes through `ContextCompactor` (summarizer implementation DEFERRED). |
+| QV-CTX-003 | **Provider session loss ≠ conversation loss.** On provider disconnect the Core re-seeds a new provider session from a `ContextSnapshot` (system + activity_state + FieldStore + bounded turns + reconciled transcript). Demonstrated by test. |
+| QV-CTX-004 | **Entity Focus Stack** (Core-owned): recently referenced entities/offers/tool results/questions with recency and salience; passed to the model as structured data; used by the Core to validate model-proposed references ("مكوناته إيه؟" → resolves to the burger entity in focus). Reference resolution is explicit in the architecture, not implicit in the prompt. |
+| QV-CTX-005 | Memory stores are separate: Conversation State · Session State · Customer Profile (deferred) · Customer Context (deferred) · Learned Preferences (deferred) · Evidence/Confidence. Persistent memory sits behind an abstraction boundary. |
+| QV-CTX-006 | Context assembly time is measured (target p95 < 20 ms excluding provider calls). |
+
+## §21. Conversation Intelligence
+
+Intent is one runtime signal, not the mental model. The runtime MUST support: information requests, follow-ups, contextual references, grounded recommendations, grounded comparisons, corrections, clarification, topic switching, multi-intent, preferences, objections, casual turns, confirmation, contradiction, incomplete and ambiguous language.
+
+| ID | Requirement |
+|---|---|
+| QV-CI-001 | **Multi-intent:** compound requests create multiple `PendingObjective`s; none is dropped because another was detected first; each is resolved or explicitly deferred with a record. |
+| QV-CI-002 | **Topic switching:** switching preserves prior objectives and entity focus; return is possible; switching never resets state, duplicates questions, or forgets requirements. |
+| QV-CI-003 | **Corrections** are first-class events (`user.correction{target: field\|entity\|intent, from, to}`): detected (deterministic locale-pack cues + decision-port signal), applied as FieldStore version changes / focus updates, acknowledged, and confirmations re-bound. |
+| QV-CI-004 | **Ambiguity:** when a request maps to multiple entities/quantities/options or to unavailable items, the agent asks exactly ONE focused clarification via the `clarify` tool (measurable). Guessing on material ambiguity is an evaluation failure. |
+| QV-CI-005 | **Recommendations** and **comparisons** are grounded: produced via `recommend`/`compare_entities` platform tools over approved knowledge, preferences, eligibility, availability, offers; the runtime distinguishes factual difference / inferred preference / recommendation; no manufactured facts; no forced recommendation when data is insufficient. |
+| QV-CI-006 | **Silence handling:** after N s (locale/voice profile), offer help once, again at a longer threshold; never interrogate. |
+| QV-CI-007 | **Naturalness** comes from understanding, relevance, continuity, timing, concise/full responses as needed, natural clarification/correction/recovery, controlled variation, avoiding repetition — never from random filler, scripted sympathy, exaggerated friendliness, fake pauses, or emotional performance. Evaluated behaviorally (§44). |
+| QV-CI-008 | **Repetition root-cause:** a `RepetitionDetector` flags near-duplicate agent turns and emits `failure.classified{category ∈ missing_capability, missing_knowledge, context_failure, state_failure, entity_resolution_failure, provider_limitation, configuration_issue, hardcoded_fallback, tool_failure, memory_failure, language_failure, interruption_reconciliation_failure}` with a state snapshot — never just "agent repeated itself". |
+
+## §22. Business Truth, Claim Governance, Provenance
+
+| ID | Requirement |
+|---|---|
+| QV-TRUTH-001 | Business truth comes only from validated tenant data, approved knowledge, authorized tool results, verified provider responses (e.g., transcripts as evidence of what was said), and system state. The LLM reasons over truth; it never becomes truth by confidence. |
+| QV-TRUTH-002 | **Claim Governor** (Core): every agent response is checked before/while it is spoken for claims of type price, availability, eligibility, guarantee, timing/delivery, discount, policy statement, identity assertion. Detection: deterministic patterns from the locale pack (numbers + currency, eligibility phrases) + `decision.v1` `assert` questions ("does this text state a price not present in tool results?"). |
+| QV-TRUTH-003 | Claim states: `allowed` (policy permits and source exists) · `verified` (backed by TOOL_VERIFIED/KNOWLEDGE_APPROVED) · `uncertain` · `prohibited` · `unsupported`. Unsupported/prohibited claims trigger the configured action: `block_and_regenerate` (default), `redact`, `state_limitation`, `handoff`; every decision emits `claim.checked`. |
+| QV-TRUTH-004 | **Uncertainty policy** (§12) governs missing, conflicting, stale, and ambiguous information; the runtime never continues with fabricated data. |
+| QV-TRUTH-005 | Spoken numbers/quantities/prices in read-backs are generated from FieldStore/tool results (structured read-back), not free recall; tested by comparing spoken transcript to structured state. |
+| QV-TRUTH-006 | Provenance categories (`USER_STATED, TOOL_VERIFIED, SYSTEM_DERIVED, KNOWLEDGE_APPROVED, UNVERIFIED, UNKNOWN`) apply to fields, outcome data, and knowledge facts; downstream consumers can always distinguish customer-stated from verified from inferred. |
+
+## §23. Tools
+
+Tools are the **only** way the model affects the world.
+
+### 23.1 Platform tools (generic, Core-registered; Activity binds them to tenant data via tool backends)
+
+`lookup_knowledge(query, entity_type?)` · `get_entity(entity_type, entity_id)` · `list_entities(entity_type, filter)` · `compare_entities(ids[])` · `recommend(criteria)` · `check_rule(rule_id, inputs)` (eligibility/availability/hours) · `compute_quote(items[])` (server-side pricing from tenant data) · `record_field(name, value)` (USER_STATED capture) · `verify_field(name, via_backend)` (→ TOOL_VERIFIED) · `clarify(question, options[])` · `request_handoff(reason)` · `submit_record(record_type, payload)` (**write**; schema from Activity; idempotent) · `schedule_callback(when)` (write) · `collect_question(text)` (unknown-question policy). Activity-specific tools = `tool_backend.v1` adapters + registry entries — never Core code.
+
+### 23.2 Contract (`qevion.tool.v1`)
+
+`ToolSpec{tool_id, version, description, parameters: JSONSchema (strict), result: JSONSchema, impact: read|write|escalation, confirmation: none|confirm_before_execute, idempotency: natural|guarded, timeout_ms, authorization_scope, failure_injection}` · `ToolCallRequest{request_id, tool_id, arguments, idempotency_key (Core-generated), tenant_id (server-injected), session_id, turn_id}` · `ToolCallResult{request_id, status: completed|rejected|failed|awaiting_confirmation|duplicate, result?, error?{code, message, retriable}, duration_ms, audit_ref}`.
+
+### 23.3 Execution pipeline (normative order; no step skipped or reordered)
+
+```text
+1 receive → 2 dedupe (idempotency ledger; duplicate → recorded result + tool.duplicate_ignored)
+→ 3 validate args (strict schema; unknown fields rejected → tool.args_invalid, model-recoverable)
+→ 4 policy & authorization (tool allowed for tenant ∩ activity; scope) → 5 business rules via backend (existence, availability, quantities, prices from tenant data)
+→ 6 trusted-field injection/stripping (tenant_id, prices, availability, field versions never from model)
+→ 7 confirmation gate (write/confirm tools: park, emit tool.confirmation_requested; grant only via ConfirmationInterpreter §24)
+→ 8 execute (timeout; single retry only if guarded AND retriable; execution_status proposed→executing→completed|failed|unknown persisted)
+→ 9 validate result schema → 10 audit + events → 11 return normalized result
+```
+
+| ID | Requirement |
+|---|---|
+| QV-TOOL-001 | Pipeline order above is normative. |
+| QV-TOOL-002 | All write tools are idempotent under `idempotency_key`; duplicate `submit_record` returns the first result (test). |
+| QV-TOOL-003 | `execution_status=unknown` (connection lost mid-write) triggers reconciliation, never blind retry. |
+| QV-TOOL-004 | Model arguments never override trusted fields; violations are stripped/rejected and audited. |
+| QV-TOOL-005 | Structured, actionable errors to the model (e.g., `entity_not_found` with closest matches); never stack traces. |
+| QV-TOOL-006 | Tool backends (`tool_backend.v1`) are adapters: `in_memory_tenant_data` (POC), `http` (DEFERRED). Backends never call AI providers. |
+| QV-TOOL-007 | Per-tool timeouts and session budget bound execution; a hung tool degrades the turn, never the session. |
+| QV-TOOL-008 | The POC backend supports scriptable failure injection (timeout, error, malformed result). |
+| QV-TOOL-009 | Every tool invocation records tool version, backend id, and authority (`model_proposed`, `core_policy`, `operator_console`). |
+
+## §24. Confirmation
+
+| ID | Requirement |
+|---|---|
+| QV-CONF-001 | Confirmation is required for: write-impact tools, irreversible actions, high-impact transactions, outbound commitments, and any tool the Activity marks `confirm_before_execute`. Who decides = Activity permissions + tenant policy (data), enforced by Core. |
+| QV-CONF-002 | Confirmation is granted ONLY by the Core-owned deterministic `ConfirmationInterpreter`: locale-pack affirm/negate/backchannel sets first; ambiguity → `decision.v1` `choose(affirm|negate|unclear)` with confidence threshold scaled by impact; unclear → ask again (once), then policy. Model text saying "the user confirmed" is never sufficient. |
+| QV-CONF-003 | Confirmation binds to a FieldStore version; a changed draft after confirmation forces re-confirmation; one confirmation per version (no loops). |
+| QV-CONF-004 | Read-back before confirmation is structured (from FieldStore/tool results), dialect-appropriate via locale pack. |
+| QV-CONF-005 | Interruption during a pending write: await bounded completion, apply result to versioned FieldStore, force re-confirmation if changed; never cancel a write mid-side-effect. |
+| QV-CONF-006 | All confirmation events are audit-grade (`tool.confirmation_requested/granted/denied` with interpreter evidence). |
+
+## §25. Human Handoff (`qevion.handoff.v1`)
+
+| ID | Requirement |
+|---|---|
+| QV-HAND-001 | Handoff is a Core decision (policy validation of model proposals + Core triggers: repeated misunderstanding counters, unresolved ambiguity, tool failures, unsupported request, policy restriction, complaint, operational exception, escalation rule, business-defined condition, explicit user request). |
+| QV-HAND-002 | `HandoffRequest{reason, priority, context: ConversationSnapshotRef (transcript digest, FieldStore with provenance, activity state, entity focus, turn count, outcome-so-far), proposed_by: model\|policy\|guard, destination_ref}` → `HandoffResult{handoff_id, accepted, destination, sink_ref}`. |
+| QV-HAND-003 | Destinations are pluggable `handoff_sink.v1`: `console_state` (POC terminal UI state), `jsonl` (POC), `webhook_stub` (POC local), future: human inbox, ticket, CRM, queue, phone transfer adapter. |
+| QV-HAND-004 | Triggers are Activity/tenant data; events `handoff.requested` + `handoff.acknowledged` carry full reason + snapshot ref. A log line alone is not a handoff. |
+| QV-HAND-005 | Snapshot content is bounded, structured, redaction-aware (no raw audio, no secrets). |
+
+## §26. Outcome Engine (`qevion.outcome.v1`)
+
+| ID | Requirement |
+|---|---|
+| QV-OUT-001 | Every session produces an `Outcome` **generated deterministically by the Core** from events + FieldStore + completion rules: `outcome_id, session_id, tenant_id, line_id, activity_id, activity_version, direction, channel, primary, secondary[] (compound allowed: accepted + callback_requested), collected_fields (with provenance), verified_fields, inferred_fields, rejected_fields, observations, next_actions[], handoff_ref?, policy_versions, knowledge_versions, tool_provenance[], timestamps, evidence_refs`. |
+| QV-OUT-002 | Primary/secondary enums are Activity-extensible (base set in §9.1). A transcript summary is NOT an outcome; free-text summary MAY be attached as `summary_text` labeled model-generated. |
+| QV-OUT-003 | Outcomes are consumable by downstream systems: `outcome_sink.v1` with `jsonl` and `webhook_stub` (POC); a downstream-consumption test parses outcomes from a materially different Activity without Activity-specific code. |
+| QV-OUT-004 | The **InteractionRecord** (`qevion.interaction_record.v1`) is the superset business record (outcome + routing history + handoff refs + coverage misses + claim decisions + evidence refs), Core-generated, replay-consistent. |
+
+## §27. Error and Recovery Model
+
+| ID | Requirement |
+|---|---|
+| QV-ERR-001 | Error classes (minimum): `user_input_problem, ambiguity, unsupported_request, knowledge_unavailable, tool_failure, provider_failure, transport_failure, audio_failure, asr_failure, tts_failure, policy_restriction, configuration_error, activity_blocked, timeout, auth_error, budget_exceeded, internal_error`. Every error knows its layer and whether recovery is possible. "Something went wrong" is a defect. |
+| QV-ERR-002 | Recovery strategies are defined for: ASR uncertainty (clarify), provider timeout (retry once/reseed), TTS failure (fallback voice or text), interruption (§31), tool timeout (degrade turn), conflicting tool result (uncertainty policy), missing knowledge (unknown-question policy), state-corruption detection (invariant checks → DEGRADED + handoff), unsupported request (policy), invalid data (structured error to model), customer correction (§21). Recovery preserves state integrity and never fabricates data. |
+| QV-ERR-003 | Transport disconnect → `DEGRADED`, grace period (default 10 s), resume or graceful end with recorded outcome. Provider disconnect → re-seed (QV-CTX-003). |
+| QV-ERR-004 | Failure classification (8 classes: provider limitation · transport limitation · QEVION core bug · adapter bug · configuration error · test/environment · external service · unknown) precedes every fix and is recorded in `failure.classified`. |
+| QV-ERR-005 | Provider failover chain / circuit breaker: DESIGN ONLY (config schema `composition.fallbacks[]` with per-hop timeout budgets); implementation out of scope. |
+
+---
+
+# PART VI — VOICE
+
+## §28. Voice Architecture and Media Topology
+
+Voice is decomposed into logical responsibilities that remain separate even when a bundled provider performs several: Audio Input · Transport · VAD · Endpointing · Turn Detection · Interruption Detection · ASR · Language/Dialect Handling · Conversation State · Reasoning/LLM · Tool Orchestration · Policy Enforcement · Response Planning · TTS/Voice · Audio Output · Observability.
+
+| ID | Requirement |
+|---|---|
+| QV-VOICE-001 | **True realtime:** streaming audio input, incremental processing, streaming/incremental ASR where supported, conversational state continuity, incremental response generation, low-latency output, runtime-controlled turn handling, output cancellation, interruption handling, timing instrumentation. `mic → browser speech recognition → text → backend → browser speech synthesis` is NOT the runtime and MUST NOT be presented as such. |
+| QV-VOICE-002 | **Topology (EXISTING DIRECTION, ADR-0001):** Topology A — browser AudioWorklet captures PCM16 mono (canonical 24 kHz, configurable) → WebSocket → runtime → provider adapter; audio returns the same path. All conversation events reach the Core normalized; all tool calls go through the Core. Topology B (browser ↔ provider direct with server-minted ephemeral token, events relayed) is OPTIONAL and must keep the same invariants. |
+| QV-VOICE-003 | One canonical internal audio format; resampling only at adapter edges, once per direction, asserted at startup (no double resample). Core never transcodes; audio passes as opaque frames. |
+| QV-VOICE-004 | The composition `ASR A + LLM B + TTS C + VAD D + Transport E` MUST be expressible without Core redesign (§33); the POC proves it with mocks and the s2s path with a real provider. |
+| QV-VOICE-005 | Pipecat / LiveKit are reference and integration options for future transport adapters (WebRTC, telephony), not Core dependencies (ADR-0001). |
+
+## §29. Transport (`qevion.transport.v1`)
+
+```text
+TransportDescriptor{transport_id: browser_ws|text|simulated|mock|(future sip, gsm_gateway, whatsapp_voice, webrtc_foundation),
+  capabilities{direction: full_duplex|half_duplex, audio_formats[], playout_cancellation, reconnection, dtmf, caller_identity}}
+VoiceTransport: connect(session_token) · incoming_audio() · outgoing_audio(frames) · stop_playout() (returns when stopped)
+  · events() (connected|disconnected|reconnecting|failed|playout_started|playout_stopped + client watermarks) · close(reason)
+```
+
+| ID | Requirement |
+|---|---|
+| QV-TR-001 | Transport SDK types never reach the Core; events and audio are normalized. |
+| QV-TR-002 | `stop_playout()` target < 100 ms to silence (measured); it is the transport half of interruption. |
+| QV-TR-003 | Browser tokens are server-minted, short-TTL, single-session; the browser never holds long-lived credentials. |
+| QV-TR-004 | `MockTransport` (scripted audio, disconnect injection), `TextTransport` (text-mode evaluation), `SimulatedCustomerTransport` (§17) MUST exist. |
+| QV-TR-005 | Browser capture requests `echoCancellation`, `noiseSuppression`, `autoGainControl`; client reports playout watermarks and clock-offset estimate. |
+| QV-TR-006 | Design-review criterion: a future SIP/GSM adapter implements this same interface with `caller_identity`/`dtmf` populated; no Core change. |
+
+## §30. Turn Plane (`qevion.turn.v1`)
+
+Distinct concepts, never collapsed: **VAD** (is there speech?) · **Endpointing** (acoustic end of utterance) · **Turn Detection** (is the turn finished? silence-based) · **Semantic Turn Detection** (finished by meaning/prosody) · **Interruption Detection** (speech onset while agent speaks) · **Overlap/backchannel** classification (Core policy).
+
+```text
+TurnDetectorSpec{detector_id: silero_v1|smart_turn_v3|provider_delegated|mock, config{sample_rate, frame_ms, min_silence_ms,
+  min_speech_ms, max_utterance_ms, semantic_threshold?}}
+TurnEvent: speech_started | speech_continuing | speech_prob_sample | likely_turn_complete(confidence) | end_of_turn(committed_audio_ref, duration_ms)
+  | short_utterance(duration_ms) | silence(duration_ms) | overlap_detected | noise_detected
+```
+
+| ID | Requirement |
+|---|---|
+| QV-TURN-001 | Pluggable behind the contract; default Silero VAD + silence end-of-turn; Smart Turn (semantic) as second implementation (Arabic quality UNVERIFIED → measured); provider-delegated when negotiated (adapter translates provider VAD events into the same `TurnEvent`s); mock for tests. Core logic identical in all modes. |
+| QV-TURN-002 | Thresholds come from voice profile / locale pack (Egyptian hesitant speech "عايز… اممم…" needs longer `min_silence_ms`). No code change to tune. |
+| QV-TURN-003 | The detector never interprets semantics beyond turn completion; backchannel vs real turn is Core policy informed by dialog state and locale pack. |
+| QV-TURN-004 | The same scenario MUST run under (a) external Silero, (b) Smart Turn, (c) provider VAD, with behavioral differences recorded (evidence that turn detection is swappable). |
+| QV-TURN-005 | For providers supporting manual turn control (e.g., `turn_detection: null` + explicit commit), the adapter MUST disable provider auto-turns when `turn_mode = qevion_external`. |
+
+## §31. Interruption (Barge-in)
+
+Three levels, separately measured: **L1 provider capability** (native barge-in / output_cancellable / none) · **L2 transport** (playout cancellation latency, echo path) · **L3 QEVION reconciliation**.
+
+```text
+1 DETECT   speech_started while dialog=SPEAKING (echo-guarded)                    → t_interruption_detected
+2 CANCEL   emit interruption.detected → provider.cancel_response() + transport.stop_playout()   → t_cancel_requested
+           wait playout_stopped/response_cancelled (timeout 300 ms → force path)                  → t_audio_stopped
+3 RECONCILE mark agent turn cancelled; record audio actually played + partial text; truncate context to what the user heard
+4 ACCEPT   dialog → USER_SPEAKING                                                                → t_new_input_start
+5 COMMIT   end_of_turn → user.speech_committed (new turn_id)
+6 COHERE   FieldStore/activity state unchanged by cancelled speech (only tools mutate — by construction)
+7 RESPOND  new response from system + policies + activity state + FieldStore + reconciled transcript + new turn → t_next_response_start
+```
+
+| ID | Requirement |
+|---|---|
+| QV-INT-001 | Protocol implemented in Core, identical regardless of L1 capability. |
+| QV-INT-002 | Unheard remainder never persists as context. Test: interrupt mid-response, ask "what were you about to say?" — agent must not recite the unheard tail as heard. |
+| QV-INT-003 | False positives (cough/noise): empty committed turn → `user.speech_discarded`; resume policy `regenerate\|continue` configurable. |
+| QV-INT-004 | Backchannels during confirmation prompts are interpreted per locale-pack backchannel policy, not as interruptions requiring full responses. |
+| QV-INT-005 | All five timestamps above are recorded per interruption and reported per level (p50/p95/p99). "Stopping UI audio" alone is not interruption support. |
+| QV-INT-006 | Echo discipline: AEC constraints on; critical listening/interruption evidence runs use headphones and are labeled; open-air results are a separate labeled category; optional echo-guard window is a recorded toggle. |
+
+## §32. Provider Ports
+
+Each port is a separate versioned contract; adapters implement exactly one port; Admin selects per role.
+
+| Port | Contract | Roles | POC adapters |
+|---|---|---|---|
+| `s2s.v1` | realtime speech-to-speech session: `open(SessionSpec)→NegotiatedSession`, `send_audio`, `commit_turn`, `cancel_response`, `send_tool_result`, `events()` (session_ready, audio_out, response_started/delta/ended/cancelled, user_transcript, speech_boundary, tool_call_requested, usage, error, closed), `close` | runtime_voice | `openai_realtime`, `gemini_live_stub` (fixtures), `mock` |
+| `llm.v1` | streaming text/JSON-schema completion with tool calling | `config_chat`, `runtime_reasoning`, `simulated_customer`, `grader` | `openai_chat`, `mock` |
+| `asr.v1` | streaming/chunked transcription with partials, language hint, confidence | runtime_asr (cascade) | `mock`, `local_stub` (fixture-only; registry: QwenCleo-ASR, faster-whisper) |
+| `tts.v1` | streaming synthesis with voice id, pronunciation hints, cancellation | runtime_tts (cascade) | `mock`, `local_stub` (fixture-only; registry: Habibi-TTS EGY, VoiceTuT-TTS; commercial: Azure ar-EG, ElevenLabs, OpenAI TTS, Gemini TTS) |
+| `turn.v1` | §30 | turn_detection | `silero`, `smart_turn`, `provider_delegated`, `mock` |
+| `decision.v1` | `choose(state, options)→{choice, probabilities, confidence}`, `score(state, rubric)→{score, confidence}`, `assert(state, statement)→{p_true}`; batch, isolated evaluation | confirmation fallback, turn-signal fan-out, claim post-check, graders, copilot classification | `deterministic` (rules/phrase sets, always first), `structured_llm` (any llm.v1 with JSON schema), `typesafe` (OPTIONAL/DEFERRED; Admin-enabled) |
+
+| ID | Requirement |
+|---|---|
+| QV-PROV-001 | The Core consumes only port types; no provider-native object, dict, or error code crosses an adapter. Provider strings (model/voice ids) live in provider config, never Core. |
+| QV-PROV-002 | Every adapter declares static capabilities; sessions negotiate effective capabilities; the Core validates required-vs-effective and degrades per policy or fails with a typed `CapabilityMismatch`. The Core never assumes a capability (test `test_no_capability_assumptions`). |
+| QV-PROV-003 | Errors normalize to `ProviderError{code ∈ auth_failed, quota_exceeded, rate_limited, timeout, disconnect, invalid_request, capability_mismatch, content_policy, overloaded, internal, unknown; retriable; sanitized_detail}`. |
+| QV-PROV-004 | Adapters translate normalized `ToolSpec`s to provider schemas and provider tool events back to normalized requests (including malformed-argument cases). |
+| QV-PROV-005 | The `config_chat` provider and `runtime_*` providers are selected independently in Admin; the provider that builds an Activity never automatically executes it. |
+| QV-PROV-006 | `decision.v1` ordering is deterministic-first: rule/phrase implementations run before any model-backed implementation; confidence thresholds scale with impact (write > read). TypeSafe never enters Core directly. |
+| QV-PROV-007 | The same contract test suite runs against every adapter of a port (mock in CI always; real providers budget-gated; stubs via fixtures). |
+| QV-PROV-008 | Provider data-retention controls are configured when available and recorded per session (§39). |
+
+## §33. Composition and Router Boundary
+
+| ID | Requirement |
+|---|---|
+| QV-COMP-001 | `composition.v1` (Admin config, versioned): `{mode: s2s\|cascade, s2s?: adapter_ref, asr?: ref, llm?: ref, tts?: ref, turn: ref, turn_mode: qevion_external\|provider_vad\|provider_semantic_vad, decision: [refs ordered], fallbacks: [] (design-only)}`. Sessions pin the composition version. |
+| QV-COMP-002 | The Core sees one `ConversationEngine` interface regardless of mode; cascade wiring lives in `runtime/`. POC proves cascade with mocks and s2s with OpenAI Realtime. |
+| QV-COMP-003 | **Router boundary (`router.v1`, DEFERRED design):** may select provider/model/voice/ASR/TTS by task requirements, latency, cost, quality, language capability, tool needs, context size, availability, policy. Router decisions are observable (`provider.selected{reason}`) and never business logic. Model classes (Max/Medium/Fast/Auto) are labels over registry entries. |
+| QV-COMP-004 | Local vs remote inference is a deployment concern (adapter + registry hardware requirements); Activity semantics do not change. Hardware awareness (CPU/GPU/memory/quantization) belongs to registry + deployment config, never to Core. |
+
+## §34. Language, Locale, Dialect, Pronunciation, Egyptian Benchmark
+
+| ID | Requirement |
+|---|---|
+| QV-LANG-001 | Separate: language · locale · dialect · voice · provider · model · capabilities. No `if Egyptian` in Core. Adding a language/dialect = new Locale Pack + voice profile + registry entries. |
+| QV-LANG-002 | **Locale Pack (`qevion.locale_pack.v1`)** = data + pure deterministic library: numeral normalization (Arabic-Indic/Eastern/Western), quantity/unit words (اتنين، تلاتة، نص، ربع، دبل…), time expressions (tz-aware; Africa/Cairo DST), affirm/negate/unclear sets, backchannel set, correction cues, opt-out phrases, politeness/register hints, Arabizi/code-switch normalization (OPTIONAL), fuzzy-match thresholds, pronunciation lexicon. Unit-tested, provider-independent. |
+| QV-LANG-003 | **Language Capability Registry**: per (language, dialect) × role (asr/tts/s2s/llm/turn) × provider/model: `SUPPORTED / PARTIAL / UNSUPPORTED / UNVERIFIED` with streaming, realtime, interruption, code-switching, pronunciation support, voice availability, latency class, hardware, license, known limitations, evidence ref. A locale code is metadata; quality is an evaluated capability. |
+| QV-LANG-004 | **Pronunciation/Lexicon layer**: tenant/Activity terms (company, brands, products, branches, names where authorized, places, abbreviations, foreign words) flow into instructions and TTS adapters (hints/SSML where supported) without touching business logic. |
+| QV-LANG-005 | **Voice profiles** (`qevion.voice_profile.v1`): persona/tone/register, speaking style, turn-taking thresholds, response style, provider voice mapping (from provider config), backchannel policy. Three ship: `eg_ar_casual`, `eg_ar_professional`, `ar_msa`. Switching = config only (`git diff core/` empty). |
+| QV-LANG-006 | **Egyptian Arabic quality bar** — evaluated dimensions: comprehension, vocabulary, sentence construction, pronunciation, rhythm, naturalness, MSA drift, Gulf/Levantine drift, slang, code-switching, numbers, prices, names, product names, fast speech, slow speech, interruptions, corrections, ambiguous utterances, contextual references. Measured via tagged corpus (text + audio subset), human listening rubric (1–5), ASR WER on fixtures, and deterministic graders. Claiming "Egyptian support" from a locale code is a defect. |
+| QV-LANG-007 | RTL correctness: logical-order storage; BiDi at render only; evidence transcripts must not be mangled. |
+| QV-LANG-008 | ASR-on-noise hallucinations: noise-only commits are discarded via turn policy, never forwarded as intent. |
+
+## §35. Telephony — Future Seam
+
+| ID | Requirement |
+|---|---|
+| QV-TEL-001 | No telephony implementation in the POC (QV-ANTI-001). |
+| QV-TEL-002 | The seam: a `transport.v1` adapter (SIP/PBX/Asterisk/FreeSWITCH/Kamailio/4G-LTE gateway/carrier) with `caller_identity`, `dtmf`, and Line channel addresses; outbound dialing enters via `session.create(direction=outbound, contact_ref)`; no Core change. Design-review criterion recorded in ADR-0003. |
+| QV-TEL-003 | The long-term design lets a customer's existing numbers/PBX attach through an external telephony boundary rather than a single vendor-dependent architecture. |
+
+## §36. Outbound Activities and Campaign Boundary
+
+| ID | Requirement |
+|---|---|
+| QV-OUT-DIR-001 | Outbound is first-class: a session is created by the runtime with `direction=outbound`, `ContactContext{contact_ref, attributes, offer/activity context}`; the agent opens per the Activity's opening guidance; the Activity may introduce the organization, present, answer, handle objections, clarify eligibility, explain terms, collect data, determine interest/acceptance, offer callback, confirm, and produce a structured outcome (disposition). |
+| QV-OUT-DIR-002 | **Contact-policy hooks** (evaluated before session open and honored during): consent, opt-out, do-not-contact, attempt limits, permitted contact windows, suppression. Hooks are REQUIRED; jurisdiction-specific compliance software is DEFERRED. |
+| QV-OUT-DIR-003 | Persuasion is bounded (QV-OBJ-002): truthful, non-deceptive, non-coercive, transparent about material terms, no invented urgency/discounts/eligibility/availability, respects opt-out. Objection handling uses only approved responses (§13). |
+| QV-OUT-DIR-004 | POC "dial" = Operator Console action that opens a browser/simulated session in outbound mode; telephony dialing is the future transport. Outbound machinery is not telecom-specific — the same primitives serve reorder, follow-up, retention, offer announcement. |
+| QV-CAMP-001 | **Campaign (`campaign.v1`, DEFERRED design):** audience, target contacts, Activity version, schedule, retry policy, max attempts, contact policy, throttling, success criteria, outcome handling, suppression/opt-out. Campaign orchestrates sessions via the integration boundary; it is distinct from the conversation runtime and never in Core. |
