@@ -302,12 +302,12 @@ async def test_sinks(tmp_path: Path) -> None:
 def test_credential_resolver_order_and_no_leak() -> None:
     r = EnvAdminEphemeralResolver(env={})
     assert r.resolve("openai_realtime", "t") == (None, CredentialSource.NONE)
-    scope = r.set_ephemeral("openai_realtime", "sk-test-ephemeral-1234abcd", tenant_id="t", ttl_seconds=60)
+    scope = r.set_ephemeral("openai_realtime", "FAKE-EPHEMERAL-VALUE-abcd", tenant_id="t", ttl_seconds=60)
     assert scope.fingerprint == "…abcd" and "sk-" not in scope.model_dump_json()
-    assert r.resolve("openai_realtime", "t") == ("sk-test-ephemeral-1234abcd", CredentialSource.EPHEMERAL_UI)
-    r.set_admin("openai_realtime", "sk-admin-store-key-wxyz")
+    assert r.resolve("openai_realtime", "t") == ("FAKE-EPHEMERAL-VALUE-abcd", CredentialSource.EPHEMERAL_UI)
+    r.set_admin("openai_realtime", "FAKE-ADMIN-VALUE-wxyz")
     assert r.resolve("openai_realtime", "t")[1] is CredentialSource.ADMIN_STORE
-    r.env = {"OPENAI_API_KEY": "sk-from-env-0000"}
+    r.env = {"OPENAI_API_KEY": "FAKE-ENV-VALUE-0000"}
     assert r.resolve("openai_realtime", "t")[1] is CredentialSource.ENV
     r.env = {}
     r.admin_store.clear()

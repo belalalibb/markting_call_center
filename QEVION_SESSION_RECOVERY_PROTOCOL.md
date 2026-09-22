@@ -94,6 +94,7 @@ copies) + committed manifest. No secrets. The manifest is the source of truth fo
   Never hold more than ~20 minutes of work uncommitted. Push to `origin main` at least at every checkpoint
   and after any increment that would be expensive to recreate.
 - 8.2 No intentionally broken state on main. Partial work lands behind flags or as verified partial increments.
+- **8.2a Gate before push (added 2026-09-22 after CI failure 35777148614):** once `pyproject.toml` exists, run `scripts/ci_local.sh` (mirror of the GitHub Actions job) and require `CI_LOCAL: PASS` before every push of code/tests. Doc-only commits are exempt. Test fixtures must never use realistic secret shapes (`sk-…`, `ghp_…`); use `FAKE-…` values.
 - 8.3 Significant pushes reference a checkpoint ID in the commit message.
 
 ## 9. Failure discipline

@@ -65,7 +65,6 @@ def test_composition_configs_validate() -> None:
     from pathlib import Path
 
     import yaml
-
     from qevion.contracts.composition import Composition
 
     files = sorted((Path(__file__).resolve().parents[1] / "config" / "compositions").glob("*.yaml"))
