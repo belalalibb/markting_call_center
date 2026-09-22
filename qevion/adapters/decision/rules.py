@@ -259,14 +259,16 @@ def _eval_rule(rule: str, fields: dict[str, Any], recorded: set[str], flags: set
                 right = float(right)
             except (TypeError, ValueError):
                 return None
-        return {
-            "==": left == right,
-            "!=": left != right,
-            ">": left > right,
-            "<": left < right,
-            ">=": left >= right,
-            "<=": left <= right,
-        }[op]
+        return bool(
+            {
+                "==": left == right,
+                "!=": left != right,
+                ">": left > right,
+                "<": left < right,
+                ">=": left >= right,
+                "<=": left <= right,
+            }[op]
+        )
     if re.fullmatch(r"[a-z_]+", r):
         return r in flags
     return None
