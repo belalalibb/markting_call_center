@@ -7,6 +7,7 @@ ID="${1:?checkpoint id}"; PHASE="${2:?phase}"; TITLE="${3:?title}"
 [[ -z "$(git status --porcelain)" ]] || { echo "ERROR: working tree dirty; commit first" >&2; exit 2; }
 SHA="$(git rev-parse HEAD)"; TS="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 REC="recovery/checkpoints/${ID}.md"
+mkdir -p recovery/checkpoints
 [[ ! -e "$REC" ]] || { echo "ERROR: $REC exists (append-only)" >&2; exit 3; }
 PREV="$(git tag --list 'cp/*' | sort -V | tail -1)"; BASE="${PREV:-$(git rev-list --max-parents=0 HEAD)}"
 cat > "$REC" <<MD
