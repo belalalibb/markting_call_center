@@ -1243,3 +1243,57 @@ Full machine-readable matrix: `docs/registry/traceability.yaml` (schema: `{id, s
 | Acceptance criteria QV-ACC-001..022 | each with phase + evidence kind | §52, §53 |
 
 Status values: `planned` → `implemented` → `evidenced` → `accepted` | `waived` | `retired`.
+
+---
+
+# APPENDICES
+
+## Appendix A — v2.3 → v3.0 Change Map
+
+Disposition codes: **C** carried (semantics unchanged, renumbered) · **G** generalized (restaurant/POC-specific → Activity-generic) · **S** superseded (replaced by a stronger v3 rule) · **R** retired (out of v3 scope or contradicted by approved decisions). Counts are the number of v2.3 IDs under each prefix. Per-ID rows live in `docs/registry/traceability.yaml`.
+
+| v2.3 prefix | Meaning | # | Disposition | v3 home |
+|---|---|---|---|---|
+| GR | golden rules | 23 | C/G | §0 QV-META, §1 QV-GOLD |
+| SC / AS | scope / anti-scope | 21 / 15 | G | §2, §50 (restaurant-only scope → Activity-generic; telephony stays anti-scope) |
+| AR | architecture & boundaries | 16 | G | §5–§6 QV-ARCH (adds Design/Control planes, Copilot ≠ runtime) |
+| FN | foundation selection | 5 | S | §49 QV-REF/QV-LIC (Pipecat/LiveKit → future adapters only, D3) |
+| MT | media topology | 5 | C | §29 QV-TR (Topology A confirmed) |
+| CV | contract versioning | 9 | C | §38 QV-VERS |
+| EV | events | 9 | C | §37 QV-EVT (`qevion.event.v1` unchanged envelope) |
+| PC | provider contract | 15 | G | §32 QV-PROV (single provider → role ports `s2s/llm/asr/tts/turn/decision`, D2) |
+| TC | transport contract | 9 | C | §29 QV-TR |
+| TD | turn detection | 11 | G | §30 QV-TURN (`turn.v1`, Silero default, Smart Turn candidate) |
+| TL | tools | 20 | G | §24 QV-TOOL (restaurant tools → platform tools + `submit_record`, D12) |
+| HH | handoff | 4 | C | §26 QV-HAND |
+| VP | voice profiles | 7 | C | §28 QV-VOICE |
+| TN | tenant config | 12 | S | §7–§8 tenant/line + §9 Blueprint (`tenant_config.v1` → `activity.v1`, D4) |
+| SM | state machines | 9 | G | §19 QV-RT (dialog machine fixed; activity machine data-driven, D1) |
+| IN | interruption | 19 | C | §31 QV-INT (7 steps, 5 timestamps) |
+| CM | context | 10 | G | §21 QV-CTX + §20 FieldStore/Entity Focus |
+| NC | natural conversation | 7 | C | §22 QV-CI |
+| LG | language | 17 | C | §34 QV-LANG |
+| MT2 | multi-tenancy | 12 | C | §7 tenant, §39 QV-SEC isolation |
+| PV | privacy | 14 | C | §40 QV-PRIV (+ PDPL ER 816/2025) |
+| CA | cost accounting | 9 | C | §42 QV-COST |
+| SE | security | 32 | C/G | §39 QV-SEC + §39.6 QV-CRED (CredentialResolver, D9) |
+| LB | latency | 9 | C | §42 QV-PERF table |
+| AP | adapter performance | 8 | C | §32 QV-PROV |
+| AQ | audio quality | 9 | C | §28/§42 |
+| TS | test strategy | 13 | G | §43 QV-TEST (adds Core-neutrality fixtures §54) |
+| EH | eval harness | 9 | C | §44 QV-EVAL |
+| FC | failure classification | 3 | C | §27 QV-ERR + Recovery Protocol §9 |
+| RS | resilience/replay | 18 | C | §27, §45 QV-REPLAY |
+| OB | observability | 11 | C | §41 QV-OBS |
+| CG | cost guards | 7 | C | §42 QV-COST (defaults $10 / 5 min / 20 sessions, D14) |
+| CFG | config management | 10 | S | §18 QV-VER + §13 readiness lifecycle |
+| AC | acceptance | 12 | S | §52 QV-ACC-001..022 |
+| XD | execution discipline | 15 | S | Recovery Protocol + §51 gates + §53 evidence |
+| DG | decision gate | 10 | C | §51.1 |
+| IB | integration boundary | 13 | G | §24 tool backends + §26 sinks + §35 telephony seam (ADR-0003) |
+| CO | test console | 20 | G | §43.7 Operator Console (one web app, three modes, D5) |
+| SP | service & interaction primitives | 25 | S | Part III Blueprint + Part V Core (SP was the seed of the generic Core) |
+| D-* | deliverables | — | S | §51 checkpoints + §53 evidence bundle |
+| RK | risks | 51 | C | §47 QV-RISK-001..026 (merged; duplicates collapsed) |
+
+Retired outright (R): v2.3 §5 recommendation to build on Pipecat; v2.3 §15 `tenant_config.v1` restaurant fields (`menu`, `delivery_zones`); v2.3 Appendix B restaurant example (replaced by §54 A–D).
