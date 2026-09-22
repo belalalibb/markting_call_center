@@ -1208,3 +1208,38 @@ These four Blueprints ship under `config/examples/` and are used by QV-ACC-006. 
 | **D** | Utility bill inquiry (deferred fixture) | inbound | answer balance questions | account_id (USER_STATED→TOOL_VERIFIED) | question answered from TOOL_VERIFIED only | pure `get_entity` lookups, zero `submit_record`, Claim Governor stress |
 
 Rule: A–C are P1 exit-gate fixtures; D is added in P2 to stress Preflight and the Claim Governor. None of the four names, fields or vocabularies may appear in `qevion/core`.
+
+## §55. Assumptions Ledger
+
+Assumptions are explicit, numbered, and each has an owner action that either confirms or retires it. Waivers of acceptance criteria are recorded here too.
+
+| ID | Assumption | Risk if false | Confirming action | Status |
+|---|---|---|---|---|
+| A1 | OpenAI Realtime API (`gpt-realtime` family) remains available with PCM16 24 kHz input/output and server-side VAD toggle | P4 blocked | First real session in P4 (QV-ACC-022) | UNVERIFIED (docs verified 2026-09-22) |
+| A2 | Silero VAD (MIT) runs on CPU in the sandbox at < 5 ms per 32 ms frame | Turn plane latency | Benchmark in P4 | UNVERIFIED |
+| A3 | Smart Turn v3 handles Egyptian Arabic acceptably | Fallback to Silero-only end-of-turn | Offline eval in P4 (optional) | UNVERIFIED — not on critical path |
+| A4 | Sandbox public URL supports WebSocket upgrade and `AudioWorklet` requires HTTPS (satisfied by sandbox TLS) | Voice loop cannot be previewed | Smoke test at start of P4 | UNVERIFIED |
+| A5 | Operator will supply an OpenAI test key through the Admin ephemeral UI or `.env` before P4 exit gate | QV-ACC-022 waived, mock evidence only | Operator action | PENDING |
+| A6 | Pydantic v2 `model_json_schema()` output is sufficient as the canonical JSON Schema 2020-12 for all contracts | Schema drift | Round-trip tests P0.2 | UNVERIFIED |
+| A7 | Single-process FastAPI + in-memory stores are acceptable for POC persistence (no Postgres/Redis) | Data loss across restarts (accepted for POC) | Documented in ADR; revisit post-POC | ACCEPTED |
+| A8 | Egypt PDPL obligations for the POC are satisfied by: no real customer data, redaction in evidence, no audio retention | Compliance gap | Privacy review checklist in P6 | ACCEPTED for POC |
+| A9 | Habibi-TTS EGY / VoiceTuT / QwenCleo require GPU and are therefore adapter stubs only in POC | No local cascade path in POC | Stub + capability UNSUPPORTED in registry | ACCEPTED |
+| A10 | Default budget guards ($10 / 5 min / 20 sessions/day) are adequate to protect the operator's test key | Cost overrun | Guard tests P5 (QV-ACC-021) | ACCEPTED |
+
+Waivers: none at spec freeze. A waiver entry has the form `W-n: QV-ACC-xxx waived because …; compensating evidence …; approved_by operator on <date>`.
+
+## §56. Traceability Matrix (summary)
+
+Full machine-readable matrix: `docs/registry/traceability.yaml` (schema: `{id, source_ids[], spec_sections[], acceptance_ids[], evidence_paths[], status}`).
+
+| Source | Coverage in v3 | Where |
+|---|---|---|
+| SPEC v2.3 requirement IDs (41 prefixes) | 100 % — each ID carried, generalized, superseded or retired | Appendix A |
+| `important_rebuild.md` master prompt X² §0–112 | 100 % mapped | Appendix B |
+| `important_rebuild.md` master prompt X³ §1–50 | 100 % mapped | Appendix B |
+| Pre-approval inspection conflicts C1–C12 | each resolved by a QV-* rule | `recovery/analysis/pre_approval_inspection_2026-09-22.md` + §0 |
+| Operator decisions D1–D15 | each frozen in an ADR | `docs/adr/` |
+| External references | each with verdict + license | §49 + `docs/registry/references.yaml`, `licenses.yaml` |
+| Acceptance criteria QV-ACC-001..022 | each with phase + evidence kind | §52, §53 |
+
+Status values: `planned` → `implemented` → `evidenced` → `accepted` | `waived` | `retired`.
