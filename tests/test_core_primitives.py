@@ -11,7 +11,6 @@ from typing import Any
 import pytest
 from hypothesis import given
 from hypothesis import strategies as st
-
 from qevion.adapters.decision.rules import RulesDecisionAdapter
 from qevion.adapters.tools.memory_backend import MemoryStore, MemoryToolBackend
 from qevion.contracts.activity import FieldSpec, ToolPermission, ToolRef, ToolsBlock
@@ -102,23 +101,24 @@ def test_unverified_never_satisfies(actual: Provenance, required: Provenance) ->
 
 def test_dialog_machine_happy_path_and_barge_in() -> None:
     dm = DialogMachine()
-    assert dm.state is DialogState.IDLE
+    assert dm.state.value == "IDLE"  # (.value avoids mypy narrowing across mutating fire() calls)
     dm.fire("session_started", 1)
     dm.fire("end_of_turn", 2)
-    assert dm.state is DialogState.THINKING
+    assert dm.state == DialogState.THINKING
     dm.fire("tool_requested", 3)
     dm.fire("tool_returned", 4)
     dm.fire("response_started", 5)
-    assert dm.state is DialogState.SPEAKING
+    assert dm.state.value == "SPEAKING"
     t = dm.fire("barge_in", 6, reason="user spoke")
-    assert t.to_state is DialogState.INTERRUPTED and t.reason == "user spoke" and t.authority == "core"
+    assert t.to_state == DialogState.INTERRUPTED and t.reason == "user spoke" and t.authority == "core"
+    assert t.machine == "dialog" and t.from_state == DialogState.SPEAKING
     dm.fire("reconciled", 7)
-    assert dm.state is DialogState.LISTENING
+    assert dm.state == DialogState.LISTENING
     assert not dm.can("response_done")
     with pytest.raises(IllegalTransitionError):
         dm.fire("response_done", 8)
     dm.fire("close", 9)
-    assert dm.state is DialogState.CLOSED and not dm.can("session_started")
+    assert dm.state == DialogState.CLOSED and not dm.can("session_started")
 
 
 # ---------------------------------------------------------------- Activity machine (data-driven)
@@ -129,10 +129,10 @@ def test_generic_table_is_valid_and_terminal_states_absorb() -> None:
     am = ActivityMachine.from_blueprint_ref("generic_default_v1", None)
     am.fire(ActivityTrigger.OPENED, 1)
     am.fire(ActivityTrigger.FIELD_NEEDED, 2)
-    assert am.state is ActivityState.COLLECTING
+    assert am.state.value == "COLLECTING"
     am.fire(ActivityTrigger.FIELDS_COMPLETE, 3)
     am.fire(ActivityTrigger.CONFIRMED, 4)
-    assert am.state is ActivityState.EXECUTING
+    assert am.state == ActivityState.EXECUTING
     am.fire(ActivityTrigger.EXECUTED, 5)
     am.fire(ActivityTrigger.CLOSED, 6)
     assert am.terminal
@@ -156,7 +156,8 @@ def test_entity_focus_stack() -> None:
     fs.push("p1", "person", 3, source="tool")
     assert fs.current().entity_id == "p1"  # type: ignore[union-attr]
     assert fs.current("item").entity_id == "e2"  # type: ignore[union-attr]
-    assert fs.nth(1, "item").entity_id == "e1"  # type: ignore[union-attr]
+    assert fs.nth(2, "item").entity_id == "e1"  # type: ignore[union-attr]  # 1-based: 'the second one'
+    assert fs.nth(3, "item") is None
     assert fs.is_ambiguous("item")
     assert not fs.is_ambiguous("person")
     fs.push("e3", "item", 4, source="user")  # depth cap evicts oldest
@@ -225,7 +226,14 @@ async def test_claim_governor_blocks_unverified_and_prohibited() -> None:
     assert approved.state == "allowed"
     assert gov.behavior_for_unknown_topic("what is the price?") is Behavior.COLLECT_QUESTION
     assert gov.behavior_for_unknown_topic("weather") is Behavior.STATE_LIMITATION
-    assert [e.claim_type for e in gov.log] == ["availability", "availability", "hours", "price_quote", "legal_advice", "hours"]
+    assert [e.claim_type for e in gov.log] == [
+        "availability",
+        "availability",
+        "hours",
+        "price_quote",
+        "legal_advice",
+        "hours",
+    ]
 
 
 async def test_confirmation_interpreter_deterministic_and_ambiguous() -> None:
@@ -304,7 +312,9 @@ class _Recorder:
         return [str(n) for n, _ in self.events]
 
 
-def _build(confirm_answer: bool | None, *, tenant_allowed: set[str] | None = None) -> tuple[ToolPipeline, _Recorder, MemoryStore]:
+def _build(
+    confirm_answer: bool | None, *, tenant_allowed: set[str] | None = None
+) -> tuple[ToolPipeline, _Recorder, MemoryStore]:
     store = MemoryStore()
     rec = _Recorder()
 
@@ -369,15 +379,11 @@ async def test_tool_pipeline_all_gates() -> None:
     assert out.status is ToolOutcomeStatus.FAILED
 
     # 9 second distinct write ok (write budget = 2) …
-    out = await pipe.run(
-        ToolCallRequest(call_id="c9", tool_id=_SUBMIT, arguments={"fields": {"alpha": "y"}}), **_CTX
-    )
+    out = await pipe.run(ToolCallRequest(call_id="c9", tool_id=_SUBMIT, arguments={"fields": {"alpha": "y"}}), **_CTX)
     assert out.status is ToolOutcomeStatus.COMPLETED and len(store.records) == 2
 
     # 10 … third write exceeds the write budget → REJECTED_BUDGET + budget.exceeded event
-    out = await pipe.run(
-        ToolCallRequest(call_id="c10", tool_id=_SUBMIT, arguments={"fields": {"alpha": "z"}}), **_CTX
-    )
+    out = await pipe.run(ToolCallRequest(call_id="c10", tool_id=_SUBMIT, arguments={"fields": {"alpha": "z"}}), **_CTX)
     assert out.status is ToolOutcomeStatus.REJECTED_BUDGET and out.step_reached is ToolPipelineStep.BUDGET_CHECKED
     assert any("budget" in n for n in rec.names())
 
