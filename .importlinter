@@ -1,0 +1,78 @@
+[importlinter]
+root_package = qevion
+
+[importlinter:contract:core-imports-contracts-only]
+name = Core imports contracts only (QV-ACC-004, ADR-0002)
+type = forbidden
+source_modules = qevion.core
+forbidden_modules =
+    qevion.copilot
+    qevion.knowledge
+    qevion.control
+    qevion.admin
+    qevion.adapters
+    qevion.runtime
+    qevion.observability
+    qevion.replay
+    qevion.eval
+    qevion.simulation
+    fastapi
+    httpx
+    websockets
+    yaml
+    numpy
+
+[importlinter:contract:contracts-are-leaf]
+name = Contracts import nothing internal
+type = forbidden
+source_modules = qevion.contracts
+forbidden_modules =
+    qevion.core
+    qevion.copilot
+    qevion.knowledge
+    qevion.control
+    qevion.admin
+    qevion.adapters
+    qevion.runtime
+    qevion.observability
+    qevion.replay
+    qevion.eval
+    qevion.simulation
+
+[importlinter:contract:adapters-independent]
+name = Adapters depend on contracts only, never on core internals or each other's siblings
+type = forbidden
+source_modules = qevion.adapters
+forbidden_modules =
+    qevion.core
+    qevion.copilot
+    qevion.knowledge
+    qevion.control
+    qevion.admin
+    qevion.runtime
+
+[importlinter:contract:copilot-not-in-runtime]
+name = Copilot is never imported by runtime path (QV-ARCH Copilot != runtime)
+type = forbidden
+source_modules =
+    qevion.core
+    qevion.runtime
+    qevion.adapters
+forbidden_modules = qevion.copilot
+
+[importlinter:contract:nothing-imports-runtime]
+name = Nothing imports runtime
+type = forbidden
+source_modules =
+    qevion.contracts
+    qevion.core
+    qevion.copilot
+    qevion.knowledge
+    qevion.control
+    qevion.admin
+    qevion.adapters
+    qevion.observability
+    qevion.replay
+    qevion.eval
+    qevion.simulation
+forbidden_modules = qevion.runtime

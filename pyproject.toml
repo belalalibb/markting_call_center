@@ -1,0 +1,62 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "qevion"
+version = "0.1.0"
+description = "QEVION Agent Activity Platform — Configuration Copilot + provider-neutral realtime voice runtime"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "Proprietary" }
+dependencies = [
+  "pydantic>=2.7,<3",
+  "fastapi>=0.111",
+  "uvicorn[standard]>=0.30",
+  "websockets>=12",
+  "httpx>=0.27",
+  "pyyaml>=6",
+  "numpy>=1.26",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8",
+  "pytest-asyncio>=0.23",
+  "hypothesis>=6.100",
+  "ruff>=0.5",
+  "mypy>=1.10",
+  "import-linter>=2.0",
+  "pip-licenses>=4.4",
+  "types-PyYAML",
+]
+vad = ["onnxruntime>=1.18"]
+
+[tool.setuptools.packages.find]
+include = ["qevion*"]
+
+[tool.setuptools.package-data]
+"qevion.contracts" = ["schemas/*.json"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+markers = ["req(id): links a test to a QV-* requirement id"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 110
+target-version = "py312"
+src = ["qevion", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "N", "S", "T20"]
+ignore = ["S101"]  # asserts allowed in tests
+per-file-ignores = { "tests/*" = ["S", "T20"], "scripts/*" = ["T20", "S"] }
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+plugins = ["pydantic.mypy"]
+packages = ["qevion"]
+ignore_missing_imports = true
