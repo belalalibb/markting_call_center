@@ -146,8 +146,10 @@ class InstructionComposer:
         if p.allowed_claims:
             lines.append(
                 "You may state facts about: "
-                + ", ".join(f"{c.claim_type}" + (f" (only when {c.source_requirement})" if c.source_requirement else "")
-                            for c in p.allowed_claims)
+                + ", ".join(
+                    f"{c.claim_type}" + (f" (only when {c.source_requirement})" if c.source_requirement else "")
+                    for c in p.allowed_claims
+                )
                 + "."
             )
         if p.prohibited_claims:
@@ -175,11 +177,14 @@ class InstructionComposer:
             return ""
         lines = ["Known question handling:"]
         for q in covered:
-            lines.append(f"- '{q.pattern}': handle via {q.handling.lower()}" + (f" ({q.answer_ref})" if q.answer_ref else ""))
+            lines.append(
+                f"- '{q.pattern}': handle via {q.handling.lower()}" + (f" ({q.answer_ref})" if q.answer_ref else "")
+            )
         for q in declined:
             lines.append(f"- '{q.pattern}': do not answer; {_BEHAVIOR_TEXT[Behavior.DECLINE_UNSUPPORTED_REQUEST]}")
         for ob in cov.objections:
-            lines.append(f"- objection '{ob.pattern}': {ob.response_ref}")
+            if ob.status == "COVERED" and ob.approved_response_ref:
+                lines.append(f"- objection '{ob.pattern}': respond with {ob.approved_response_ref}")
         return "\n".join(lines)
 
     def _disclosures(self) -> str:
