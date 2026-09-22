@@ -1297,3 +1297,56 @@ Disposition codes: **C** carried (semantics unchanged, renumbered) · **G** gene
 | RK | risks | 51 | C | §47 QV-RISK-001..026 (merged; duplicates collapsed) |
 
 Retired outright (R): v2.3 §5 recommendation to build on Pipecat; v2.3 §15 `tenant_config.v1` restaurant fields (`menu`, `delivery_zones`); v2.3 Appendix B restaurant example (replaced by §54 A–D).
+
+## Appendix B — Master Prompt Traceability (`docs/inputs/important_rebuild_master_prompt.md`)
+
+### B.1 X² (platform master prompt) §0–§112 → v3 sections
+
+| X² § | Topic | v3 home |
+|---|---|---|
+| 0 | Input & evidence discipline | §0 QV-META, §53 QV-EVID |
+| 1 | Primary objective + quality order | §1, §3 |
+| 2–3 | Product identity, core idea | §1–§2 |
+| 4 | Generic domain model | §7 (Activity/Field/Policy/Outcome, D1) |
+| 5 | Configuration-first extensibility | §9 Blueprint, §18 QV-VER |
+| 6 | Agent builder / Activity designer | §14 QV-COP |
+| 7 | Activity model | §9–§10 QV-ACT |
+| 8 | Activity preflight | §12 QV-PRE |
+| 9 | Optimization objectives | §11 QV-OBJ |
+| 10 | Outbound voice activities | §35 QV-OUT-DIR (D10) |
+| 11 | Campaign boundary | §36 QV-CAMP (anti-scope) |
+| 12 | Line / endpoint model | §8 line |
+| 13 | Channel-independent Core | §5–§6 QV-ARCH |
+| 14–15 | Voice architecture, true realtime | §28–§29 QV-VOICE/QV-TR |
+| 16 | Interruption 7 steps | §31 QV-INT |
+| 17 | VAD / endpointing / turn | §30 QV-TURN |
+| 18–26 | Conversation-first intelligence, reference resolution, recommendations, comparison, multi-intent, topic switching, correction, natural conversation, repetition RCA | §21–§22 QV-CTX/QV-CI, Entity Focus Stack, PendingObjectives |
+| 27 | Knowledge architecture | §15 QV-KNOW |
+| 28–30 | Business truth, claim governance, provenance | §23 QV-TRUTH, Claim Governor, §20 FieldStore provenance |
+| 31 | Tools | §24 QV-TOOL |
+| 32 | Confirmation | §25 QV-CONF |
+| 33 | Human handoff | §26 QV-HAND |
+| 34 | Outcome engine | §26 QV-OUT |
+| 35 | Memory & customer context | §21 QV-CTX (session-scoped only in POC) |
+| 36–37 | Versioning, experimentation | §18 QV-VER, §48 QV-LEARN |
+| 38–41 | Multilingual, language capability registry, lexicon, Egyptian Arabic bar | §34 QV-LANG, §16 QV-CAP |
+| 42–46 | TTS candidates, datasets, OSS pool, evaluation rule, license gate | §49 QV-REF/QV-LIC, registries |
+| 47–49 | Provider architecture, Core responsibilities, transport | §32 QV-PROV, §19 QV-RT, §29 QV-TR |
+| 50 | Telephony future scope | §35 seam, ADR-0003 |
+| 51–54 | Security, observability, latency, cost | §39–§42 |
+| 55–58 | Evaluation fabric, replay, regression, red-team | §43–§46 |
+| 59–60 | Self-improvement, human agency | §48 QV-LEARN, §17 approval |
+| 61–65 | Events/contracts, error model, failure recovery, state separation, model authority | §37–§38, §27 QV-ERR, §19, §23 |
+| 66–67 | Generic examples, POC scope | §54, §50 |
+| 68–71 | No fake completeness / hard-coded demo / lock-in / dogmatism | §0 QV-META, QV-ACC-005, D2, D3 |
+| 72–73 | ADRs, assumptions ledger | `docs/adr/`, §55 |
+| 74–77 | Testability, acceptance, evidence, gates | §43, §52, §53, §51 |
+| 78–80 | X² QA, exploit→countermeasure, compression gate | §46 red-team matrix, §0 |
+| 81–86 | Executor calibration, contradiction resolution, separation, deployment, storage, admin boundary | §0, inspection C1–C12, §5, A7, §6 Admin plane |
+| 87–90 | Tenancy, policy engine, consent hooks, data safety | §7, §11 QV-POL, §35 contact hooks, §40 |
+| 91–94 | Model agnosticism, router boundary, local/remote, hardware | §32–§33 QV-COMP, A9 |
+| 95–96 | OSS research protocol, reference registry format | §49, `references.yaml` |
+| 97–101 | POC freedom, spec structure, traceability, risk register, no silent decisions | §50, TOC, §56, §47, §51.1 |
+| 102–103 | Historical failure interpretation, README as context | Recovery Protocol §9, README |
+| 104–110 | Research/output requirements, quality, anti-superficial, self-review, file rule, output rule | §0, §53, this Appendix |
+| 111–112 | Final closure check, final instruction | §52 + CP-0001 record |
