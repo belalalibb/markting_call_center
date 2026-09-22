@@ -656,4 +656,220 @@ class SessionInterruption(SessionTools):
         return self.resolve_confirmation(call_id, res.value)
 
 
-# --- part 6 ---
+class Session(SessionInterruption):
+    """The public orchestrator. Drive with `run()` (full loop) or the granular `handle_*` methods (tests/replay)."""
+
+    # ------------------------------------------------------------------ user input
+    def _new_turn(self) -> str:
+        self._turn_no += 1
+        self.turn_id = f"turn_{self._turn_no}"
+        self.facts.turn_count = self._turn_no
+        now = self.clock()
+        if self.facts.first_user_turn_ms is None:
+            self.facts.first_user_turn_ms = now
+        self.facts.last_user_turn_ms = now
+        return self.turn_id
+
+    async def _begin_user_turn(self, channel: str, extra: dict[str, Any]) -> str:
+        if self.dialog.state is DialogState.INTERRUPTED:
+            await self.dialog_fire("reconciled")
+        tid = self._new_turn()
+        await self.emit(EventType.TURN_STARTED, {"channel": channel})
+        await self.emit(EventType.USER_SPEECH_COMMITTED, {"turn_id": tid, **extra})
+        return tid
+
+    async def _after_user_turn(self) -> None:
+        await self.activity_fire(ActivityTrigger.USER_ENGAGED, "user turn", authority="core")
+        if self.fields.missing_required() and self.activity.state is ActivityState.ENGAGED:
+            await self.activity_fire(ActivityTrigger.FIELD_NEEDED, "required fields missing", authority="core")
+        await self.refresh_instructions()
+
+    async def handle_text(self, text: str) -> None:
+        """Text channel input == a committed user turn."""
+        if self._closed or not self._provider:
+            return
+        if self.dialog.state is DialogState.SPEAKING:
+            await self.interrupt(onset_ms=self.clock())
+        if self.dialog.state is DialogState.WAITING_CONFIRMATION and self._pending_confirm:
+            await self.resolve_confirmation_from_text(text)
+            return
+        tid = await self._begin_user_turn("text", _digest(text))
+        await self.dialog_fire("text_received")
+        await self._after_user_turn()
+        await self._provider.send_text(text)
+        await self.emit(EventType.TURN_ENDED, {"turn_id": tid})
+
+    async def handle_audio(self, pcm16: bytes, ref: AudioFrameRef) -> None:
+        """Audio frame from transport: turn plane first (authoritative), then forward to provider."""
+        if self._closed or not self._provider:
+            return
+        speaking = self.dialog.state is DialogState.SPEAKING
+        for tev in self.deps.turn.push(pcm16, self.clock(), speaking):
+            await self.handle_turn_event(tev)
+        await self._provider.send_audio(pcm16, ref)
+
+    async def handle_turn_event(self, tev: TurnEvent) -> None:
+        src = f"turn:{tev.detector}"
+        match tev.type:
+            case TurnEventType.SPEECH_START:
+                self._speech_onset_ms = tev.ts_ms
+                await self.emit(EventType.USER_SPEECH_STARTED, {"detector": tev.detector}, source=src)
+            case TurnEventType.BARGE_IN:
+                await self.emit(EventType.USER_SPEECH_STARTED, {"detector": tev.detector, "barge_in": True}, source=src)
+                await self.interrupt(onset_ms=self._speech_onset_ms or tev.ts_ms, detected_ms=tev.ts_ms)
+            case TurnEventType.END_OF_TURN:
+                if self._speech_onset_ms is not None:
+                    self._latency(
+                        "speech_onset_to_commit",
+                        Watermark.T0_USER_SPEECH_ONSET,
+                        Watermark.USER_SPEECH_END,
+                        tev.ts_ms - self._speech_onset_ms,
+                    )
+                self._speech_onset_ms = None
+                await self._begin_user_turn("audio", {"speech_ms": tev.speech_ms})
+                await self.dialog_fire("end_of_turn")
+                await self._after_user_turn()
+                if self._provider:
+                    await self._provider.commit_input()
+            case TurnEventType.NOISE_REJECTED:
+                await self.emit(EventType.USER_SPEECH_DISCARDED, {"reason": "noise"}, source=src)
+                self._speech_onset_ms = None
+            case _:
+                pass
+
+    async def handle_client_message(self, msg: ClientMessage) -> None:
+        match msg.type:
+            case ClientMessageType.TEXT:
+                await self.handle_text(msg.text or "")
+            case ClientMessageType.CONFIRM:
+                if msg.call_id:
+                    self.resolve_confirmation(msg.call_id, msg.granted)
+            case ClientMessageType.PLAYOUT_STOPPED:
+                self._playout_stopped.set()
+                await self.emit(
+                    EventType.TRANSPORT_PLAYOUT_STOPPED, {"response_id": msg.response_id, "client_ts_ms": msg.client_ts_ms}
+                )
+            case ClientMessageType.PLAYOUT_STARTED:
+                await self.emit(EventType.TRANSPORT_PLAYOUT_STARTED, {"response_id": msg.response_id})
+            case ClientMessageType.AUDIO_COMMIT:
+                await self.handle_turn_event(TurnEvent(type=TurnEventType.END_OF_TURN, ts_ms=self.clock(), detector="client"))
+            case ClientMessageType.BYE:
+                await self.close("user_bye")
+            case ClientMessageType.PING:
+                await self._send(ServerMessageType.PONG)
+            case _:
+                pass
+
+    # ------------------------------------------------------------------ provider events
+    async def handle_provider_event(self, ev: S2SEvent) -> None:
+        src = f"provider:s2s:{self.deps.s2s_config.provider}"
+        rid = ev.response_id or ""
+        match ev.type:
+            case S2SEventType.RESPONSE_STARTED:
+                rid = rid or new_id("resp")
+                self._responses[rid] = ResponseTrack(response_id=rid, started_ms=self.clock())
+                self._current_response = rid
+                self._playout_stopped.clear()
+                await self.emit(EventType.ASSISTANT_RESPONSE_STARTED, {"response_id": rid}, source=src)
+                await self.dialog_fire("response_started")
+                await self._send(ServerMessageType.AUDIO_START, response_id=rid)
+            case S2SEventType.RESPONSE_TEXT_DELTA:
+                tr = self._responses.get(rid)
+                if tr and not tr.cancelled:
+                    tr.text += ev.text or ""
+            case S2SEventType.RESPONSE_AUDIO_DELTA:
+                tr = self._responses.get(rid)
+                if tr and not tr.cancelled and ev.audio:
+                    tr.audio_ms_sent += ev.audio.duration_ms
+            case S2SEventType.RESPONSE_TOOL_CALL:
+                if ev.tool_call:
+                    await self.dialog_fire("tool_requested")
+                    await self.run_tool(ev.tool_call.call_id, ev.tool_call.tool_id, ev.tool_call.arguments)
+            case S2SEventType.RESPONSE_DONE:
+                tr = self._responses.get(rid)
+                if tr:
+                    tr.done = True
+                    await self.emit(
+                        EventType.ASSISTANT_RESPONSE_ENDED,
+                        {"response_id": tr.response_id, "audio_ms": tr.audio_ms_sent, **_digest(tr.text)},
+                        source=src,
+                    )
+                    await self._send(ServerMessageType.AUDIO_END, response_id=tr.response_id)
+                if self._current_response == rid:
+                    self._current_response = None
+                if self.dialog.state is DialogState.SPEAKING:
+                    await self.dialog_fire("response_done")
+                elif self.dialog.state is DialogState.THINKING:
+                    await self.dialog_fire("nothing_to_say")
+                await self.evaluate_completion()
+            case S2SEventType.RESPONSE_CANCELLED:
+                tr = self._responses.get(rid)
+                if tr:
+                    tr.cancelled = True
+                self._playout_stopped.set()
+            case S2SEventType.INPUT_TRANSCRIPT:
+                await self.emit(EventType.USER_SPEECH_COMMITTED, {"transcript": True, **_digest(ev.text or "")}, source=src)
+            case S2SEventType.ERROR:
+                await self.emit(
+                    EventType.PROVIDER_ERROR,
+                    {"code": ev.error.code if ev.error else "unknown", "retryable": bool(ev.error and ev.error.retryable)},
+                    source=src,
+                )
+                if not (ev.error and ev.error.retryable):
+                    await self.activity_fire(ActivityTrigger.BLOCKED, "provider error", authority="core")
+            case S2SEventType.CLOSED:
+                if not self._closed:
+                    await self.close("provider_closed")
+            case _:
+                pass
+
+    # ------------------------------------------------------------------ run loop
+    async def run(self) -> InteractionRecord:
+        await self.start()
+        provider = self._provider
+        assert provider is not None  # noqa: S101 — start() always opens the provider
+
+        async def pump_provider() -> None:
+            async for ev in provider.events():
+                await self.handle_provider_event(ev)
+                if self._closed:
+                    return
+
+        async def pump_audio_out() -> None:
+            async for _ref, pcm in provider.audio_out():
+                rid = self._current_response
+                if rid and not self._responses[rid].cancelled:
+                    try:
+                        await self.deps.transport.send_audio(rid, pcm)
+                    except ConnectionError:
+                        return
+
+        async def pump_client() -> None:
+            fmt = self.deps.s2s_config.input_format
+            async for item in self.deps.transport.incoming():
+                if isinstance(item, bytes):
+                    dur = int(len(item) / 2 / fmt.sample_rate_hz * 1000)
+                    ref = AudioFrameRef(frame_id=new_id("frm"), byte_length=len(item), duration_ms=dur, fmt=fmt)
+                    await self.handle_audio(item, ref)
+                else:
+                    await self.handle_client_message(item)
+                if self._closed:
+                    return
+            if not self._closed:
+                await self.emit(EventType.TRANSPORT_DISCONNECTED, {"reason": "client eof"})
+                await self.close("client_disconnected")
+
+        tasks = [asyncio.create_task(pump_provider()), asyncio.create_task(pump_audio_out()), asyncio.create_task(pump_client())]
+        try:
+            await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
+            if not self._closed:
+                await self.close("pump_finished")
+        finally:
+            for t in tasks:
+                t.cancel()
+            await asyncio.gather(*tasks, return_exceptions=True)
+        assert self.record is not None  # noqa: S101 — close() always sets the record
+        return self.record
+
+
+__all__ = ["InterruptionRecord", "Session", "SessionDeps"]
