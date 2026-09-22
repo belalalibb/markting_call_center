@@ -4,7 +4,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"; cd "$ROOT"
 fail=0
 echo "[1] secret scan (tracked files)"
-if git grep -nIE 'gh[pousr]_[A-Za-z0-9]{20,}|sk-[A-Za-z0-9_-]{20,}|AKIA[0-9A-Z]{16}|AIza[0-9A-Za-z_-]{30,}' -- ':!scripts/recovery/verify.sh' ; then echo "  FAIL: credential pattern in tracked files"; fail=1; else echo "  ok"; fi
+if git grep -nIE 'gh[pousr]_[A-Za-z0-9]{20,}|\bsk-[A-Za-z0-9_-]{20,}|AKIA[0-9A-Z]{16}|AIza[0-9A-Za-z_-]{30,}' -- ':!scripts/recovery/verify.sh' ; then echo "  FAIL: credential pattern in tracked files"; fail=1; else echo "  ok"; fi
 echo "[2] recovery files present"
 for f in QEVION_SESSION_RECOVERY_PROTOCOL.md QEVION_WORK_STATE.md; do [[ -f $f ]] && echo "  ok $f" || { echo "  FAIL missing $f"; fail=1; }; done
 echo "[3] core business-branching grep gate"
