@@ -1533,6 +1533,7 @@ version_metadata:
   sources: []
   decisions:
     - { item_path: policies.contact_policy_hooks.attempt_limit, proposed_by: copilot, approved_by: operator_demo, ts: 2026-09-22T00:00:00Z, rationale: "Two attempts max per PDPL guidance." }
+    - { item_path: tools.permissions.submit_record.confirmation, proposed_by: copilot, approved_by: operator_demo, ts: 2026-09-22T00:00:00Z, rationale: "Survey answers are read back per question; no final confirmation needed before submit." }
   rejected_suggestions: []
   pinned: { policy_versions: {}, knowledge_versions: {}, locale_pack: lp_ar_eg_v1, voice_profile: vp_warm_female_v1, composition_config: comp_s2s_openai_v1 }
   readiness: { state: DRAFT }
