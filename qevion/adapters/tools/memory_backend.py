@@ -27,7 +27,13 @@ class MemoryStore:
 
 
 def _ok(inv: ToolInvocation, output: dict[str, Any], provenance: Provenance = Provenance.TOOL_VERIFIED) -> ToolOutcome:
-    return ToolOutcome(call_id=inv.call_id, tool_id=inv.tool_id, status=ToolOutcomeStatus.COMPLETED, output=output, provenance=provenance)
+    return ToolOutcome(
+        call_id=inv.call_id,
+        tool_id=inv.tool_id,
+        status=ToolOutcomeStatus.COMPLETED,
+        output=output,
+        provenance=provenance,
+    )
 
 
 @dataclass
@@ -39,12 +45,26 @@ class MemoryToolBackend:
         t0 = time.perf_counter()
         if self.tool_id in self.store.fail_next:
             self.store.fail_next.discard(self.tool_id)
-            return ToolOutcome(call_id=invocation.call_id, tool_id=self.tool_id, status=ToolOutcomeStatus.FAILED, error="injected failure")
+            return ToolOutcome(
+                call_id=invocation.call_id,
+                tool_id=self.tool_id,
+                status=ToolOutcomeStatus.FAILED,
+                error="injected failure",
+            )
         if self.tool_id in self.store.unknown_next:
             self.store.unknown_next.discard(self.tool_id)
-            return ToolOutcome(call_id=invocation.call_id, tool_id=self.tool_id, status=ToolOutcomeStatus.UNKNOWN, error="injected ambiguity")
+            return ToolOutcome(
+                call_id=invocation.call_id,
+                tool_id=self.tool_id,
+                status=ToolOutcomeStatus.UNKNOWN,
+                error="injected ambiguity",
+            )
         args = invocation.arguments
-        base = {"tenant_id": invocation.tenant_id, "session_id": invocation.session_id, "activity_id": invocation.activity_id}
+        base = {
+            "tenant_id": invocation.tenant_id,
+            "session_id": invocation.session_id,
+            "activity_id": invocation.activity_id,
+        }
         match self.tool_id:
             case PlatformTool.RECORD_FIELD:
                 # Recording is a user statement, not verification.
@@ -54,11 +74,21 @@ class MemoryToolBackend:
                 ok = args.get("value") not in (None, "")
                 out = _ok(invocation, {"name": args.get("name"), "verified": ok})
             case PlatformTool.SUBMIT_RECORD:
-                rec = {**base, "record_type": args.get("record_type", "generic"), "fields": args.get("fields", {}), "id": f"rec_{len(self.store.records) + 1}"}
+                rec = {
+                    **base,
+                    "record_type": args.get("record_type", "generic"),
+                    "fields": args.get("fields", {}),
+                    "id": f"rec_{len(self.store.records) + 1}",
+                }
                 self.store.records.append(rec)
                 out = _ok(invocation, {"accepted": True, "record_id": rec["id"]})
             case PlatformTool.SCHEDULE_CALLBACK:
-                cb = {**base, "when": args.get("when"), "reason": args.get("reason"), "id": f"cb_{len(self.store.callbacks) + 1}"}
+                cb = {
+                    **base,
+                    "when": args.get("when"),
+                    "reason": args.get("reason"),
+                    "id": f"cb_{len(self.store.callbacks) + 1}",
+                }
                 self.store.callbacks.append(cb)
                 out = _ok(invocation, {"scheduled": True, "callback_id": cb["id"]})
             case PlatformTool.COLLECT_QUESTION:
@@ -72,9 +102,18 @@ class MemoryToolBackend:
             case PlatformTool.CLARIFY:
                 out = _ok(invocation, {"question": args.get("question")}, Provenance.SYSTEM_DERIVED)
             case PlatformTool.CHECK_RULE:
-                out = _ok(invocation, {"rule": args.get("rule"), "result": None, "note": "evaluate via decision port"}, Provenance.SYSTEM_DERIVED)
+                out = _ok(
+                    invocation,
+                    {"rule": args.get("rule"), "result": None, "note": "evaluate via decision port"},
+                    Provenance.SYSTEM_DERIVED,
+                )
             case _:
-                return ToolOutcome(call_id=invocation.call_id, tool_id=self.tool_id, status=ToolOutcomeStatus.FAILED, error=f"no memory backend for {self.tool_id}")
+                return ToolOutcome(
+                    call_id=invocation.call_id,
+                    tool_id=self.tool_id,
+                    status=ToolOutcomeStatus.FAILED,
+                    error=f"no memory backend for {self.tool_id}",
+                )
         out.latency_ms = int((time.perf_counter() - t0) * 1000)
         return out
 

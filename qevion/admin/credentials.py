@@ -50,13 +50,19 @@ class EnvAdminEphemeralResolver:
         self.admin_store[(tenant_id, provider)] = value
         return self._scope(provider, CredentialSource.ADMIN_STORE, tenant_id, value)
 
-    def set_ephemeral(self, provider: str, value: str, tenant_id: str | None = None, ttl_seconds: int | None = None) -> CredentialScope:
+    def set_ephemeral(
+        self, provider: str, value: str, tenant_id: str | None = None, ttl_seconds: int | None = None
+    ) -> CredentialScope:
         ttl = ttl_seconds or self.ephemeral_ttl_seconds
         self._ephemeral[(tenant_id, provider)] = _Ephemeral(value=value, expires_at=time.time() + ttl)
         return self._scope(provider, CredentialSource.EPHEMERAL_UI, tenant_id, value)
 
     def clear_ephemeral(self, provider: str | None = None, tenant_id: str | None = None) -> int:
-        keys = [k for k in self._ephemeral if (provider is None or k[1] == provider) and (tenant_id is None or k[0] == tenant_id)]
+        keys = [
+            k
+            for k in self._ephemeral
+            if (provider is None or k[1] == provider) and (tenant_id is None or k[0] == tenant_id)
+        ]
         for k in keys:
             del self._ephemeral[k]
         return len(keys)
@@ -82,7 +88,9 @@ class EnvAdminEphemeralResolver:
 
     def status(self, provider: str, tenant_id: str | None) -> CredentialScope:
         value, source = self.resolve(provider, tenant_id)
-        return CredentialScope(provider=provider, source=source, tenant_id=tenant_id, fingerprint=fingerprint(value) if value else None)
+        return CredentialScope(
+            provider=provider, source=source, tenant_id=tenant_id, fingerprint=fingerprint(value) if value else None
+        )
 
     def _scope(self, provider: str, source: CredentialSource, tenant_id: str | None, value: str) -> CredentialScope:
         s = CredentialScope(provider=provider, source=source, tenant_id=tenant_id, fingerprint=fingerprint(value))

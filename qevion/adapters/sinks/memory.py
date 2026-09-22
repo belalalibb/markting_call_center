@@ -55,7 +55,12 @@ class MemoryHandoffSink:
     async def handoff(self, request: HandoffRequest) -> HandoffResult:
         self.requests.append(request)
         if request.destination_ref in self.reject_destinations:
-            return HandoffResult(handoff_id=request.handoff_id, accepted=False, destination=request.destination_ref, message="destination unavailable")
+            return HandoffResult(
+                handoff_id=request.handoff_id,
+                accepted=False,
+                destination=request.destination_ref,
+                message="destination unavailable",
+            )
         return HandoffResult(
             handoff_id=request.handoff_id,
             accepted=True,

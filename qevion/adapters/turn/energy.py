@@ -25,7 +25,7 @@ def rms_probability(pcm16: bytes, threshold_rms: float = 500.0) -> float:
         return 0.0
     samples = struct.unpack(f"<{n}h", pcm16[: n * 2])
     rms = (sum(s * s for s in samples) / n) ** 0.5
-    return max(0.0, min(1.0, rms / (2 * threshold_rms)))
+    return float(max(0.0, min(1.0, rms / (2 * threshold_rms))))
 
 
 @dataclass
