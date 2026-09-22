@@ -317,3 +317,56 @@ async def test_illegal_authority_cannot_move_activity_machine() -> None:
     authorities = {e.payload["authority"] for e in session.events if e.type == EventType.STATE_CHANGED}
     assert all(a.startswith("core") for a in authorities)
     assert record.outcome.primary != "accepted"
+
+
+# ---------------------------------------------------------------- Interruption (§31, QV-INT-001/002)
+
+
+async def test_interruption_seven_steps_with_watermarks_and_reconciled_context() -> None:
+    bp = _bp("activity_a_restaurant")
+    long_text = "x" * 100
+    script = [
+        MockScriptStep(text=long_text, audio_ms=2000),  # long response so the user can barge in mid-way
+        MockScriptStep(text="short", audio_ms=50),
+    ]
+    session, transport, _, _, _ = _harness(bp, script)
+    task = asyncio.create_task(session.run())
+    transport.client_sends(_text("hi"))
+    for _ in range(12):  # response started, a few audio chunks delivered
+        await asyncio.sleep(0)
+    assert session.dialog.state is DialogState.SPEAKING
+    transport.client_sends(_text("wait, change that"))  # text during SPEAKING == barge-in (1 DETECT)
+    for _ in range(10):
+        await asyncio.sleep(0)
+    # client acknowledges playout stop (3) — before that the 300 ms force path would mark forced=True
+    stop = transport.messages_of("stop_playout")
+    assert stop, _types(session)[-8:]
+    transport.client_sends(ClientMessage(type=ClientMessageType.PLAYOUT_STOPPED, response_id=stop[-1].response_id))
+    for _ in range(60):
+        await asyncio.sleep(0)
+    transport.client_sends(ClientMessage(type=ClientMessageType.BYE))
+    record = await asyncio.wait_for(task, 5)
+
+    assert record.interruption_count == 1 and len(session.interruptions) == 1
+    rec = session.interruptions[0]
+    assert rec.t0_user_speech_onset <= rec.t1_barge_in_detected <= rec.t2_cancel_sent  # type: ignore[operator]
+    assert rec.t2_cancel_sent <= rec.t3_playout_stopped <= rec.t4_state_reconciled  # type: ignore[operator]
+    assert rec.unheard_text_len > 0 and rec.heard_text_len + rec.unheard_text_len == len(long_text)
+    heard = session.heard_context()
+    assert all(len(h) < len(long_text) for h in heard)  # unheard tail never persists (QV-INT-002)
+    ev = _types(session)
+    for t in (
+        EventType.INTERRUPTION_DETECTED,
+        EventType.ASSISTANT_RESPONSE_CANCELLED,
+        EventType.TRANSPORT_PLAYOUT_STOPPED,
+        EventType.LATENCY_SAMPLE,
+    ):
+        assert t in ev, t
+    assert {s.segment for s in session.latency} >= {
+        "barge_in_to_cancel",
+        "barge_in_to_playout_stop",
+        "barge_in_to_reconciled",
+    }
+    # the new user turn was committed (5) and the provider answered (7)
+    assert record.turn_count == 2
+    assert not session.fields.all()  # 6 COHERE: FieldStore untouched by construction
