@@ -1,0 +1,40 @@
+# QEVION License Registry (QV-LIC-001/002).
+# gate: ALLOW (product use OK) | ALLOW_DEV_ONLY (tests/tools only) | DENY
+# Runtime dependencies MUST be ALLOW. CI license scan fails on DENY or unknown.
+schema: qevion.registry.licenses.v1
+policy:
+  allow: [MIT, BSD-2-Clause, BSD-3-Clause, Apache-2.0, ISC, PSF-2.0, MPL-2.0, Unlicense, 0BSD]
+  allow_dev_only: [GPL-3.0-only, GPL-3.0-or-later, LGPL-3.0-only]   # never shipped in runtime
+  deny: [CC-BY-NC-SA-4.0, CC-BY-NC-4.0, CPML, SSPL-1.0, BUSL-1.1, proprietary-unlicensed]
+  unknown_policy: DENY_UNTIL_VERIFIED
+components:
+  - { name: openai-realtime-api, kind: service, license: OpenAI Terms of Use, gate: ALLOW, ref: REF-001, note: API terms; credentials via CredentialResolver only }
+  - { name: gemini-live-api,     kind: service, license: Google API Terms,   gate: ALLOW, ref: REF-002, note: stub only }
+  - { name: silero-vad,          kind: model+code, license: MIT,             gate: ALLOW, ref: REF-003 }
+  - { name: smart-turn-v3,       kind: model+code, license: BSD-2-Clause,    gate: ALLOW, ref: REF-004, note: candidate }
+  - { name: habibi-tts-egy,      kind: model, license: Apache-2.0,           gate: ALLOW, ref: REF-005, note: GPU; deferred }
+  - { name: habibi-tts-unified,  kind: model, license: CC-BY-NC-SA-4.0,      gate: DENY,  ref: REF-005 }
+  - { name: voicetut-tts,        kind: model, license: Apache-2.0,           gate: ALLOW, ref: REF-006, note: GPU; deferred }
+  - { name: qwencleo-asr,        kind: model, license: Apache-2.0,           gate: ALLOW, ref: REF-007, note: GPU; deferred }
+  - { name: edge-tts,            kind: code,  license: GPL-3.0 + undocumented endpoint, gate: DENY, ref: REF-008 }
+  - { name: coqui-xtts-v2,       kind: model, license: CPML,                 gate: DENY,  ref: REF-009 }
+  - { name: typesafe,            kind: code,  license: UNVERIFIED,           gate: DENY_UNTIL_VERIFIED, ref: REF-010 }
+  - { name: pipecat,             kind: code,  license: BSD-2-Clause,         gate: ALLOW, ref: REF-011, note: future adapter }
+  - { name: livekit-agents,      kind: code,  license: Apache-2.0,           gate: ALLOW, ref: REF-012, note: future adapter }
+  # Python runtime stack (to be pinned in pyproject at P0.2)
+  - { name: fastapi,   kind: code, license: MIT,        gate: ALLOW }
+  - { name: pydantic,  kind: code, license: MIT,        gate: ALLOW }
+  - { name: uvicorn,   kind: code, license: BSD-3-Clause, gate: ALLOW }
+  - { name: websockets,kind: code, license: BSD-3-Clause, gate: ALLOW }
+  - { name: httpx,     kind: code, license: BSD-3-Clause, gate: ALLOW }
+  - { name: pyyaml,    kind: code, license: MIT,        gate: ALLOW }
+  - { name: onnxruntime, kind: code, license: MIT,      gate: ALLOW }
+  - { name: numpy,     kind: code, license: BSD-3-Clause, gate: ALLOW }
+  # Dev-only
+  - { name: pytest,        kind: code, license: MIT,        gate: ALLOW_DEV_ONLY }
+  - { name: hypothesis,    kind: code, license: MPL-2.0,    gate: ALLOW_DEV_ONLY }
+  - { name: ruff,          kind: code, license: MIT,        gate: ALLOW_DEV_ONLY }
+  - { name: mypy,          kind: code, license: MIT,        gate: ALLOW_DEV_ONLY }
+  - { name: import-linter, kind: code, license: BSD-2-Clause, gate: ALLOW_DEV_ONLY }
+  - { name: gitleaks,      kind: tool, license: MIT,        gate: ALLOW_DEV_ONLY }
+  - { name: pip-licenses,  kind: tool, license: MIT,        gate: ALLOW_DEV_ONLY }
