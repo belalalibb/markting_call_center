@@ -1,0 +1,110 @@
+# QEVION Reference Registry (QV-REF-001/002). Verified 2026-09-22 unless noted.
+# verdict: SELECTED | CANDIDATE | STUB | DEFERRED | REJECTED
+# role: s2s | llm | asr | tts | turn | decision | transport | standard
+schema: qevion.registry.references.v1
+verified_on: "2026-09-22"
+entries:
+  - id: REF-001
+    name: OpenAI Realtime API
+    role: s2s
+    url: https://platform.openai.com/docs/guides/realtime
+    verdict: SELECTED
+    license: commercial API (OpenAI Terms)
+    notes: PCM16 24 kHz in/out, server VAD toggle, WS + WebRTC; primary POC provider. Assumption A1.
+    spec_refs: [§32, §33, §49]
+  - id: REF-002
+    name: Gemini Live API
+    role: s2s
+    url: https://ai.google.dev/gemini-api/docs/live
+    verdict: STUB
+    license: commercial API (Google Terms)
+    notes: adapter stub only; proves port replaceability.
+    spec_refs: [§32, §49]
+  - id: REF-003
+    name: Silero VAD
+    role: turn
+    url: https://github.com/snakers4/silero-vad
+    verdict: SELECTED
+    license: MIT
+    notes: default local VAD, CPU, ONNX/Torch. Assumption A2.
+    spec_refs: [§30, §49]
+  - id: REF-004
+    name: Smart Turn v3 (pipecat-ai)
+    role: turn
+    url: https://github.com/pipecat-ai/smart-turn
+    verdict: CANDIDATE
+    license: BSD-2-Clause
+    notes: end-of-turn model; Arabic quality UNVERIFIED (A3); optional adapter.
+    spec_refs: [§30, §49]
+  - id: REF-005
+    name: Habibi-TTS (EGY)
+    role: tts
+    url: https://huggingface.co/collections/MBZUAI/habibi-tts
+    verdict: DEFERRED
+    license: Apache-2.0 (EGY model); Unified model CC-BY-NC-SA (NOT usable in product)
+    notes: GPU required; adapter stub only in POC (A9).
+    spec_refs: [§34, §49]
+  - id: REF-006
+    name: VoiceTuT-TTS
+    role: tts
+    url: https://huggingface.co/VoiceTuT
+    verdict: DEFERRED
+    license: Apache-2.0
+    notes: GPU required; stub only.
+    spec_refs: [§34, §49]
+  - id: REF-007
+    name: QwenCleo-ASR
+    role: asr
+    url: https://huggingface.co/Qwen
+    verdict: DEFERRED
+    license: Apache-2.0
+    notes: GPU required; cascade path deferred.
+    spec_refs: [§33, §49]
+  - id: REF-008
+    name: edge-tts
+    role: tts
+    url: https://github.com/rany2/edge-tts
+    verdict: REJECTED
+    license: GPL-3.0 wrapper over undocumented Microsoft endpoint
+    notes: ToS/licensing risk; REJECTED for product by operator decision.
+    spec_refs: [§49]
+  - id: REF-009
+    name: Coqui XTTS-v2
+    role: tts
+    url: https://huggingface.co/coqui/XTTS-v2
+    verdict: REJECTED
+    license: Coqui Public Model License (non-commercial)
+    notes: CPML forbids commercial use.
+    spec_refs: [§49]
+  - id: REF-010
+    name: TypeSafe
+    role: decision
+    url: unverified-third-party
+    verdict: DEFERRED
+    license: UNVERIFIED
+    notes: optional decision.v1 adapter; deterministic-first rule applies (D8). ADR-0004.
+    spec_refs: [§32, §49]
+  - id: REF-011
+    name: Pipecat
+    role: transport
+    url: https://github.com/pipecat-ai/pipecat
+    verdict: DEFERRED
+    license: BSD-2-Clause
+    notes: future transport adapter only (D3); not a foundation.
+    spec_refs: [§29, §49]
+  - id: REF-012
+    name: LiveKit Agents
+    role: transport
+    url: https://github.com/livekit/agents
+    verdict: DEFERRED
+    license: Apache-2.0
+    notes: future transport adapter only (D3).
+    spec_refs: [§29, §49]
+  - id: REF-013
+    name: Standards bundle
+    role: standard
+    url: n/a
+    verdict: SELECTED
+    license: open standards
+    notes: RFC 2119/8174, JSON Schema 2020-12, SemVer 2.0, CloudEvents 1.0, W3C Trace Context, OWASP LLM Top 10 (2025), OWASP API Top 10, NIST AI RMF, ISO 42001/27001, Egypt PDPL 151/2020 + ER 816/2025, GDPR, CaMeL (capability-based prompt-injection defense).
+    spec_refs: [§37, §38, §39, §40, §49]
