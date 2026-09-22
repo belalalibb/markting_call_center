@@ -11,7 +11,7 @@ from dataclasses import dataclass, field
 from enum import StrEnum
 
 from qevion.contracts.control import TERMINAL_ACTIVITY_STATES, ActivityState
-from qevion.core.dialog_machine import IllegalTransition, Transition
+from qevion.core.dialog_machine import IllegalTransitionError, Transition
 
 
 class ActivityTrigger(StrEnum):
@@ -39,7 +39,12 @@ class ActivityTrigger(StrEnum):
 
 T = ActivityTrigger
 S = ActivityState
-_COMMON_EXITS = {T.HANDOFF: S.ESCALATED, T.USER_LEFT: S.ABANDONED, T.BLOCKED: S.BLOCKED, T.EXIT_RULE_MET: S.CLOSING}
+_COMMON_EXITS: dict[str, str] = {
+    T.HANDOFF: S.ESCALATED,
+    T.USER_LEFT: S.ABANDONED,
+    T.BLOCKED: S.BLOCKED,
+    T.EXIT_RULE_MET: S.CLOSING,
+}
 
 GENERIC_DEFAULT_V1: dict[str, dict[str, str]] = {
     S.OPENING: {T.OPENED: S.ENGAGED, **_COMMON_EXITS},
@@ -140,7 +145,7 @@ class ActivityMachine:
     def fire(self, trigger: str, ts_ms: int, reason: str | None = None) -> Transition:
         nxt = self.table.get(self.state.value, {}).get(trigger)
         if nxt is None:
-            raise IllegalTransition(f"activity: {self.state.value} --{trigger}--> ?")
+            raise IllegalTransitionError(f"activity: {self.state.value} --{trigger}--> ?")
         t = Transition("activity", self.state.value, nxt, trigger, ts_ms, reason)
         self.state = ActivityState(nxt)
         self.transitions.append(t)

@@ -7,7 +7,7 @@ from dataclasses import dataclass, field
 from qevion.contracts.control import DialogState
 
 
-class IllegalTransition(Exception):
+class IllegalTransitionError(Exception):
     pass
 
 
@@ -68,7 +68,7 @@ class DialogMachine:
     def fire(self, trigger: str, ts_ms: int, reason: str | None = None) -> Transition:
         nxt = _DIALOG[self.state].get(trigger)
         if nxt is None:
-            raise IllegalTransition(f"dialog: {self.state.value} --{trigger}--> ?")
+            raise IllegalTransitionError(f"dialog: {self.state.value} --{trigger}--> ?")
         t = Transition("dialog", self.state.value, nxt.value, trigger, ts_ms, reason)
         self.state = nxt
         self.transitions.append(t)
