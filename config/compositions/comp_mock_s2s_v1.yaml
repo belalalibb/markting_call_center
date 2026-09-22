@@ -1,0 +1,9 @@
+# Composition: all-mock speech-to-speech (tests, simulation, CI). Pinned by Activities via version_metadata.pinned.composition_config.
+schema: qevion.composition.v1
+composition_id: comp_mock_s2s_v1
+mode: s2s
+bindings:
+  - { role: s2s, adapter: mock, model: mock-s2s }
+  - { role: turn, adapter: mock }
+  - { role: decision, adapter: rules }
+turn: { detector: mock, threshold: 0.5, min_speech_ms: 120, min_silence_ms: 500, barge_in_min_speech_ms: 200 }

@@ -59,3 +59,17 @@ def test_readiness_illegal_transitions() -> None:
     for s in ReadinessState:
         if s is not ReadinessState.RETIRED:
             assert ReadinessState.RETIRED in READINESS_TRANSITIONS[s], s
+
+
+def test_composition_configs_validate() -> None:
+    from pathlib import Path
+
+    import yaml
+
+    from qevion.contracts.composition import Composition
+
+    files = sorted((Path(__file__).resolve().parents[1] / "config" / "compositions").glob("*.yaml"))
+    assert files
+    for f in files:
+        c = Composition.model_validate(yaml.safe_load(f.read_text()))
+        assert c.composition_id == f.stem
