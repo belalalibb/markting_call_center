@@ -1154,3 +1154,32 @@ Rules: phases execute in order; a phase may start before the previous phase's op
 ### §51.1 Decision Gate
 
 Before P1 begins the operator's approved decisions D1–D15 are frozen into `docs/adr/`. Any change afterwards requires a new ADR superseding the old one and a spec version bump (QV-VERS). Deferred items (TypeSafe adapter, Pipecat/LiveKit adapters, telephony) are recorded as `status: deferred` and MUST NOT block the exit gates above.
+
+## §52. Acceptance Criteria
+
+Every criterion is testable and maps to an evidence artifact under `evidence/<phase>/`. Status is tracked in `docs/registry/traceability.yaml`.
+
+| ID | Criterion | Phase | Evidence kind |
+|---|---|---|---|
+| QV-ACC-001 | Recovery drill: fresh sandbox + `تابع <token>` reaches last checkpoint in ≤ 10 min with zero rebuild | P0 | drill log |
+| QV-ACC-002 | No secret pattern in any tracked file or commit (gitleaks + verify.sh step 1) | P0 | CI report |
+| QV-ACC-003 | Every v1 contract round-trips Pydantic → JSON Schema → Pydantic with identical payload | P0.2 | pytest |
+| QV-ACC-004 | `lint-imports`: `qevion.core` imports only `qevion.contracts` + stdlib | P0.2 | CI report |
+| QV-ACC-005 | Core grep gate: zero domain terms (restaurant, menu, pizza, clinic, order, booking…) in `qevion/core` | P1 | verify.sh |
+| QV-ACC-006 | Three example Activities (§54 A–C) execute end-to-end on mocks with no Core code change | P1 | pytest + InteractionRecords |
+| QV-ACC-007 | Every FieldStore write carries provenance; UNVERIFIED fields never reach EXECUTING | P1 | property test |
+| QV-ACC-008 | Claim Governor blocks any assistant factual claim lacking KNOWLEDGE_APPROVED/TOOL_VERIFIED source | P1 | red-team fixture |
+| QV-ACC-009 | Tool pipeline enforces permission, schema, budget and timeout at each of the 11 steps | P1 | pytest |
+| QV-ACC-010 | Outcome Engine emits `qevion.outcome.v1` for every ENDED/ESCALATED/ABANDONED session | P1 | pytest |
+| QV-ACC-011 | Preflight returns BLOCKED with the correct reason code for each seeded defect fixture | P2 | pytest |
+| QV-ACC-012 | Knowledge pipeline flags seeded contradiction and gap fixtures with correct classes | P2 | pytest |
+| QV-ACC-013 | Readiness lifecycle rejects illegal transitions (e.g. DRAFT → ACTIVE) | P2 | pytest |
+| QV-ACC-014 | Copilot draft contains zero facts absent from uploaded sources or operator answers | P3 | diff report |
+| QV-ACC-015 | Copilot output always passes validator or lists NEEDS_INFORMATION questions | P3 | pytest |
+| QV-ACC-016 | Web app three modes reachable at sandbox URL; Admin test key lives only in memory (no disk, no log) | P3 | screenshot + grep |
+| QV-ACC-017 | AudioWorklet → WS → provider loop delivers first audio response < 1.5 s p50 on mock provider | P4 | latency table |
+| QV-ACC-018 | 7-step interruption: all 5 timestamps recorded; barge-in → playback stop ≤ 300 ms p95 | P4 | latency table |
+| QV-ACC-019 | Recorded session replays deterministically (same events, same outcome) | P4 | replay diff |
+| QV-ACC-020 | Simulation blocks a Blueprint with a seeded policy violation; Activation refused | P5 | pytest |
+| QV-ACC-021 | Budget guards ($10 / 5 min / 20 sessions/day defaults) terminate sessions and emit events | P5 | pytest |
+| QV-ACC-022 | **Real-provider evidence** (needs operator test key): one full OpenAI Realtime session with interruption, recorded + replayed | P6 | evidence bundle |
