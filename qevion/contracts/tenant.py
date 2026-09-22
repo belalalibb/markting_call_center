@@ -78,7 +78,7 @@ class LocalePack(QevionModel):
     language: str
     locale: str
     dialect: str | None = None
-    register: Literal["formal", "neutral", "casual"] = "neutral"
+    speech_register: Literal["formal", "neutral", "casual"] = "neutral"
     greeting_refs: list[str] = Field(default_factory=list)
     confirmation_phrases: list[str] = Field(default_factory=list)
     negation_phrases: list[str] = Field(default_factory=list)
