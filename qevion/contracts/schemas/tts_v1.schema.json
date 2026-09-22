@@ -1,0 +1,78 @@
+{
+  "$defs": {
+    "AudioFormat": {
+      "additionalProperties": false,
+      "properties": {
+        "channels": {
+          "const": 1,
+          "default": 1,
+          "title": "Channels",
+          "type": "integer"
+        },
+        "encoding": {
+          "const": "pcm16",
+          "default": "pcm16",
+          "title": "Encoding",
+          "type": "string"
+        },
+        "sample_rate_hz": {
+          "default": 24000,
+          "enum": [
+            8000,
+            16000,
+            24000,
+            48000
+          ],
+          "title": "Sample Rate Hz",
+          "type": "integer"
+        }
+      },
+      "title": "AudioFormat",
+      "type": "object"
+    }
+  },
+  "$id": "https://qevion.dev/schemas/tts_v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "fmt": {
+      "$ref": "#/$defs/AudioFormat"
+    },
+    "locale": {
+      "title": "Locale",
+      "type": "string"
+    },
+    "pronunciation_hints": {
+      "items": {
+        "additionalProperties": {
+          "type": "string"
+        },
+        "type": "object"
+      },
+      "title": "Pronunciation Hints",
+      "type": "array"
+    },
+    "schema": {
+      "const": "qevion.tts.v1",
+      "default": "qevion.tts.v1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "text": {
+      "title": "Text",
+      "type": "string"
+    },
+    "voice": {
+      "title": "Voice",
+      "type": "string"
+    }
+  },
+  "required": [
+    "text",
+    "voice",
+    "locale"
+  ],
+  "title": "TTSRequest",
+  "type": "object",
+  "x-qevion-schema-id": "qevion.tts.v1"
+}

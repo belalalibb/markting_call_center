@@ -1,0 +1,137 @@
+{
+  "$defs": {
+    "BudgetGuards": {
+      "additionalProperties": false,
+      "description": "Defaults per D14 (QV-COST).",
+      "properties": {
+        "max_session_seconds": {
+          "default": 300,
+          "minimum": 10,
+          "title": "Max Session Seconds",
+          "type": "integer"
+        },
+        "max_sessions_per_day": {
+          "default": 20,
+          "minimum": 1,
+          "title": "Max Sessions Per Day",
+          "type": "integer"
+        },
+        "usd_per_day": {
+          "default": 10.0,
+          "minimum": 0,
+          "title": "Usd Per Day",
+          "type": "number"
+        },
+        "warn_at_fraction": {
+          "default": 0.8,
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Warn At Fraction",
+          "type": "number"
+        }
+      },
+      "title": "BudgetGuards",
+      "type": "object"
+    },
+    "PrivacyPosture": {
+      "additionalProperties": false,
+      "description": "QV-PRIV defaults: no audio retention, redacted transcripts.",
+      "properties": {
+        "consent_disclosure_required": {
+          "default": true,
+          "title": "Consent Disclosure Required",
+          "type": "boolean"
+        },
+        "jurisdiction": {
+          "default": "EG-PDPL-151/2020",
+          "title": "Jurisdiction",
+          "type": "string"
+        },
+        "pii_fields_encrypted": {
+          "default": true,
+          "title": "Pii Fields Encrypted",
+          "type": "boolean"
+        },
+        "redact_transcripts": {
+          "default": true,
+          "title": "Redact Transcripts",
+          "type": "boolean"
+        },
+        "retain_audio": {
+          "default": false,
+          "title": "Retain Audio",
+          "type": "boolean"
+        },
+        "transcript_retention_days": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Transcript Retention Days",
+          "type": "integer"
+        }
+      },
+      "title": "PrivacyPosture",
+      "type": "object"
+    },
+    "TenantStatus": {
+      "enum": [
+        "active",
+        "suspended"
+      ],
+      "title": "TenantStatus",
+      "type": "string"
+    }
+  },
+  "$id": "https://qevion.dev/schemas/tenant_v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "budget": {
+      "$ref": "#/$defs/BudgetGuards"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "default_locale": {
+      "default": "ar-EG",
+      "title": "Default Locale",
+      "type": "string"
+    },
+    "enabled_providers": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Enabled Providers",
+      "type": "array"
+    },
+    "name": {
+      "title": "Name",
+      "type": "string"
+    },
+    "privacy": {
+      "$ref": "#/$defs/PrivacyPosture"
+    },
+    "schema": {
+      "const": "qevion.tenant.v1",
+      "default": "qevion.tenant.v1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "status": {
+      "$ref": "#/$defs/TenantStatus",
+      "default": "active"
+    },
+    "tenant_id": {
+      "title": "Tenant Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "tenant_id",
+    "name"
+  ],
+  "title": "Tenant",
+  "type": "object",
+  "x-qevion-schema-id": "qevion.tenant.v1"
+}

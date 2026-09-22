@@ -1,0 +1,111 @@
+{
+  "$defs": {
+    "Provenance": {
+      "description": "Where a fact/field value came from (QV-FLD, §20).",
+      "enum": [
+        "USER_STATED",
+        "TOOL_VERIFIED",
+        "SYSTEM_DERIVED",
+        "KNOWLEDGE_APPROVED",
+        "UNVERIFIED",
+        "UNKNOWN"
+      ],
+      "title": "Provenance",
+      "type": "string"
+    },
+    "ToolOutcomeStatus": {
+      "enum": [
+        "completed",
+        "failed",
+        "rejected_args",
+        "rejected_policy",
+        "rejected_budget",
+        "confirmation_denied",
+        "duplicate",
+        "timeout",
+        "unknown"
+      ],
+      "title": "ToolOutcomeStatus",
+      "type": "string"
+    },
+    "ToolPipelineStep": {
+      "description": "§24 11-step pipeline; each step emits a tool.* event.",
+      "enum": [
+        "received",
+        "schema_validated",
+        "permission_checked",
+        "policy_checked",
+        "budget_checked",
+        "deduplicated",
+        "confirmation",
+        "executing",
+        "result_validated",
+        "provenance_tagged",
+        "returned"
+      ],
+      "title": "ToolPipelineStep",
+      "type": "string"
+    }
+  },
+  "$id": "https://qevion.dev/schemas/tool_outcome_v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "call_id": {
+      "title": "Call Id",
+      "type": "string"
+    },
+    "error": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Error"
+    },
+    "latency_ms": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Latency Ms"
+    },
+    "output": {
+      "additionalProperties": true,
+      "title": "Output",
+      "type": "object"
+    },
+    "provenance": {
+      "$ref": "#/$defs/Provenance",
+      "default": "TOOL_VERIFIED"
+    },
+    "status": {
+      "$ref": "#/$defs/ToolOutcomeStatus"
+    },
+    "step_reached": {
+      "$ref": "#/$defs/ToolPipelineStep",
+      "default": "returned"
+    },
+    "tool_id": {
+      "title": "Tool Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "call_id",
+    "tool_id",
+    "status"
+  ],
+  "title": "ToolOutcome",
+  "type": "object",
+  "x-qevion-schema-id": "qevion.tool_outcome.v1"
+}

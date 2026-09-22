@@ -1,0 +1,51 @@
+{
+  "$id": "https://qevion.dev/schemas/handoff_result_v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "accepted": {
+      "title": "Accepted",
+      "type": "boolean"
+    },
+    "destination": {
+      "title": "Destination",
+      "type": "string"
+    },
+    "handoff_id": {
+      "title": "Handoff Id",
+      "type": "string"
+    },
+    "message": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Message"
+    },
+    "sink_ref": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Sink Ref"
+    }
+  },
+  "required": [
+    "handoff_id",
+    "accepted",
+    "destination"
+  ],
+  "title": "HandoffResult",
+  "type": "object",
+  "x-qevion-schema-id": "qevion.handoff_result.v1"
+}

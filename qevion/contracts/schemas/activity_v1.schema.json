@@ -1,0 +1,1546 @@
+{
+  "$defs": {
+    "ActivityMachineRef": {
+      "additionalProperties": false,
+      "properties": {
+        "inline": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Inline"
+        },
+        "table_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "generic_default_v1",
+          "title": "Table Ref"
+        }
+      },
+      "title": "ActivityMachineRef",
+      "type": "object"
+    },
+    "Behavior": {
+      "description": "QV-POL-004 unknown-question / uncertainty behaviors. 'The model decides' is NOT a value.",
+      "enum": [
+        "ANSWER_FROM_APPROVED_KNOWLEDGE",
+        "ASK_CLARIFYING_QUESTION",
+        "STATE_LIMITATION",
+        "USE_AUTHORIZED_TOOL",
+        "ASK_OPERATOR_SOURCE",
+        "OFFER_HUMAN_HANDOFF",
+        "COLLECT_QUESTION",
+        "REQUEST_ADDITIONAL_INFORMATION",
+        "CLOSE_GRACEFULLY",
+        "DECLINE_UNSUPPORTED_REQUEST"
+      ],
+      "title": "Behavior",
+      "type": "string"
+    },
+    "BehaviorOverride": {
+      "additionalProperties": false,
+      "properties": {
+        "behavior": {
+          "$ref": "#/$defs/Behavior"
+        },
+        "topic_pattern": {
+          "title": "Topic Pattern",
+          "type": "string"
+        }
+      },
+      "required": [
+        "topic_pattern",
+        "behavior"
+      ],
+      "title": "BehaviorOverride",
+      "type": "object"
+    },
+    "Channel": {
+      "enum": [
+        "browser_voice",
+        "text",
+        "telephony"
+      ],
+      "title": "Channel",
+      "type": "string"
+    },
+    "ClaimRule": {
+      "additionalProperties": false,
+      "properties": {
+        "claim_type": {
+          "title": "Claim Type",
+          "type": "string"
+        },
+        "scope": {
+          "default": "activity",
+          "title": "Scope",
+          "type": "string"
+        },
+        "source_requirement": {
+          "anyOf": [
+            {
+              "enum": [
+                "KNOWLEDGE_APPROVED",
+                "TOOL_VERIFIED",
+                "ANY_APPROVED"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Requirement"
+        }
+      },
+      "required": [
+        "claim_type"
+      ],
+      "title": "ClaimRule",
+      "type": "object"
+    },
+    "Completion": {
+      "additionalProperties": false,
+      "properties": {
+        "exit_rules": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Exit Rules",
+          "type": "array"
+        },
+        "failure_rules": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Failure Rules",
+          "type": "array"
+        },
+        "success_rules": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Success Rules",
+          "type": "array"
+        }
+      },
+      "title": "Completion",
+      "type": "object"
+    },
+    "ConstrainedFlow": {
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "default": false,
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "steps": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Steps",
+          "type": "array"
+        }
+      },
+      "title": "ConstrainedFlow",
+      "type": "object"
+    },
+    "ContactPolicyHooks": {
+      "additionalProperties": false,
+      "description": "Outbound-only hooks (ADR-0003).",
+      "properties": {
+        "attempt_limit": {
+          "default": 2,
+          "maximum": 10,
+          "minimum": 1,
+          "title": "Attempt Limit",
+          "type": "integer"
+        },
+        "consent_required": {
+          "default": true,
+          "title": "Consent Required",
+          "type": "boolean"
+        },
+        "contact_window": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "e.g. \"10:00-20:00 Africa/Cairo\"",
+          "title": "Contact Window"
+        },
+        "suppression_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Suppression Ref"
+        }
+      },
+      "title": "ContactPolicyHooks",
+      "type": "object"
+    },
+    "CoverageBlock": {
+      "additionalProperties": false,
+      "properties": {
+        "exceptions": {
+          "items": {
+            "$ref": "#/$defs/CoverageException"
+          },
+          "title": "Exceptions",
+          "type": "array"
+        },
+        "objections": {
+          "items": {
+            "$ref": "#/$defs/CoverageObjection"
+          },
+          "title": "Objections",
+          "type": "array"
+        },
+        "questions": {
+          "items": {
+            "$ref": "#/$defs/CoverageQuestion"
+          },
+          "title": "Questions",
+          "type": "array"
+        }
+      },
+      "title": "CoverageBlock",
+      "type": "object"
+    },
+    "CoverageException": {
+      "additionalProperties": false,
+      "properties": {
+        "behavior": {
+          "title": "Behavior",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "situation": {
+          "title": "Situation",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "situation",
+        "behavior"
+      ],
+      "title": "CoverageException",
+      "type": "object"
+    },
+    "CoverageObjection": {
+      "additionalProperties": false,
+      "properties": {
+        "allowed_alternatives": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Allowed Alternatives",
+          "type": "array"
+        },
+        "approved_response_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Approved Response Ref"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "pattern": {
+          "title": "Pattern",
+          "type": "string"
+        },
+        "status": {
+          "default": "ASK_OWNER",
+          "enum": [
+            "COVERED",
+            "ASK_OWNER",
+            "DECLINED"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "pattern"
+      ],
+      "title": "CoverageObjection",
+      "type": "object"
+    },
+    "CoverageQuestion": {
+      "additionalProperties": false,
+      "properties": {
+        "answer_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Answer Ref"
+        },
+        "category": {
+          "title": "Category",
+          "type": "string"
+        },
+        "entity_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Entity Ref"
+        },
+        "handling": {
+          "enum": [
+            "KNOWLEDGE",
+            "TOOL",
+            "CLARIFY",
+            "LIMITATION",
+            "HANDOFF"
+          ],
+          "title": "Handling",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "pattern": {
+          "title": "Pattern",
+          "type": "string"
+        },
+        "status": {
+          "default": "ASK_OWNER",
+          "enum": [
+            "COVERED",
+            "ASK_OWNER",
+            "DECLINED"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "category",
+        "pattern",
+        "handling"
+      ],
+      "title": "CoverageQuestion",
+      "type": "object"
+    },
+    "DataBlock": {
+      "additionalProperties": false,
+      "properties": {
+        "optional": {
+          "items": {
+            "$ref": "#/$defs/FieldSpec"
+          },
+          "title": "Optional",
+          "type": "array"
+        },
+        "required": {
+          "items": {
+            "$ref": "#/$defs/FieldSpec"
+          },
+          "title": "Required",
+          "type": "array"
+        }
+      },
+      "title": "DataBlock",
+      "type": "object"
+    },
+    "Decision": {
+      "additionalProperties": false,
+      "description": "QV-ACT-002: every business-decision element carries who proposed and who approved it.",
+      "properties": {
+        "approved_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "operator id; None = unapproved → blocks activation",
+          "title": "Approved By"
+        },
+        "item_path": {
+          "title": "Item Path",
+          "type": "string"
+        },
+        "proposed_by": {
+          "$ref": "#/$defs/ProposedBy"
+        },
+        "rationale": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rationale"
+        },
+        "ts": {
+          "format": "date-time",
+          "title": "Ts",
+          "type": "string"
+        }
+      },
+      "required": [
+        "item_path",
+        "proposed_by"
+      ],
+      "title": "Decision",
+      "type": "object"
+    },
+    "Direction": {
+      "enum": [
+        "inbound",
+        "outbound",
+        "bidirectional"
+      ],
+      "title": "Direction",
+      "type": "string"
+    },
+    "Disclosure": {
+      "additionalProperties": false,
+      "properties": {
+        "text_ref": {
+          "title": "Text Ref",
+          "type": "string"
+        },
+        "when": {
+          "description": "dialog/activity state name or trigger, e.g. OPENING",
+          "title": "When",
+          "type": "string"
+        }
+      },
+      "required": [
+        "when",
+        "text_ref"
+      ],
+      "title": "Disclosure",
+      "type": "object"
+    },
+    "EscalationRule": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "title": "Action",
+          "type": "string"
+        },
+        "priority": {
+          "default": "normal",
+          "enum": [
+            "low",
+            "normal",
+            "high",
+            "urgent"
+          ],
+          "title": "Priority",
+          "type": "string"
+        },
+        "trigger": {
+          "title": "Trigger",
+          "type": "string"
+        }
+      },
+      "required": [
+        "trigger",
+        "action"
+      ],
+      "title": "EscalationRule",
+      "type": "object"
+    },
+    "Evaluation": {
+      "additionalProperties": false,
+      "properties": {
+        "adversarial_cases": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Adversarial Cases",
+          "type": "array"
+        },
+        "cases": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Cases",
+          "type": "array"
+        },
+        "simulation_personas": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Simulation Personas",
+          "type": "array"
+        }
+      },
+      "title": "Evaluation",
+      "type": "object"
+    },
+    "FieldSpec": {
+      "additionalProperties": false,
+      "description": "A datum the Activity needs. Names are Activity data; Core never knows them (QV-ACT-004).",
+      "properties": {
+        "clarification_hint": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Clarification Hint"
+        },
+        "enum_values": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Enum Values"
+        },
+        "name": {
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Name",
+          "type": "string"
+        },
+        "provenance_required": {
+          "$ref": "#/$defs/Provenance",
+          "default": "USER_STATED"
+        },
+        "sensitivity": {
+          "$ref": "#/$defs/Sensitivity",
+          "default": "low"
+        },
+        "type": {
+          "enum": [
+            "string",
+            "integer",
+            "number",
+            "boolean",
+            "date",
+            "datetime",
+            "enum",
+            "entity_ref",
+            "list"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "validation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "expression or rule ref evaluated by decision port",
+          "title": "Validation"
+        }
+      },
+      "required": [
+        "name",
+        "type"
+      ],
+      "title": "FieldSpec",
+      "type": "object"
+    },
+    "Freshness": {
+      "additionalProperties": false,
+      "properties": {
+        "max_age_days": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Age Days"
+        },
+        "stale_behavior": {
+          "default": "STATE_LIMITATION",
+          "title": "Stale Behavior",
+          "type": "string"
+        }
+      },
+      "title": "Freshness",
+      "type": "object"
+    },
+    "HandoffRule": {
+      "additionalProperties": false,
+      "properties": {
+        "context_projection": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Context Projection",
+          "type": "array"
+        },
+        "destination_ref": {
+          "title": "Destination Ref",
+          "type": "string"
+        },
+        "priority": {
+          "default": "normal",
+          "enum": [
+            "low",
+            "normal",
+            "high",
+            "urgent"
+          ],
+          "title": "Priority",
+          "type": "string"
+        },
+        "trigger": {
+          "title": "Trigger",
+          "type": "string"
+        }
+      },
+      "required": [
+        "trigger",
+        "destination_ref"
+      ],
+      "title": "HandoffRule",
+      "type": "object"
+    },
+    "Identity": {
+      "additionalProperties": false,
+      "properties": {
+        "activity_id": {
+          "title": "Activity Id",
+          "type": "string"
+        },
+        "description": {
+          "default": "",
+          "title": "Description",
+          "type": "string"
+        },
+        "line_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Line Id"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/ReadinessState",
+          "default": "DRAFT"
+        },
+        "tenant_id": {
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "version": {
+          "pattern": "^\\d+\\.\\d+\\.\\d+$",
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "tenant_id",
+        "activity_id",
+        "name",
+        "version"
+      ],
+      "title": "Identity",
+      "type": "object"
+    },
+    "KnowledgeBlock": {
+      "additionalProperties": false,
+      "properties": {
+        "freshness": {
+          "$ref": "#/$defs/Freshness"
+        },
+        "requirements": {
+          "items": {
+            "$ref": "#/$defs/KnowledgeRequirement"
+          },
+          "title": "Requirements",
+          "type": "array"
+        },
+        "source_priority": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Source Priority",
+          "type": "array"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/KnowledgeSourceRef"
+          },
+          "title": "Sources",
+          "type": "array"
+        }
+      },
+      "title": "KnowledgeBlock",
+      "type": "object"
+    },
+    "KnowledgeRequirement": {
+      "additionalProperties": false,
+      "properties": {
+        "description": {
+          "default": "",
+          "title": "Description",
+          "type": "string"
+        },
+        "domain": {
+          "title": "Domain",
+          "type": "string"
+        },
+        "status": {
+          "default": "MISSING",
+          "enum": [
+            "SATISFIED",
+            "MISSING",
+            "PARTIAL"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "domain"
+      ],
+      "title": "KnowledgeRequirement",
+      "type": "object"
+    },
+    "KnowledgeSourceRef": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "file",
+            "structured",
+            "api"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "priority": {
+          "default": 100,
+          "minimum": 0,
+          "title": "Priority",
+          "type": "integer"
+        },
+        "source_id": {
+          "title": "Source Id",
+          "type": "string"
+        },
+        "version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Version"
+        }
+      },
+      "required": [
+        "source_id",
+        "kind"
+      ],
+      "title": "KnowledgeSourceRef",
+      "type": "object"
+    },
+    "Locale": {
+      "additionalProperties": false,
+      "properties": {
+        "dialect": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Dialect"
+        },
+        "language": {
+          "maxLength": 3,
+          "minLength": 2,
+          "title": "Language",
+          "type": "string"
+        },
+        "locale": {
+          "pattern": "^[a-z]{2,3}-[A-Z]{2}$",
+          "title": "Locale",
+          "type": "string"
+        },
+        "locale_pack_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Locale Pack Ref"
+        },
+        "pronunciation": {
+          "items": {
+            "$ref": "#/$defs/Pronunciation"
+          },
+          "title": "Pronunciation",
+          "type": "array"
+        },
+        "voice_profile_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Voice Profile Ref"
+        }
+      },
+      "required": [
+        "language",
+        "locale"
+      ],
+      "title": "Locale",
+      "type": "object"
+    },
+    "Objective": {
+      "additionalProperties": false,
+      "properties": {
+        "optimization_bounds": {
+          "$ref": "#/$defs/OptimizationBounds"
+        },
+        "primary": {
+          "$ref": "#/$defs/ObjectiveItem"
+        },
+        "secondary": {
+          "items": {
+            "$ref": "#/$defs/ObjectiveItem"
+          },
+          "title": "Secondary",
+          "type": "array"
+        }
+      },
+      "required": [
+        "primary"
+      ],
+      "title": "Objective",
+      "type": "object"
+    },
+    "ObjectiveItem": {
+      "additionalProperties": false,
+      "properties": {
+        "description": {
+          "default": "",
+          "title": "Description",
+          "type": "string"
+        },
+        "kind": {
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "title": "ObjectiveItem",
+      "type": "object"
+    },
+    "OptOutPolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "$ref": "#/$defs/Behavior",
+          "default": "CLOSE_GRACEFULLY"
+        },
+        "phrases_ref": {
+          "title": "Phrases Ref",
+          "type": "string"
+        }
+      },
+      "required": [
+        "phrases_ref"
+      ],
+      "title": "OptOutPolicy",
+      "type": "object"
+    },
+    "OptimizationBounds": {
+      "additionalProperties": false,
+      "properties": {
+        "no_invented_urgency": {
+          "default": true,
+          "title": "No Invented Urgency",
+          "type": "boolean"
+        },
+        "respect_opt_out": {
+          "default": true,
+          "title": "Respect Opt Out",
+          "type": "boolean"
+        },
+        "truthfulness": {
+          "const": "required",
+          "default": "required",
+          "title": "Truthfulness",
+          "type": "string"
+        }
+      },
+      "title": "OptimizationBounds",
+      "type": "object"
+    },
+    "OutcomeField": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "required": {
+          "default": false,
+          "title": "Required",
+          "type": "boolean"
+        },
+        "source_field": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Field"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "OutcomeField",
+      "type": "object"
+    },
+    "OutcomeSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "fields": {
+          "items": {
+            "$ref": "#/$defs/OutcomeField"
+          },
+          "title": "Fields",
+          "type": "array"
+        },
+        "next_actions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Next Actions",
+          "type": "array"
+        },
+        "primary": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Primary",
+          "type": "array"
+        },
+        "secondary": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Secondary",
+          "type": "array"
+        }
+      },
+      "required": [
+        "primary"
+      ],
+      "title": "OutcomeSchema",
+      "type": "object"
+    },
+    "Pinned": {
+      "additionalProperties": false,
+      "properties": {
+        "composition_config": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Composition Config"
+        },
+        "knowledge_versions": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Knowledge Versions",
+          "type": "object"
+        },
+        "locale_pack": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Locale Pack"
+        },
+        "policy_versions": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Policy Versions",
+          "type": "object"
+        },
+        "voice_profile": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Voice Profile"
+        }
+      },
+      "title": "Pinned",
+      "type": "object"
+    },
+    "PolicyBlock": {
+      "additionalProperties": false,
+      "properties": {
+        "allowed_claims": {
+          "items": {
+            "$ref": "#/$defs/ClaimRule"
+          },
+          "title": "Allowed Claims",
+          "type": "array"
+        },
+        "clarification_policy": {
+          "default": "always_when_ambiguous",
+          "enum": [
+            "always_when_ambiguous",
+            "when_high_impact"
+          ],
+          "title": "Clarification Policy",
+          "type": "string"
+        },
+        "contact_policy_hooks": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ContactPolicyHooks"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "disclosures": {
+          "items": {
+            "$ref": "#/$defs/Disclosure"
+          },
+          "title": "Disclosures",
+          "type": "array"
+        },
+        "escalation": {
+          "items": {
+            "$ref": "#/$defs/EscalationRule"
+          },
+          "title": "Escalation",
+          "type": "array"
+        },
+        "opt_out": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/OptOutPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "prohibited_claims": {
+          "items": {
+            "$ref": "#/$defs/ClaimRule"
+          },
+          "title": "Prohibited Claims",
+          "type": "array"
+        },
+        "schema": {
+          "const": "qevion.policy.v1",
+          "default": "qevion.policy.v1",
+          "title": "Schema",
+          "type": "string"
+        },
+        "uncertainty_policy": {
+          "$ref": "#/$defs/UncertaintyPolicy"
+        },
+        "unknown_question_policy": {
+          "$ref": "#/$defs/UnknownQuestionPolicy"
+        }
+      },
+      "required": [
+        "unknown_question_policy",
+        "uncertainty_policy"
+      ],
+      "title": "PolicyBlock",
+      "type": "object"
+    },
+    "Pronunciation": {
+      "additionalProperties": false,
+      "properties": {
+        "hint": {
+          "title": "Hint",
+          "type": "string"
+        },
+        "scope": {
+          "default": "activity",
+          "title": "Scope",
+          "type": "string"
+        },
+        "term": {
+          "title": "Term",
+          "type": "string"
+        }
+      },
+      "required": [
+        "term",
+        "hint"
+      ],
+      "title": "Pronunciation",
+      "type": "object"
+    },
+    "ProposedBy": {
+      "enum": [
+        "copilot",
+        "operator",
+        "source_doc"
+      ],
+      "title": "ProposedBy",
+      "type": "string"
+    },
+    "Provenance": {
+      "description": "Where a fact/field value came from (QV-FLD, §20).",
+      "enum": [
+        "USER_STATED",
+        "TOOL_VERIFIED",
+        "SYSTEM_DERIVED",
+        "KNOWLEDGE_APPROVED",
+        "UNVERIFIED",
+        "UNKNOWN"
+      ],
+      "title": "Provenance",
+      "type": "string"
+    },
+    "Readiness": {
+      "additionalProperties": false,
+      "properties": {
+        "preflight_result_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Preflight Result Ref"
+        },
+        "simulation_report_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Simulation Report Ref"
+        },
+        "state": {
+          "$ref": "#/$defs/ReadinessState",
+          "default": "DRAFT"
+        }
+      },
+      "title": "Readiness",
+      "type": "object"
+    },
+    "ReadinessState": {
+      "description": "§10 lifecycle (QV-LIFE).",
+      "enum": [
+        "DRAFT",
+        "DISCOVERY_IN_PROGRESS",
+        "NEEDS_INFORMATION",
+        "NEEDS_CONFIGURATION",
+        "BLOCKED",
+        "READY_FOR_SIMULATION",
+        "SIMULATION_FAILED",
+        "READY_FOR_ACTIVATION",
+        "ACTIVE",
+        "SUSPENDED",
+        "RETIRED"
+      ],
+      "title": "ReadinessState",
+      "type": "string"
+    },
+    "Sensitivity": {
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "restricted"
+      ],
+      "title": "Sensitivity",
+      "type": "string"
+    },
+    "ToolPermission": {
+      "additionalProperties": false,
+      "properties": {
+        "authorization_scope": {
+          "default": "activity",
+          "title": "Authorization Scope",
+          "type": "string"
+        },
+        "confirmation": {
+          "default": "none",
+          "enum": [
+            "none",
+            "confirm_before_execute"
+          ],
+          "title": "Confirmation",
+          "type": "string"
+        },
+        "impact": {
+          "enum": [
+            "read",
+            "write",
+            "escalation"
+          ],
+          "title": "Impact",
+          "type": "string"
+        }
+      },
+      "required": [
+        "impact"
+      ],
+      "title": "ToolPermission",
+      "type": "object"
+    },
+    "ToolRef": {
+      "additionalProperties": false,
+      "properties": {
+        "purpose": {
+          "default": "",
+          "title": "Purpose",
+          "type": "string"
+        },
+        "tool_id": {
+          "title": "Tool Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "tool_id"
+      ],
+      "title": "ToolRef",
+      "type": "object"
+    },
+    "ToolsBlock": {
+      "additionalProperties": false,
+      "properties": {
+        "optional": {
+          "items": {
+            "$ref": "#/$defs/ToolRef"
+          },
+          "title": "Optional",
+          "type": "array"
+        },
+        "permissions": {
+          "additionalProperties": {
+            "$ref": "#/$defs/ToolPermission"
+          },
+          "title": "Permissions",
+          "type": "object"
+        },
+        "required": {
+          "items": {
+            "$ref": "#/$defs/ToolRef"
+          },
+          "title": "Required",
+          "type": "array"
+        }
+      },
+      "title": "ToolsBlock",
+      "type": "object"
+    },
+    "UncertaintyPolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "ambiguous": {
+          "$ref": "#/$defs/Behavior"
+        },
+        "conflicting": {
+          "$ref": "#/$defs/Behavior"
+        },
+        "missing": {
+          "$ref": "#/$defs/Behavior"
+        },
+        "stale": {
+          "$ref": "#/$defs/Behavior"
+        }
+      },
+      "required": [
+        "missing",
+        "conflicting",
+        "stale",
+        "ambiguous"
+      ],
+      "title": "UncertaintyPolicy",
+      "type": "object"
+    },
+    "UnknownQuestionPolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "default": {
+          "$ref": "#/$defs/Behavior"
+        },
+        "overrides": {
+          "items": {
+            "$ref": "#/$defs/BehaviorOverride"
+          },
+          "title": "Overrides",
+          "type": "array"
+        }
+      },
+      "required": [
+        "default"
+      ],
+      "title": "UnknownQuestionPolicy",
+      "type": "object"
+    },
+    "VersionMetadata": {
+      "additionalProperties": false,
+      "properties": {
+        "decisions": {
+          "items": {
+            "$ref": "#/$defs/Decision"
+          },
+          "title": "Decisions",
+          "type": "array"
+        },
+        "pinned": {
+          "$ref": "#/$defs/Pinned"
+        },
+        "readiness": {
+          "$ref": "#/$defs/Readiness"
+        },
+        "rejected_suggestions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Rejected Suggestions",
+          "type": "array"
+        },
+        "sources": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Sources",
+          "type": "array"
+        }
+      },
+      "title": "VersionMetadata",
+      "type": "object"
+    }
+  },
+  "$id": "https://qevion.dev/schemas/activity_v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Top-level `qevion.activity.v1` (§9.1).",
+  "properties": {
+    "activity_machine": {
+      "$ref": "#/$defs/ActivityMachineRef"
+    },
+    "channels": {
+      "items": {
+        "$ref": "#/$defs/Channel"
+      },
+      "minItems": 1,
+      "title": "Channels",
+      "type": "array"
+    },
+    "completion": {
+      "$ref": "#/$defs/Completion"
+    },
+    "constrained_flow": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ConstrainedFlow"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "coverage": {
+      "$ref": "#/$defs/CoverageBlock"
+    },
+    "data": {
+      "$ref": "#/$defs/DataBlock"
+    },
+    "direction": {
+      "$ref": "#/$defs/Direction"
+    },
+    "evaluation": {
+      "$ref": "#/$defs/Evaluation"
+    },
+    "handoff_rules": {
+      "items": {
+        "$ref": "#/$defs/HandoffRule"
+      },
+      "title": "Handoff Rules",
+      "type": "array"
+    },
+    "identity": {
+      "$ref": "#/$defs/Identity"
+    },
+    "knowledge": {
+      "$ref": "#/$defs/KnowledgeBlock"
+    },
+    "locale": {
+      "$ref": "#/$defs/Locale"
+    },
+    "objective": {
+      "$ref": "#/$defs/Objective"
+    },
+    "outcome_schema": {
+      "$ref": "#/$defs/OutcomeSchema"
+    },
+    "policies": {
+      "$ref": "#/$defs/PolicyBlock"
+    },
+    "schema": {
+      "const": "qevion.activity.v1",
+      "default": "qevion.activity.v1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "tools": {
+      "$ref": "#/$defs/ToolsBlock"
+    },
+    "version_metadata": {
+      "$ref": "#/$defs/VersionMetadata"
+    }
+  },
+  "required": [
+    "identity",
+    "direction",
+    "channels",
+    "locale",
+    "objective",
+    "policies",
+    "outcome_schema"
+  ],
+  "title": "ActivityBlueprint",
+  "type": "object",
+  "x-qevion-schema-id": "qevion.activity.v1"
+}

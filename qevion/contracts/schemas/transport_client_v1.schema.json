@@ -1,0 +1,98 @@
+{
+  "$defs": {
+    "ClientMessageType": {
+      "enum": [
+        "hello",
+        "audio_commit",
+        "text",
+        "playout_started",
+        "playout_stopped",
+        "confirm",
+        "bye",
+        "ping"
+      ],
+      "title": "ClientMessageType",
+      "type": "string"
+    }
+  },
+  "$id": "https://qevion.dev/schemas/transport_client_v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "call_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Call Id"
+    },
+    "client_ts_ms": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Client Ts Ms"
+    },
+    "granted": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Granted"
+    },
+    "response_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Response Id"
+    },
+    "schema": {
+      "const": "qevion.transport.v1",
+      "default": "qevion.transport.v1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "text": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Text"
+    },
+    "type": {
+      "$ref": "#/$defs/ClientMessageType"
+    }
+  },
+  "required": [
+    "type"
+  ],
+  "title": "ClientMessage",
+  "type": "object",
+  "x-qevion-schema-id": "qevion.transport.client.v1"
+}

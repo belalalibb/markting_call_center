@@ -1,0 +1,119 @@
+{
+  "$defs": {
+    "AdapterCapabilities": {
+      "additionalProperties": false,
+      "properties": {
+        "adapter": {
+          "title": "Adapter",
+          "type": "string"
+        },
+        "capabilities": {
+          "items": {
+            "$ref": "#/$defs/Capability"
+          },
+          "title": "Capabilities",
+          "type": "array"
+        },
+        "role": {
+          "$ref": "#/$defs/ProviderRole"
+        }
+      },
+      "required": [
+        "adapter",
+        "role",
+        "capabilities"
+      ],
+      "title": "AdapterCapabilities",
+      "type": "object"
+    },
+    "Capability": {
+      "additionalProperties": false,
+      "properties": {
+        "evidence_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Evidence Ref"
+        },
+        "name": {
+          "description": "e.g. language:ar-EG, feature:barge_in, feature:tool_calls, audio:pcm16_24k",
+          "title": "Name",
+          "type": "string"
+        },
+        "notes": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Notes"
+        },
+        "state": {
+          "$ref": "#/$defs/CapabilityState"
+        }
+      },
+      "required": [
+        "name",
+        "state"
+      ],
+      "title": "Capability",
+      "type": "object"
+    },
+    "CapabilityState": {
+      "enum": [
+        "SUPPORTED",
+        "PARTIAL",
+        "UNSUPPORTED",
+        "UNVERIFIED"
+      ],
+      "title": "CapabilityState",
+      "type": "string"
+    },
+    "ProviderRole": {
+      "enum": [
+        "s2s",
+        "llm",
+        "asr",
+        "tts",
+        "turn",
+        "decision"
+      ],
+      "title": "ProviderRole",
+      "type": "string"
+    }
+  },
+  "$id": "https://qevion.dev/schemas/capability_registry_v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "adapters": {
+      "items": {
+        "$ref": "#/$defs/AdapterCapabilities"
+      },
+      "title": "Adapters",
+      "type": "array"
+    },
+    "schema": {
+      "const": "qevion.capability_registry.v1",
+      "default": "qevion.capability_registry.v1",
+      "title": "Schema",
+      "type": "string"
+    }
+  },
+  "required": [
+    "adapters"
+  ],
+  "title": "CapabilityRegistry",
+  "type": "object",
+  "x-qevion-schema-id": "qevion.capability_registry.v1"
+}

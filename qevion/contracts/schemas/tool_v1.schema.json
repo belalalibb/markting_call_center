@@ -1,0 +1,91 @@
+{
+  "$defs": {
+    "Provenance": {
+      "description": "Where a fact/field value came from (QV-FLD, §20).",
+      "enum": [
+        "USER_STATED",
+        "TOOL_VERIFIED",
+        "SYSTEM_DERIVED",
+        "KNOWLEDGE_APPROVED",
+        "UNVERIFIED",
+        "UNKNOWN"
+      ],
+      "title": "Provenance",
+      "type": "string"
+    },
+    "ToolImpact": {
+      "enum": [
+        "read",
+        "write",
+        "escalation"
+      ],
+      "title": "ToolImpact",
+      "type": "string"
+    }
+  },
+  "$id": "https://qevion.dev/schemas/tool_v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "What the model/provider sees. Rendered per provider by adapters; source of truth is here.",
+  "properties": {
+    "confirmation": {
+      "default": "none",
+      "enum": [
+        "none",
+        "confirm_before_execute"
+      ],
+      "title": "Confirmation",
+      "type": "string"
+    },
+    "description": {
+      "title": "Description",
+      "type": "string"
+    },
+    "idempotency_key_fields": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Idempotency Key Fields",
+      "type": "array"
+    },
+    "impact": {
+      "$ref": "#/$defs/ToolImpact"
+    },
+    "parameters": {
+      "additionalProperties": true,
+      "description": "JSON Schema for arguments",
+      "title": "Parameters",
+      "type": "object"
+    },
+    "result_provenance": {
+      "$ref": "#/$defs/Provenance",
+      "default": "TOOL_VERIFIED"
+    },
+    "schema": {
+      "const": "qevion.tool.v1",
+      "default": "qevion.tool.v1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "timeout_ms": {
+      "default": 5000,
+      "maximum": 60000,
+      "minimum": 100,
+      "title": "Timeout Ms",
+      "type": "integer"
+    },
+    "tool_id": {
+      "title": "Tool Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "tool_id",
+    "description",
+    "parameters",
+    "impact"
+  ],
+  "title": "ToolDeclaration",
+  "type": "object",
+  "x-qevion-schema-id": "qevion.tool.v1"
+}

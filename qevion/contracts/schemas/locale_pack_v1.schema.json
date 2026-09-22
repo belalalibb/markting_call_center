@@ -1,0 +1,141 @@
+{
+  "$defs": {
+    "LexiconEntry": {
+      "additionalProperties": false,
+      "properties": {
+        "pronunciation": {
+          "title": "Pronunciation",
+          "type": "string"
+        },
+        "scope": {
+          "default": "global",
+          "title": "Scope",
+          "type": "string"
+        },
+        "term": {
+          "title": "Term",
+          "type": "string"
+        }
+      },
+      "required": [
+        "term",
+        "pronunciation"
+      ],
+      "title": "LexiconEntry",
+      "type": "object"
+    }
+  },
+  "$id": "https://qevion.dev/schemas/locale_pack_v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Language/dialect assets the Core's instruction composer and adapters consume (§34 QV-LANG).",
+  "properties": {
+    "confirmation_phrases": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Confirmation Phrases",
+      "type": "array"
+    },
+    "dialect": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Dialect"
+    },
+    "filler_policy": {
+      "default": "minimal",
+      "enum": [
+        "none",
+        "minimal",
+        "natural"
+      ],
+      "title": "Filler Policy",
+      "type": "string"
+    },
+    "greeting_refs": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Greeting Refs",
+      "type": "array"
+    },
+    "language": {
+      "title": "Language",
+      "type": "string"
+    },
+    "lexicon": {
+      "items": {
+        "$ref": "#/$defs/LexiconEntry"
+      },
+      "title": "Lexicon",
+      "type": "array"
+    },
+    "locale": {
+      "title": "Locale",
+      "type": "string"
+    },
+    "locale_pack_id": {
+      "title": "Locale Pack Id",
+      "type": "string"
+    },
+    "negation_phrases": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Negation Phrases",
+      "type": "array"
+    },
+    "number_style": {
+      "default": "spoken_words",
+      "enum": [
+        "spoken_words",
+        "digits"
+      ],
+      "title": "Number Style",
+      "type": "string"
+    },
+    "opt_out_phrases": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Opt Out Phrases",
+      "type": "array"
+    },
+    "schema": {
+      "const": "qevion.locale_pack.v1",
+      "default": "qevion.locale_pack.v1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "speech_register": {
+      "default": "neutral",
+      "enum": [
+        "formal",
+        "neutral",
+        "casual"
+      ],
+      "title": "Speech Register",
+      "type": "string"
+    },
+    "version": {
+      "default": "1",
+      "title": "Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "locale_pack_id",
+    "language",
+    "locale"
+  ],
+  "title": "LocalePack",
+  "type": "object",
+  "x-qevion-schema-id": "qevion.locale_pack.v1"
+}

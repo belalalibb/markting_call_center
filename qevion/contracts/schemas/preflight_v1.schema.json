@@ -1,0 +1,135 @@
+{
+  "$defs": {
+    "PreflightFinding": {
+      "additionalProperties": false,
+      "properties": {
+        "fix_hint": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fix Hint"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "path": {
+          "description": "JSON path into the Blueprint, e.g. tools.required[0]",
+          "title": "Path",
+          "type": "string"
+        },
+        "reason": {
+          "$ref": "#/$defs/PreflightReason"
+        },
+        "severity": {
+          "default": "BLOCK",
+          "enum": [
+            "BLOCK",
+            "WARN"
+          ],
+          "title": "Severity",
+          "type": "string"
+        }
+      },
+      "required": [
+        "reason",
+        "path",
+        "message"
+      ],
+      "title": "PreflightFinding",
+      "type": "object"
+    },
+    "PreflightReason": {
+      "description": "QV-PRE-002 minimum reason codes (20).",
+      "enum": [
+        "MISSING_REQUIRED_KNOWLEDGE",
+        "MISSING_REQUIRED_TOOL",
+        "TOOL_NOT_AUTHORIZED_FOR_TENANT",
+        "UNSUPPORTED_CAPABILITY",
+        "UNSUPPORTED_LOCALE_COMBINATION",
+        "VOICE_UNAVAILABLE",
+        "CONTRADICTORY_POLICIES",
+        "MISSING_OUTCOME_SCHEMA",
+        "IMPOSSIBLE_COMPLETION_CRITERIA",
+        "PROVIDER_CAPABILITY_UNAVAILABLE",
+        "INCOMPLETE_FIELD_DEFINITION",
+        "INCOMPATIBLE_CONFIRMATION_RULE",
+        "UNDEFINED_ESCALATION",
+        "UNDEFINED_UNKNOWN_QUESTION_POLICY",
+        "UNAPPROVED_BUSINESS_DECISION",
+        "UNRESOLVED_KNOWLEDGE_CONFLICT",
+        "INVALID_CONFIG",
+        "UNSUPPORTED_CHANNEL",
+        "CONTACT_POLICY_MISSING_FOR_OUTBOUND",
+        "LICENSE_BLOCKED_COMPONENT"
+      ],
+      "title": "PreflightReason",
+      "type": "string"
+    }
+  },
+  "$id": "https://qevion.dev/schemas/preflight_v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "activity_id": {
+      "title": "Activity Id",
+      "type": "string"
+    },
+    "activity_version": {
+      "title": "Activity Version",
+      "type": "string"
+    },
+    "checked_at": {
+      "format": "date-time",
+      "title": "Checked At",
+      "type": "string"
+    },
+    "composition_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Composition Id"
+    },
+    "findings": {
+      "items": {
+        "$ref": "#/$defs/PreflightFinding"
+      },
+      "title": "Findings",
+      "type": "array"
+    },
+    "schema": {
+      "const": "qevion.preflight.v1",
+      "default": "qevion.preflight.v1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "READY",
+        "BLOCKED"
+      ],
+      "title": "Status",
+      "type": "string"
+    }
+  },
+  "required": [
+    "activity_id",
+    "activity_version",
+    "status"
+  ],
+  "title": "PreflightResult",
+  "type": "object",
+  "x-qevion-schema-id": "qevion.preflight.v1"
+}

@@ -1,0 +1,147 @@
+{
+  "$defs": {
+    "EventKind": {
+      "enum": [
+        "runtime",
+        "config",
+        "control",
+        "admin",
+        "eval"
+      ],
+      "title": "EventKind",
+      "type": "string"
+    }
+  },
+  "$id": "https://qevion.dev/schemas/event_v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Append-only, seq-ordered envelope. Never contains secrets, raw audio, or full transcripts (QV-EVT-003).",
+  "properties": {
+    "activity_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Activity Id"
+    },
+    "activity_version": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Activity Version"
+    },
+    "event_id": {
+      "title": "Event Id",
+      "type": "string"
+    },
+    "kind": {
+      "$ref": "#/$defs/EventKind"
+    },
+    "line_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Line Id"
+    },
+    "payload": {
+      "additionalProperties": true,
+      "title": "Payload",
+      "type": "object"
+    },
+    "schema": {
+      "const": "qevion.event.v1",
+      "default": "qevion.event.v1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "seq": {
+      "description": "Strictly increasing per session (QV-EVT-001)",
+      "minimum": 0,
+      "title": "Seq",
+      "type": "integer"
+    },
+    "session_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Session Id"
+    },
+    "source": {
+      "description": "core | transport:<name> | turn:<name> | provider:<role>:<name> | tool:<id> | copilot | control",
+      "title": "Source",
+      "type": "string"
+    },
+    "tenant_id": {
+      "title": "Tenant Id",
+      "type": "string"
+    },
+    "trace_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Trace Id"
+    },
+    "ts": {
+      "format": "date-time",
+      "title": "Ts",
+      "type": "string"
+    },
+    "turn_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Turn Id"
+    },
+    "type": {
+      "description": "Dotted type from the §37.2 catalog",
+      "pattern": "^[a-z_]+(\\.[a-z_]+)+$",
+      "title": "Type",
+      "type": "string"
+    }
+  },
+  "required": [
+    "seq",
+    "tenant_id",
+    "kind",
+    "type",
+    "source"
+  ],
+  "title": "Event",
+  "type": "object",
+  "x-qevion-schema-id": "qevion.event.v1"
+}

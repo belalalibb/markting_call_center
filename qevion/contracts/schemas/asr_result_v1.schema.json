@@ -1,0 +1,56 @@
+{
+  "$id": "https://qevion.dev/schemas/asr_result_v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "confidence": {
+      "anyOf": [
+        {
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Confidence"
+    },
+    "is_final": {
+      "title": "Is Final",
+      "type": "boolean"
+    },
+    "language": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Language"
+    },
+    "text": {
+      "title": "Text",
+      "type": "string"
+    },
+    "words": {
+      "items": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "title": "Words",
+      "type": "array"
+    }
+  },
+  "required": [
+    "text",
+    "is_final"
+  ],
+  "title": "ASRResult",
+  "type": "object",
+  "x-qevion-schema-id": "qevion.asr_result.v1"
+}

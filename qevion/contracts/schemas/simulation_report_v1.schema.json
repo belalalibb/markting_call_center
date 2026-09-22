@@ -1,0 +1,229 @@
+{
+  "$defs": {
+    "FailureClass": {
+      "description": "§27 QV-ERR / Recovery Protocol §9 classification.",
+      "enum": [
+        "test_environment",
+        "provider",
+        "transport",
+        "configuration",
+        "knowledge",
+        "core_logic",
+        "budget",
+        "security",
+        "unknown"
+      ],
+      "title": "FailureClass",
+      "type": "string"
+    },
+    "LatencyStats": {
+      "additionalProperties": false,
+      "properties": {
+        "count": {
+          "title": "Count",
+          "type": "integer"
+        },
+        "max_ms": {
+          "title": "Max Ms",
+          "type": "integer"
+        },
+        "p50_ms": {
+          "title": "P50 Ms",
+          "type": "number"
+        },
+        "p95_ms": {
+          "title": "P95 Ms",
+          "type": "number"
+        },
+        "passed": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Passed"
+        },
+        "segment": {
+          "title": "Segment",
+          "type": "string"
+        },
+        "target_ms": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Target Ms"
+        }
+      },
+      "required": [
+        "segment",
+        "count",
+        "p50_ms",
+        "p95_ms",
+        "max_ms"
+      ],
+      "title": "LatencyStats",
+      "type": "object"
+    },
+    "ScenarioResult": {
+      "additionalProperties": false,
+      "properties": {
+        "evidence_refs": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Refs",
+          "type": "array"
+        },
+        "expected_primary": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Primary"
+        },
+        "failure_class": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FailureClass"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "latency": {
+          "items": {
+            "$ref": "#/$defs/LatencyStats"
+          },
+          "title": "Latency",
+          "type": "array"
+        },
+        "outcome_primary": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Outcome Primary"
+        },
+        "passed": {
+          "title": "Passed",
+          "type": "boolean"
+        },
+        "scenario_id": {
+          "title": "Scenario Id",
+          "type": "string"
+        },
+        "turns": {
+          "default": 0,
+          "title": "Turns",
+          "type": "integer"
+        },
+        "violations": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Violations",
+          "type": "array"
+        }
+      },
+      "required": [
+        "scenario_id",
+        "passed"
+      ],
+      "title": "ScenarioResult",
+      "type": "object"
+    }
+  },
+  "$id": "https://qevion.dev/schemas/simulation_report_v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "activity_id": {
+      "title": "Activity Id",
+      "type": "string"
+    },
+    "activity_version": {
+      "title": "Activity Version",
+      "type": "string"
+    },
+    "blocking_reasons": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Blocking Reasons",
+      "type": "array"
+    },
+    "composition_id": {
+      "title": "Composition Id",
+      "type": "string"
+    },
+    "extra": {
+      "additionalProperties": true,
+      "title": "Extra",
+      "type": "object"
+    },
+    "passed": {
+      "title": "Passed",
+      "type": "boolean"
+    },
+    "produced_at": {
+      "format": "date-time",
+      "title": "Produced At",
+      "type": "string"
+    },
+    "report_id": {
+      "title": "Report Id",
+      "type": "string"
+    },
+    "scenarios": {
+      "items": {
+        "$ref": "#/$defs/ScenarioResult"
+      },
+      "title": "Scenarios",
+      "type": "array"
+    },
+    "schema": {
+      "const": "qevion.simulation_report.v1",
+      "default": "qevion.simulation_report.v1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "tenant_id": {
+      "title": "Tenant Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "report_id",
+    "tenant_id",
+    "activity_id",
+    "activity_version",
+    "composition_id",
+    "scenarios",
+    "passed"
+  ],
+  "title": "SimulationReport",
+  "type": "object",
+  "x-qevion-schema-id": "qevion.simulation_report.v1"
+}

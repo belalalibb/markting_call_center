@@ -1,0 +1,86 @@
+{
+  "$defs": {
+    "GapClass": {
+      "enum": [
+        "REQUIRED_FOR_EXECUTION",
+        "IMPORTANT_FOR_QUALITY",
+        "OPTIONAL_IMPROVEMENT",
+        "POLICY_RISK",
+        "DATA_CONFLICT",
+        "UNKNOWN"
+      ],
+      "title": "GapClass",
+      "type": "string"
+    }
+  },
+  "$id": "https://qevion.dev/schemas/knowledge_gap_v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "activity_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Activity Id"
+    },
+    "description": {
+      "title": "Description",
+      "type": "string"
+    },
+    "gap_class": {
+      "$ref": "#/$defs/GapClass"
+    },
+    "gap_id": {
+      "title": "Gap Id",
+      "type": "string"
+    },
+    "question_for_operator": {
+      "title": "Question For Operator",
+      "type": "string"
+    },
+    "related_fact_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Related Fact Ids",
+      "type": "array"
+    },
+    "resolution_fact_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Resolution Fact Id"
+    },
+    "resolved": {
+      "default": false,
+      "title": "Resolved",
+      "type": "boolean"
+    },
+    "tenant_id": {
+      "title": "Tenant Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "gap_id",
+    "tenant_id",
+    "gap_class",
+    "description",
+    "question_for_operator"
+  ],
+  "title": "KnowledgeGap",
+  "type": "object",
+  "x-qevion-schema-id": "qevion.knowledge_gap.v1"
+}

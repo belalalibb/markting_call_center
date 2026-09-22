@@ -1,0 +1,175 @@
+{
+  "$defs": {
+    "FactKind": {
+      "enum": [
+        "entity",
+        "attribute",
+        "rule",
+        "relationship",
+        "procedure",
+        "limitation"
+      ],
+      "title": "FactKind",
+      "type": "string"
+    },
+    "FactStatus": {
+      "enum": [
+        "EXTRACTED",
+        "APPROVED",
+        "REJECTED",
+        "CONFLICTED",
+        "SUPERSEDED"
+      ],
+      "title": "FactStatus",
+      "type": "string"
+    },
+    "Provenance": {
+      "description": "Where a fact/field value came from (QV-FLD, §20).",
+      "enum": [
+        "USER_STATED",
+        "TOOL_VERIFIED",
+        "SYSTEM_DERIVED",
+        "KNOWLEDGE_APPROVED",
+        "UNVERIFIED",
+        "UNKNOWN"
+      ],
+      "title": "Provenance",
+      "type": "string"
+    }
+  },
+  "$id": "https://qevion.dev/schemas/knowledge_fact_v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Atomic, provenance-tagged unit of business knowledge. Only APPROVED facts may be spoken (QV-TRUTH).",
+  "properties": {
+    "approved_by": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Approved By"
+    },
+    "confidence": {
+      "default": 1.0,
+      "maximum": 1,
+      "minimum": 0,
+      "title": "Confidence",
+      "type": "number"
+    },
+    "extracted_at": {
+      "format": "date-time",
+      "title": "Extracted At",
+      "type": "string"
+    },
+    "fact_id": {
+      "title": "Fact Id",
+      "type": "string"
+    },
+    "kind": {
+      "$ref": "#/$defs/FactKind"
+    },
+    "predicate": {
+      "description": "attribute/relationship name, e.g. 'price', 'requires'",
+      "title": "Predicate",
+      "type": "string"
+    },
+    "provenance": {
+      "$ref": "#/$defs/Provenance",
+      "default": "UNVERIFIED"
+    },
+    "schema": {
+      "const": "qevion.knowledge_fact.v1",
+      "default": "qevion.knowledge_fact.v1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "source_id": {
+      "title": "Source Id",
+      "type": "string"
+    },
+    "source_locator": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "page/line/cell reference in the source",
+      "title": "Source Locator"
+    },
+    "status": {
+      "$ref": "#/$defs/FactStatus",
+      "default": "EXTRACTED"
+    },
+    "subject": {
+      "description": "entity id or type, e.g. 'service:consultation'",
+      "title": "Subject",
+      "type": "string"
+    },
+    "tenant_id": {
+      "title": "Tenant Id",
+      "type": "string"
+    },
+    "unit": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Unit"
+    },
+    "valid_from": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Valid From"
+    },
+    "valid_until": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Valid Until"
+    },
+    "value": {
+      "title": "Value"
+    }
+  },
+  "required": [
+    "fact_id",
+    "tenant_id",
+    "kind",
+    "subject",
+    "predicate",
+    "value",
+    "source_id"
+  ],
+  "title": "Fact",
+  "type": "object",
+  "x-qevion-schema-id": "qevion.knowledge_fact.v1"
+}

@@ -1,0 +1,128 @@
+{
+  "$defs": {
+    "AudioFormat": {
+      "additionalProperties": false,
+      "properties": {
+        "channels": {
+          "const": 1,
+          "default": 1,
+          "title": "Channels",
+          "type": "integer"
+        },
+        "encoding": {
+          "const": "pcm16",
+          "default": "pcm16",
+          "title": "Encoding",
+          "type": "string"
+        },
+        "sample_rate_hz": {
+          "default": 24000,
+          "enum": [
+            8000,
+            16000,
+            24000,
+            48000
+          ],
+          "title": "Sample Rate Hz",
+          "type": "integer"
+        }
+      },
+      "title": "AudioFormat",
+      "type": "object"
+    }
+  },
+  "$id": "https://qevion.dev/schemas/s2s_v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "extra": {
+      "additionalProperties": true,
+      "title": "Extra",
+      "type": "object"
+    },
+    "input_format": {
+      "$ref": "#/$defs/AudioFormat"
+    },
+    "instructions": {
+      "default": "",
+      "description": "rendered by Core instruction composer, regenerable from Blueprint",
+      "title": "Instructions",
+      "type": "string"
+    },
+    "language_hint": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Language Hint"
+    },
+    "model": {
+      "title": "Model",
+      "type": "string"
+    },
+    "output_format": {
+      "$ref": "#/$defs/AudioFormat"
+    },
+    "provider": {
+      "title": "Provider",
+      "type": "string"
+    },
+    "schema": {
+      "const": "qevion.s2s.v1",
+      "default": "qevion.s2s.v1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "server_vad": {
+      "default": false,
+      "description": "False = QEVION turn plane owns endpointing",
+      "title": "Server Vad",
+      "type": "boolean"
+    },
+    "temperature": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Temperature"
+    },
+    "tools": {
+      "description": "tool.v1 declarations rendered for provider",
+      "items": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "title": "Tools",
+      "type": "array"
+    },
+    "voice": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Voice"
+    }
+  },
+  "required": [
+    "provider",
+    "model"
+  ],
+  "title": "S2SSessionConfig",
+  "type": "object",
+  "x-qevion-schema-id": "qevion.s2s.v1"
+}

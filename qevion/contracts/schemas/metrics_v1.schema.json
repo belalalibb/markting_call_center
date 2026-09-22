@@ -1,0 +1,86 @@
+{
+  "$defs": {
+    "Watermark": {
+      "description": "The 5 interruption timestamps (§31 QV-INT) + core latency marks (§42 QV-PERF).",
+      "enum": [
+        "t0_user_speech_onset",
+        "t1_barge_in_detected",
+        "t2_cancel_sent",
+        "t3_playout_stopped",
+        "t4_state_reconciled",
+        "user_speech_end",
+        "provider_first_audio",
+        "client_first_playout",
+        "tool_requested",
+        "tool_returned"
+      ],
+      "title": "Watermark",
+      "type": "string"
+    }
+  },
+  "$id": "https://qevion.dev/schemas/metrics_v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "provider": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Provider"
+    },
+    "schema": {
+      "const": "qevion.metrics.v1",
+      "default": "qevion.metrics.v1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "segment": {
+      "description": "e.g. barge_in_to_playout_stop, speech_end_to_first_audio",
+      "title": "Segment",
+      "type": "string"
+    },
+    "session_id": {
+      "title": "Session Id",
+      "type": "string"
+    },
+    "turn_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Turn Id"
+    },
+    "value_ms": {
+      "minimum": 0,
+      "title": "Value Ms",
+      "type": "integer"
+    },
+    "watermark_from": {
+      "$ref": "#/$defs/Watermark"
+    },
+    "watermark_to": {
+      "$ref": "#/$defs/Watermark"
+    }
+  },
+  "required": [
+    "session_id",
+    "segment",
+    "watermark_from",
+    "watermark_to",
+    "value_ms"
+  ],
+  "title": "LatencySample",
+  "type": "object",
+  "x-qevion-schema-id": "qevion.metrics.v1"
+}

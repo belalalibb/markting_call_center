@@ -1,0 +1,116 @@
+{
+  "$defs": {
+    "Channel": {
+      "enum": [
+        "browser_voice",
+        "text",
+        "telephony"
+      ],
+      "title": "Channel",
+      "type": "string"
+    },
+    "Direction": {
+      "enum": [
+        "inbound",
+        "outbound",
+        "bidirectional"
+      ],
+      "title": "Direction",
+      "type": "string"
+    }
+  },
+  "$id": "https://qevion.dev/schemas/line_v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "An endpoint where sessions arrive/originate; binds an ACTIVE activity version (§8).",
+  "properties": {
+    "activity_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Activity Id"
+    },
+    "activity_version": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Activity Version"
+    },
+    "channel": {
+      "$ref": "#/$defs/Channel"
+    },
+    "composition_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Composition Id"
+    },
+    "direction": {
+      "$ref": "#/$defs/Direction"
+    },
+    "enabled": {
+      "default": true,
+      "title": "Enabled",
+      "type": "boolean"
+    },
+    "external_address": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "phone number / URL slug; telephony seam only",
+      "title": "External Address"
+    },
+    "line_id": {
+      "title": "Line Id",
+      "type": "string"
+    },
+    "name": {
+      "title": "Name",
+      "type": "string"
+    },
+    "schema": {
+      "const": "qevion.line.v1",
+      "default": "qevion.line.v1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "tenant_id": {
+      "title": "Tenant Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "line_id",
+    "tenant_id",
+    "name",
+    "channel",
+    "direction"
+  ],
+  "title": "Line",
+  "type": "object",
+  "x-qevion-schema-id": "qevion.line.v1"
+}

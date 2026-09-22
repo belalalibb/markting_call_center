@@ -1,0 +1,109 @@
+{
+  "$defs": {
+    "LLMMessage": {
+      "additionalProperties": false,
+      "properties": {
+        "content": {
+          "title": "Content",
+          "type": "string"
+        },
+        "role": {
+          "enum": [
+            "system",
+            "user",
+            "assistant",
+            "tool"
+          ],
+          "title": "Role",
+          "type": "string"
+        },
+        "tool_call_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tool Call Id"
+        }
+      },
+      "required": [
+        "role",
+        "content"
+      ],
+      "title": "LLMMessage",
+      "type": "object"
+    }
+  },
+  "$id": "https://qevion.dev/schemas/llm_v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "json_schema": {
+      "anyOf": [
+        {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "structured output constraint",
+      "title": "Json Schema"
+    },
+    "max_tokens": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Max Tokens"
+    },
+    "messages": {
+      "items": {
+        "$ref": "#/$defs/LLMMessage"
+      },
+      "title": "Messages",
+      "type": "array"
+    },
+    "model": {
+      "title": "Model",
+      "type": "string"
+    },
+    "schema": {
+      "const": "qevion.llm.v1",
+      "default": "qevion.llm.v1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "temperature": {
+      "default": 0.2,
+      "title": "Temperature",
+      "type": "number"
+    },
+    "tools": {
+      "items": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "title": "Tools",
+      "type": "array"
+    }
+  },
+  "required": [
+    "model",
+    "messages"
+  ],
+  "title": "LLMRequest",
+  "type": "object",
+  "x-qevion-schema-id": "qevion.llm.v1"
+}

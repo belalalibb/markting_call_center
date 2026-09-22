@@ -1,0 +1,316 @@
+{
+  "$defs": {
+    "Behavior": {
+      "description": "QV-POL-004 unknown-question / uncertainty behaviors. 'The model decides' is NOT a value.",
+      "enum": [
+        "ANSWER_FROM_APPROVED_KNOWLEDGE",
+        "ASK_CLARIFYING_QUESTION",
+        "STATE_LIMITATION",
+        "USE_AUTHORIZED_TOOL",
+        "ASK_OPERATOR_SOURCE",
+        "OFFER_HUMAN_HANDOFF",
+        "COLLECT_QUESTION",
+        "REQUEST_ADDITIONAL_INFORMATION",
+        "CLOSE_GRACEFULLY",
+        "DECLINE_UNSUPPORTED_REQUEST"
+      ],
+      "title": "Behavior",
+      "type": "string"
+    },
+    "BehaviorOverride": {
+      "additionalProperties": false,
+      "properties": {
+        "behavior": {
+          "$ref": "#/$defs/Behavior"
+        },
+        "topic_pattern": {
+          "title": "Topic Pattern",
+          "type": "string"
+        }
+      },
+      "required": [
+        "topic_pattern",
+        "behavior"
+      ],
+      "title": "BehaviorOverride",
+      "type": "object"
+    },
+    "ClaimRule": {
+      "additionalProperties": false,
+      "properties": {
+        "claim_type": {
+          "title": "Claim Type",
+          "type": "string"
+        },
+        "scope": {
+          "default": "activity",
+          "title": "Scope",
+          "type": "string"
+        },
+        "source_requirement": {
+          "anyOf": [
+            {
+              "enum": [
+                "KNOWLEDGE_APPROVED",
+                "TOOL_VERIFIED",
+                "ANY_APPROVED"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Requirement"
+        }
+      },
+      "required": [
+        "claim_type"
+      ],
+      "title": "ClaimRule",
+      "type": "object"
+    },
+    "ContactPolicyHooks": {
+      "additionalProperties": false,
+      "description": "Outbound-only hooks (ADR-0003).",
+      "properties": {
+        "attempt_limit": {
+          "default": 2,
+          "maximum": 10,
+          "minimum": 1,
+          "title": "Attempt Limit",
+          "type": "integer"
+        },
+        "consent_required": {
+          "default": true,
+          "title": "Consent Required",
+          "type": "boolean"
+        },
+        "contact_window": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "e.g. \"10:00-20:00 Africa/Cairo\"",
+          "title": "Contact Window"
+        },
+        "suppression_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Suppression Ref"
+        }
+      },
+      "title": "ContactPolicyHooks",
+      "type": "object"
+    },
+    "Disclosure": {
+      "additionalProperties": false,
+      "properties": {
+        "text_ref": {
+          "title": "Text Ref",
+          "type": "string"
+        },
+        "when": {
+          "description": "dialog/activity state name or trigger, e.g. OPENING",
+          "title": "When",
+          "type": "string"
+        }
+      },
+      "required": [
+        "when",
+        "text_ref"
+      ],
+      "title": "Disclosure",
+      "type": "object"
+    },
+    "EscalationRule": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "title": "Action",
+          "type": "string"
+        },
+        "priority": {
+          "default": "normal",
+          "enum": [
+            "low",
+            "normal",
+            "high",
+            "urgent"
+          ],
+          "title": "Priority",
+          "type": "string"
+        },
+        "trigger": {
+          "title": "Trigger",
+          "type": "string"
+        }
+      },
+      "required": [
+        "trigger",
+        "action"
+      ],
+      "title": "EscalationRule",
+      "type": "object"
+    },
+    "OptOutPolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "$ref": "#/$defs/Behavior",
+          "default": "CLOSE_GRACEFULLY"
+        },
+        "phrases_ref": {
+          "title": "Phrases Ref",
+          "type": "string"
+        }
+      },
+      "required": [
+        "phrases_ref"
+      ],
+      "title": "OptOutPolicy",
+      "type": "object"
+    },
+    "UncertaintyPolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "ambiguous": {
+          "$ref": "#/$defs/Behavior"
+        },
+        "conflicting": {
+          "$ref": "#/$defs/Behavior"
+        },
+        "missing": {
+          "$ref": "#/$defs/Behavior"
+        },
+        "stale": {
+          "$ref": "#/$defs/Behavior"
+        }
+      },
+      "required": [
+        "missing",
+        "conflicting",
+        "stale",
+        "ambiguous"
+      ],
+      "title": "UncertaintyPolicy",
+      "type": "object"
+    },
+    "UnknownQuestionPolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "default": {
+          "$ref": "#/$defs/Behavior"
+        },
+        "overrides": {
+          "items": {
+            "$ref": "#/$defs/BehaviorOverride"
+          },
+          "title": "Overrides",
+          "type": "array"
+        }
+      },
+      "required": [
+        "default"
+      ],
+      "title": "UnknownQuestionPolicy",
+      "type": "object"
+    }
+  },
+  "$id": "https://qevion.dev/schemas/policy_v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "allowed_claims": {
+      "items": {
+        "$ref": "#/$defs/ClaimRule"
+      },
+      "title": "Allowed Claims",
+      "type": "array"
+    },
+    "clarification_policy": {
+      "default": "always_when_ambiguous",
+      "enum": [
+        "always_when_ambiguous",
+        "when_high_impact"
+      ],
+      "title": "Clarification Policy",
+      "type": "string"
+    },
+    "contact_policy_hooks": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ContactPolicyHooks"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "disclosures": {
+      "items": {
+        "$ref": "#/$defs/Disclosure"
+      },
+      "title": "Disclosures",
+      "type": "array"
+    },
+    "escalation": {
+      "items": {
+        "$ref": "#/$defs/EscalationRule"
+      },
+      "title": "Escalation",
+      "type": "array"
+    },
+    "opt_out": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/OptOutPolicy"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "prohibited_claims": {
+      "items": {
+        "$ref": "#/$defs/ClaimRule"
+      },
+      "title": "Prohibited Claims",
+      "type": "array"
+    },
+    "schema": {
+      "const": "qevion.policy.v1",
+      "default": "qevion.policy.v1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "uncertainty_policy": {
+      "$ref": "#/$defs/UncertaintyPolicy"
+    },
+    "unknown_question_policy": {
+      "$ref": "#/$defs/UnknownQuestionPolicy"
+    }
+  },
+  "required": [
+    "unknown_question_policy",
+    "uncertainty_policy"
+  ],
+  "title": "PolicyBlock",
+  "type": "object",
+  "x-qevion-schema-id": "qevion.policy.v1"
+}

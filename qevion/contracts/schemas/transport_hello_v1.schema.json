@@ -1,0 +1,127 @@
+{
+  "$defs": {
+    "AudioFormat": {
+      "additionalProperties": false,
+      "properties": {
+        "channels": {
+          "const": 1,
+          "default": 1,
+          "title": "Channels",
+          "type": "integer"
+        },
+        "encoding": {
+          "const": "pcm16",
+          "default": "pcm16",
+          "title": "Encoding",
+          "type": "string"
+        },
+        "sample_rate_hz": {
+          "default": 24000,
+          "enum": [
+            8000,
+            16000,
+            24000,
+            48000
+          ],
+          "title": "Sample Rate Hz",
+          "type": "integer"
+        }
+      },
+      "title": "AudioFormat",
+      "type": "object"
+    }
+  },
+  "$id": "https://qevion.dev/schemas/transport_hello_v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "activity_id": {
+      "title": "Activity Id",
+      "type": "string"
+    },
+    "activity_version": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Activity Version"
+    },
+    "channel": {
+      "default": "browser_voice",
+      "enum": [
+        "browser_voice",
+        "text"
+      ],
+      "title": "Channel",
+      "type": "string"
+    },
+    "client_capabilities": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Client Capabilities",
+      "type": "array"
+    },
+    "direction": {
+      "default": "inbound",
+      "enum": [
+        "inbound",
+        "outbound"
+      ],
+      "title": "Direction",
+      "type": "string"
+    },
+    "input_format": {
+      "$ref": "#/$defs/AudioFormat"
+    },
+    "line_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Line Id"
+    },
+    "operator_mode": {
+      "default": false,
+      "description": "Operator Console session (extra state messages)",
+      "title": "Operator Mode",
+      "type": "boolean"
+    },
+    "output_format": {
+      "$ref": "#/$defs/AudioFormat"
+    },
+    "schema": {
+      "const": "qevion.transport.v1",
+      "default": "qevion.transport.v1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "tenant_id": {
+      "title": "Tenant Id",
+      "type": "string"
+    },
+    "type": {
+      "const": "hello",
+      "default": "hello",
+      "title": "Type",
+      "type": "string"
+    }
+  },
+  "required": [
+    "tenant_id",
+    "activity_id"
+  ],
+  "title": "ClientHello",
+  "type": "object",
+  "x-qevion-schema-id": "qevion.transport.hello.v1"
+}

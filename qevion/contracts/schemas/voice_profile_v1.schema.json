@@ -1,0 +1,59 @@
+{
+  "$id": "https://qevion.dev/schemas/voice_profile_v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "display_name": {
+      "title": "Display Name",
+      "type": "string"
+    },
+    "locale": {
+      "default": "ar-EG",
+      "title": "Locale",
+      "type": "string"
+    },
+    "persona_notes": {
+      "default": "",
+      "title": "Persona Notes",
+      "type": "string"
+    },
+    "provider_voice_map": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "adapter name → provider voice id, e.g. {openai_realtime: 'marin'}",
+      "title": "Provider Voice Map",
+      "type": "object"
+    },
+    "schema": {
+      "const": "qevion.voice_profile.v1",
+      "default": "qevion.voice_profile.v1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "speaking_rate": {
+      "default": 1.0,
+      "maximum": 2.0,
+      "minimum": 0.5,
+      "title": "Speaking Rate",
+      "type": "number"
+    },
+    "version": {
+      "default": "1",
+      "title": "Version",
+      "type": "string"
+    },
+    "voice_profile_id": {
+      "title": "Voice Profile Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "voice_profile_id",
+    "display_name",
+    "provider_voice_map"
+  ],
+  "title": "VoiceProfile",
+  "type": "object",
+  "x-qevion-schema-id": "qevion.voice_profile.v1"
+}

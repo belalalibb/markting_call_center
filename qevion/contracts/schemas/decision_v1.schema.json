@@ -1,0 +1,62 @@
+{
+  "$defs": {
+    "DecisionKind": {
+      "enum": [
+        "validate_field",
+        "interpret_confirmation",
+        "classify_intent",
+        "check_claim",
+        "next_activity_state",
+        "evaluate_rule"
+      ],
+      "title": "DecisionKind",
+      "type": "string"
+    }
+  },
+  "$id": "https://qevion.dev/schemas/decision_v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "allow_llm_proposal": {
+      "default": false,
+      "title": "Allow Llm Proposal",
+      "type": "boolean"
+    },
+    "inputs": {
+      "additionalProperties": true,
+      "title": "Inputs",
+      "type": "object"
+    },
+    "kind": {
+      "$ref": "#/$defs/DecisionKind"
+    },
+    "options": {
+      "description": "closed set of acceptable values, if any",
+      "items": {
+        "type": "string"
+      },
+      "title": "Options",
+      "type": "array"
+    },
+    "rules": {
+      "description": "rule refs / expressions from the Blueprint",
+      "items": {
+        "type": "string"
+      },
+      "title": "Rules",
+      "type": "array"
+    },
+    "schema": {
+      "const": "qevion.decision.v1",
+      "default": "qevion.decision.v1",
+      "title": "Schema",
+      "type": "string"
+    }
+  },
+  "required": [
+    "kind"
+  ],
+  "title": "DecisionRequest",
+  "type": "object",
+  "x-qevion-schema-id": "qevion.decision.v1"
+}

@@ -1,0 +1,229 @@
+{
+  "$defs": {
+    "ConversationSnapshotRef": {
+      "additionalProperties": false,
+      "properties": {
+        "activity_state": {
+          "title": "Activity State",
+          "type": "string"
+        },
+        "dialog_state": {
+          "title": "Dialog State",
+          "type": "string"
+        },
+        "entity_focus": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Entity Focus",
+          "type": "array"
+        },
+        "fields": {
+          "items": {
+            "$ref": "#/$defs/FieldValue"
+          },
+          "title": "Fields",
+          "type": "array"
+        },
+        "outcome_so_far": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Outcome So Far"
+        },
+        "transcript_digest": {
+          "description": "redacted digest, never full transcript by default",
+          "title": "Transcript Digest",
+          "type": "string"
+        },
+        "turn_count": {
+          "default": 0,
+          "title": "Turn Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "transcript_digest",
+        "activity_state",
+        "dialog_state"
+      ],
+      "title": "ConversationSnapshotRef",
+      "type": "object"
+    },
+    "FieldValue": {
+      "additionalProperties": false,
+      "description": "A collected datum with provenance (§20 QV-FLD).",
+      "properties": {
+        "confidence": {
+          "default": 1.0,
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "corrected_from": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Corrected From"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "recorded_at_ms": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Recorded At Ms"
+        },
+        "tool_call_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tool Call Id"
+        },
+        "turn_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Turn Id"
+        },
+        "value": {
+          "title": "Value"
+        }
+      },
+      "required": [
+        "name",
+        "value",
+        "provenance"
+      ],
+      "title": "FieldValue",
+      "type": "object"
+    },
+    "HandoffProposer": {
+      "enum": [
+        "model",
+        "policy",
+        "guard",
+        "user"
+      ],
+      "title": "HandoffProposer",
+      "type": "string"
+    },
+    "Provenance": {
+      "description": "Where a fact/field value came from (QV-FLD, §20).",
+      "enum": [
+        "USER_STATED",
+        "TOOL_VERIFIED",
+        "SYSTEM_DERIVED",
+        "KNOWLEDGE_APPROVED",
+        "UNVERIFIED",
+        "UNKNOWN"
+      ],
+      "title": "Provenance",
+      "type": "string"
+    }
+  },
+  "$id": "https://qevion.dev/schemas/handoff_v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "activity_id": {
+      "title": "Activity Id",
+      "type": "string"
+    },
+    "context": {
+      "$ref": "#/$defs/ConversationSnapshotRef"
+    },
+    "destination_ref": {
+      "title": "Destination Ref",
+      "type": "string"
+    },
+    "handoff_id": {
+      "title": "Handoff Id",
+      "type": "string"
+    },
+    "priority": {
+      "default": "normal",
+      "enum": [
+        "low",
+        "normal",
+        "high",
+        "urgent"
+      ],
+      "title": "Priority",
+      "type": "string"
+    },
+    "proposed_by": {
+      "$ref": "#/$defs/HandoffProposer"
+    },
+    "reason": {
+      "title": "Reason",
+      "type": "string"
+    },
+    "requested_at": {
+      "format": "date-time",
+      "title": "Requested At",
+      "type": "string"
+    },
+    "schema": {
+      "const": "qevion.handoff.v1",
+      "default": "qevion.handoff.v1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "session_id": {
+      "title": "Session Id",
+      "type": "string"
+    },
+    "tenant_id": {
+      "title": "Tenant Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "handoff_id",
+    "session_id",
+    "tenant_id",
+    "activity_id",
+    "reason",
+    "proposed_by",
+    "destination_ref",
+    "context"
+  ],
+  "title": "HandoffRequest",
+  "type": "object",
+  "x-qevion-schema-id": "qevion.handoff.v1"
+}

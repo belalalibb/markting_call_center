@@ -1,0 +1,80 @@
+{
+  "$defs": {
+    "ServerMessageType": {
+      "enum": [
+        "ready",
+        "audio_start",
+        "audio_end",
+        "stop_playout",
+        "transcript",
+        "state",
+        "event",
+        "confirmation_request",
+        "error",
+        "bye",
+        "pong"
+      ],
+      "title": "ServerMessageType",
+      "type": "string"
+    }
+  },
+  "$id": "https://qevion.dev/schemas/transport_server_v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "payload": {
+      "additionalProperties": true,
+      "title": "Payload",
+      "type": "object"
+    },
+    "response_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Response Id"
+    },
+    "schema": {
+      "const": "qevion.transport.v1",
+      "default": "qevion.transport.v1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "server_ts_ms": {
+      "title": "Server Ts Ms",
+      "type": "integer"
+    },
+    "session_id": {
+      "title": "Session Id",
+      "type": "string"
+    },
+    "text": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Text"
+    },
+    "type": {
+      "$ref": "#/$defs/ServerMessageType"
+    }
+  },
+  "required": [
+    "type",
+    "session_id",
+    "server_ts_ms"
+  ],
+  "title": "ServerMessage",
+  "type": "object",
+  "x-qevion-schema-id": "qevion.transport.server.v1"
+}

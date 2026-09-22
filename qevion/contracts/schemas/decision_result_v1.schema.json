@@ -1,0 +1,69 @@
+{
+  "$defs": {
+    "DecisionSource": {
+      "enum": [
+        "RULE",
+        "LLM_VALIDATED",
+        "UNKNOWN"
+      ],
+      "title": "DecisionSource",
+      "type": "string"
+    }
+  },
+  "$id": "https://qevion.dev/schemas/decision_result_v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "confidence": {
+      "default": 1.0,
+      "maximum": 1,
+      "minimum": 0,
+      "title": "Confidence",
+      "type": "number"
+    },
+    "decided_at_ms": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Decided At Ms"
+    },
+    "evidence_refs": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Evidence Refs",
+      "type": "array"
+    },
+    "reason": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Reason"
+    },
+    "source": {
+      "$ref": "#/$defs/DecisionSource"
+    },
+    "value": {
+      "default": null,
+      "title": "Value"
+    }
+  },
+  "required": [
+    "source"
+  ],
+  "title": "DecisionResult",
+  "type": "object",
+  "x-qevion-schema-id": "qevion.decision_result.v1"
+}

@@ -1,0 +1,79 @@
+{
+  "$id": "https://qevion.dev/schemas/usage_v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Cost accounting per session (QV-COST). Estimated unless provider returns exact usage.",
+  "properties": {
+    "audio_in_seconds": {
+      "default": 0,
+      "title": "Audio In Seconds",
+      "type": "number"
+    },
+    "audio_out_seconds": {
+      "default": 0,
+      "title": "Audio Out Seconds",
+      "type": "number"
+    },
+    "estimated_usd": {
+      "default": 0,
+      "title": "Estimated Usd",
+      "type": "number"
+    },
+    "exact": {
+      "default": false,
+      "title": "Exact",
+      "type": "boolean"
+    },
+    "input_tokens": {
+      "default": 0,
+      "title": "Input Tokens",
+      "type": "integer"
+    },
+    "output_tokens": {
+      "default": 0,
+      "title": "Output Tokens",
+      "type": "integer"
+    },
+    "provider": {
+      "title": "Provider",
+      "type": "string"
+    },
+    "recorded_at": {
+      "format": "date-time",
+      "title": "Recorded At",
+      "type": "string"
+    },
+    "role": {
+      "title": "Role",
+      "type": "string"
+    },
+    "schema": {
+      "const": "qevion.usage.v1",
+      "default": "qevion.usage.v1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "session_id": {
+      "title": "Session Id",
+      "type": "string"
+    },
+    "tenant_id": {
+      "title": "Tenant Id",
+      "type": "string"
+    },
+    "tool_calls": {
+      "default": 0,
+      "title": "Tool Calls",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "session_id",
+    "tenant_id",
+    "provider",
+    "role"
+  ],
+  "title": "UsageRecord",
+  "type": "object",
+  "x-qevion-schema-id": "qevion.usage.v1"
+}

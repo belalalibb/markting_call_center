@@ -1,0 +1,82 @@
+{
+  "$defs": {
+    "TurnEventType": {
+      "description": "§30 QV-TURN taxonomy.",
+      "enum": [
+        "speech_start",
+        "speech_continuing",
+        "speech_pause",
+        "end_of_turn_candidate",
+        "end_of_turn",
+        "barge_in",
+        "noise_rejected"
+      ],
+      "title": "TurnEventType",
+      "type": "string"
+    }
+  },
+  "$id": "https://qevion.dev/schemas/turn_v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "confidence": {
+      "default": 1.0,
+      "maximum": 1,
+      "minimum": 0,
+      "title": "Confidence",
+      "type": "number"
+    },
+    "detector": {
+      "description": "silero | smart_turn | provider_delegated | mock",
+      "title": "Detector",
+      "type": "string"
+    },
+    "schema": {
+      "const": "qevion.turn.v1",
+      "default": "qevion.turn.v1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "silence_ms": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Silence Ms"
+    },
+    "speech_ms": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Speech Ms"
+    },
+    "ts_ms": {
+      "description": "monotonic ms since session start",
+      "minimum": 0,
+      "title": "Ts Ms",
+      "type": "integer"
+    },
+    "type": {
+      "$ref": "#/$defs/TurnEventType"
+    }
+  },
+  "required": [
+    "type",
+    "ts_ms",
+    "detector"
+  ],
+  "title": "TurnEvent",
+  "type": "object",
+  "x-qevion-schema-id": "qevion.turn.v1"
+}

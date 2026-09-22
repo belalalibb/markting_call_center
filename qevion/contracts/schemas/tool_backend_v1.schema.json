@@ -1,0 +1,56 @@
+{
+  "$defs": {
+    "ToolBackendKind": {
+      "enum": [
+        "in_memory",
+        "file",
+        "http",
+        "knowledge",
+        "entity_store"
+      ],
+      "title": "ToolBackendKind",
+      "type": "string"
+    }
+  },
+  "$id": "https://qevion.dev/schemas/tool_backend_v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Maps a tool_id to a backend for one tenant/activity (Admin plane).",
+  "properties": {
+    "backend": {
+      "$ref": "#/$defs/ToolBackendKind"
+    },
+    "config": {
+      "additionalProperties": true,
+      "title": "Config",
+      "type": "object"
+    },
+    "enabled": {
+      "default": true,
+      "title": "Enabled",
+      "type": "boolean"
+    },
+    "schema": {
+      "const": "qevion.tool_backend.v1",
+      "default": "qevion.tool_backend.v1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "tenant_id": {
+      "title": "Tenant Id",
+      "type": "string"
+    },
+    "tool_id": {
+      "title": "Tool Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "tenant_id",
+    "tool_id",
+    "backend"
+  ],
+  "title": "ToolBackendBinding",
+  "type": "object",
+  "x-qevion-schema-id": "qevion.tool_backend.v1"
+}

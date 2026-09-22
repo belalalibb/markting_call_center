@@ -1,0 +1,113 @@
+{
+  "$defs": {
+    "AudioFormat": {
+      "additionalProperties": false,
+      "properties": {
+        "channels": {
+          "const": 1,
+          "default": 1,
+          "title": "Channels",
+          "type": "integer"
+        },
+        "encoding": {
+          "const": "pcm16",
+          "default": "pcm16",
+          "title": "Encoding",
+          "type": "string"
+        },
+        "sample_rate_hz": {
+          "default": 24000,
+          "enum": [
+            8000,
+            16000,
+            24000,
+            48000
+          ],
+          "title": "Sample Rate Hz",
+          "type": "integer"
+        }
+      },
+      "title": "AudioFormat",
+      "type": "object"
+    },
+    "AudioFrameRef": {
+      "additionalProperties": false,
+      "description": "Audio crosses ports as bytes out-of-band; events/logs carry only this reference (QV-EVT-003).",
+      "properties": {
+        "byte_length": {
+          "minimum": 0,
+          "title": "Byte Length",
+          "type": "integer"
+        },
+        "duration_ms": {
+          "minimum": 0,
+          "title": "Duration Ms",
+          "type": "integer"
+        },
+        "fmt": {
+          "$ref": "#/$defs/AudioFormat"
+        },
+        "frame_id": {
+          "title": "Frame Id",
+          "type": "string"
+        },
+        "sha256": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sha256"
+        }
+      },
+      "required": [
+        "frame_id",
+        "byte_length",
+        "duration_ms"
+      ],
+      "title": "AudioFrameRef",
+      "type": "object"
+    }
+  },
+  "$id": "https://qevion.dev/schemas/asr_v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "audio": {
+      "$ref": "#/$defs/AudioFrameRef"
+    },
+    "language": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Language"
+    },
+    "partial": {
+      "default": false,
+      "title": "Partial",
+      "type": "boolean"
+    },
+    "schema": {
+      "const": "qevion.asr.v1",
+      "default": "qevion.asr.v1",
+      "title": "Schema",
+      "type": "string"
+    }
+  },
+  "required": [
+    "audio"
+  ],
+  "title": "ASRRequest",
+  "type": "object",
+  "x-qevion-schema-id": "qevion.asr.v1"
+}

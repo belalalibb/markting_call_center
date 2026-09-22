@@ -1,0 +1,53 @@
+{
+  "$defs": {
+    "SinkKind": {
+      "enum": [
+        "memory",
+        "jsonl",
+        "console_state",
+        "webhook_stub"
+      ],
+      "title": "SinkKind",
+      "type": "string"
+    }
+  },
+  "$id": "https://qevion.dev/schemas/sink_v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Shared by outcome_sink.v1 and handoff_sink.v1.",
+  "properties": {
+    "config": {
+      "additionalProperties": true,
+      "title": "Config",
+      "type": "object"
+    },
+    "enabled": {
+      "default": true,
+      "title": "Enabled",
+      "type": "boolean"
+    },
+    "kind": {
+      "$ref": "#/$defs/SinkKind"
+    },
+    "schema": {
+      "enum": [
+        "qevion.outcome_sink.v1",
+        "qevion.handoff_sink.v1"
+      ],
+      "title": "Schema",
+      "type": "string"
+    },
+    "sink_id": {
+      "title": "Sink Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema",
+    "sink_id",
+    "kind"
+  ],
+  "title": "SinkConfig",
+  "type": "object",
+  "x-qevion-schema-id": "qevion.sink.v1"
+}

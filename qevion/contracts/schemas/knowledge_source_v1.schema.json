@@ -1,0 +1,123 @@
+{
+  "$defs": {
+    "SourceKind": {
+      "enum": [
+        "file",
+        "structured",
+        "api",
+        "operator_answer"
+      ],
+      "title": "SourceKind",
+      "type": "string"
+    },
+    "SourceStatus": {
+      "enum": [
+        "UPLOADED",
+        "PARSED",
+        "NORMALIZED",
+        "EXTRACTED",
+        "APPROVED",
+        "REJECTED",
+        "STALE"
+      ],
+      "title": "SourceStatus",
+      "type": "string"
+    }
+  },
+  "$id": "https://qevion.dev/schemas/knowledge_source_v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "approved_by": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Approved By"
+    },
+    "kind": {
+      "$ref": "#/$defs/SourceKind"
+    },
+    "metadata": {
+      "additionalProperties": true,
+      "title": "Metadata",
+      "type": "object"
+    },
+    "mime_type": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Mime Type"
+    },
+    "name": {
+      "title": "Name",
+      "type": "string"
+    },
+    "priority": {
+      "default": 100,
+      "minimum": 0,
+      "title": "Priority",
+      "type": "integer"
+    },
+    "schema": {
+      "const": "qevion.knowledge_source.v1",
+      "default": "qevion.knowledge_source.v1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "sha256": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Sha256"
+    },
+    "source_id": {
+      "title": "Source Id",
+      "type": "string"
+    },
+    "status": {
+      "$ref": "#/$defs/SourceStatus",
+      "default": "UPLOADED"
+    },
+    "tenant_id": {
+      "title": "Tenant Id",
+      "type": "string"
+    },
+    "uploaded_at": {
+      "format": "date-time",
+      "title": "Uploaded At",
+      "type": "string"
+    },
+    "version": {
+      "default": "1",
+      "title": "Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "source_id",
+    "tenant_id",
+    "kind",
+    "name"
+  ],
+  "title": "KnowledgeSource",
+  "type": "object",
+  "x-qevion-schema-id": "qevion.knowledge_source.v1"
+}

@@ -1,0 +1,263 @@
+{
+  "$defs": {
+    "AudioFormat": {
+      "additionalProperties": false,
+      "properties": {
+        "channels": {
+          "const": 1,
+          "default": 1,
+          "title": "Channels",
+          "type": "integer"
+        },
+        "encoding": {
+          "const": "pcm16",
+          "default": "pcm16",
+          "title": "Encoding",
+          "type": "string"
+        },
+        "sample_rate_hz": {
+          "default": 24000,
+          "enum": [
+            8000,
+            16000,
+            24000,
+            48000
+          ],
+          "title": "Sample Rate Hz",
+          "type": "integer"
+        }
+      },
+      "title": "AudioFormat",
+      "type": "object"
+    },
+    "AudioFrameRef": {
+      "additionalProperties": false,
+      "description": "Audio crosses ports as bytes out-of-band; events/logs carry only this reference (QV-EVT-003).",
+      "properties": {
+        "byte_length": {
+          "minimum": 0,
+          "title": "Byte Length",
+          "type": "integer"
+        },
+        "duration_ms": {
+          "minimum": 0,
+          "title": "Duration Ms",
+          "type": "integer"
+        },
+        "fmt": {
+          "$ref": "#/$defs/AudioFormat"
+        },
+        "frame_id": {
+          "title": "Frame Id",
+          "type": "string"
+        },
+        "sha256": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sha256"
+        }
+      },
+      "required": [
+        "frame_id",
+        "byte_length",
+        "duration_ms"
+      ],
+      "title": "AudioFrameRef",
+      "type": "object"
+    },
+    "ProviderError": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "provider_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Provider Code"
+        },
+        "retryable": {
+          "default": false,
+          "title": "Retryable",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "code",
+        "message"
+      ],
+      "title": "ProviderError",
+      "type": "object"
+    },
+    "S2SEventType": {
+      "enum": [
+        "session_ready",
+        "input_speech_started",
+        "input_speech_stopped",
+        "input_transcript",
+        "response_started",
+        "response_audio_delta",
+        "response_text_delta",
+        "response_tool_call",
+        "response_done",
+        "response_cancelled",
+        "error",
+        "closed"
+      ],
+      "title": "S2SEventType",
+      "type": "string"
+    },
+    "ToolCallRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "arguments": {
+          "additionalProperties": true,
+          "title": "Arguments",
+          "type": "object"
+        },
+        "call_id": {
+          "title": "Call Id",
+          "type": "string"
+        },
+        "tool_id": {
+          "title": "Tool Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "call_id",
+        "tool_id"
+      ],
+      "title": "ToolCallRequest",
+      "type": "object"
+    }
+  },
+  "$id": "https://qevion.dev/schemas/s2s_event_v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Provider-neutral event emitted by an s2s adapter.",
+  "properties": {
+    "audio": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/AudioFrameRef"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "error": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ProviderError"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "item_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Item Id"
+    },
+    "provider_event_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Provider Event Id"
+    },
+    "raw_type": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "provider's native event name, for diagnostics",
+      "title": "Raw Type"
+    },
+    "response_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Response Id"
+    },
+    "text": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Text"
+    },
+    "tool_call": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ToolCallRequest"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "type": {
+      "$ref": "#/$defs/S2SEventType"
+    }
+  },
+  "required": [
+    "type"
+  ],
+  "title": "S2SEvent",
+  "type": "object",
+  "x-qevion-schema-id": "qevion.s2s_event.v1"
+}

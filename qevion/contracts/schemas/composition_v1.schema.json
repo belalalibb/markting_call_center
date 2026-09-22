@@ -1,0 +1,146 @@
+{
+  "$defs": {
+    "AdapterBinding": {
+      "additionalProperties": false,
+      "properties": {
+        "adapter": {
+          "description": "registered adapter name, e.g. openai_realtime, mock, silero",
+          "title": "Adapter",
+          "type": "string"
+        },
+        "config": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              }
+            ]
+          },
+          "title": "Config",
+          "type": "object"
+        },
+        "model": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model"
+        },
+        "role": {
+          "$ref": "#/$defs/ProviderRole"
+        }
+      },
+      "required": [
+        "role",
+        "adapter"
+      ],
+      "title": "AdapterBinding",
+      "type": "object"
+    },
+    "CompositionMode": {
+      "enum": [
+        "s2s",
+        "cascade"
+      ],
+      "title": "CompositionMode",
+      "type": "string"
+    },
+    "ProviderRole": {
+      "enum": [
+        "s2s",
+        "llm",
+        "asr",
+        "tts",
+        "turn",
+        "decision"
+      ],
+      "title": "ProviderRole",
+      "type": "string"
+    },
+    "TurnDetectorConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "barge_in_min_speech_ms": {
+          "default": 200,
+          "title": "Barge In Min Speech Ms",
+          "type": "integer"
+        },
+        "detector": {
+          "default": "silero",
+          "title": "Detector",
+          "type": "string"
+        },
+        "min_silence_ms": {
+          "default": 500,
+          "title": "Min Silence Ms",
+          "type": "integer"
+        },
+        "min_speech_ms": {
+          "default": 120,
+          "title": "Min Speech Ms",
+          "type": "integer"
+        },
+        "threshold": {
+          "default": 0.5,
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Threshold",
+          "type": "number"
+        }
+      },
+      "title": "TurnDetectorConfig",
+      "type": "object"
+    }
+  },
+  "$id": "https://qevion.dev/schemas/composition_v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Which adapter fills each role. Pinned by the Blueprint (`version_metadata.pinned.composition_config`).",
+  "properties": {
+    "bindings": {
+      "items": {
+        "$ref": "#/$defs/AdapterBinding"
+      },
+      "title": "Bindings",
+      "type": "array"
+    },
+    "composition_id": {
+      "title": "Composition Id",
+      "type": "string"
+    },
+    "mode": {
+      "$ref": "#/$defs/CompositionMode"
+    },
+    "schema": {
+      "const": "qevion.composition.v1",
+      "default": "qevion.composition.v1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "turn": {
+      "$ref": "#/$defs/TurnDetectorConfig"
+    }
+  },
+  "required": [
+    "composition_id",
+    "mode",
+    "bindings"
+  ],
+  "title": "Composition",
+  "type": "object",
+  "x-qevion-schema-id": "qevion.composition.v1"
+}
