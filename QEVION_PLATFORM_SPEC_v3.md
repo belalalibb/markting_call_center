@@ -1445,3 +1445,99 @@ Import rules (enforced by `.importlinter`): `contracts` ← nothing internal; `c
 `QV-META` reading rules · `QV-GOLD` golden rules · `QV-ARCH` architecture · `QV-ACT` activity blueprint · `QV-LIFE` readiness lifecycle · `QV-PRE` preflight · `QV-OBJ` objectives · `QV-POL` policies · `QV-COV` coverage · `QV-COP` copilot · `QV-KNOW` knowledge · `QV-CAP` capability registry · `QV-SIM` simulation · `QV-VER` versioning/approval · `QV-RT` runtime core · `QV-FLD` field store · `QV-CTX` context · `QV-CI` conversational intelligence · `QV-TRUTH` business truth · `QV-TOOL` tools · `QV-CONF` confirmation · `QV-HAND` handoff · `QV-OUT` outcome · `QV-ERR` error model · `QV-VOICE` voice · `QV-TR` transport · `QV-TURN` turn plane · `QV-INT` interruption · `QV-PROV` provider ports · `QV-COMP` composition · `QV-LANG` language · `QV-TEL` telephony seam · `QV-OUT-DIR` outbound direction · `QV-CAMP` campaign boundary · `QV-EVT` events · `QV-VERS` contract versioning · `QV-SEC` security · `QV-PRIV` privacy · `QV-CRED` credentials · `QV-OBS` observability · `QV-PERF` latency · `QV-COST` cost · `QV-TEST` testing · `QV-EVAL` evaluation · `QV-REPLAY` replay · `QV-RISK` risks · `QV-LEARN` learning loop · `QV-REF` references · `QV-LIC` licenses · `QV-ACC` acceptance · `QV-EVID` evidence · `A-n` assumptions · `W-n` waivers · `D-n` operator decisions · `C-n` inspection conflicts · `CP-NNNN` checkpoints · `ADR-NNNN` decisions.
 
 Every ID is grep-able; cite as `QV-XXX-NNN` in commits, tests (`@pytest.mark.req("QV-ACC-005")`), ADRs and evidence indexes.
+
+## Appendix E — Example Blueprint (Activity C: outbound satisfaction survey, abridged but valid shape)
+
+```yaml
+schema: qevion.activity.v1
+identity:
+  tenant_id: t_demo
+  line_id: l_survey_01
+  activity_id: act_csat_survey
+  name: Post-visit satisfaction survey
+  description: Call recent customers, obtain consent, ask five short questions, record answers.
+  version: 1.0.0
+  status: DRAFT
+direction: outbound
+channels: [browser_voice]
+locale:
+  language: ar
+  locale: ar-EG
+  dialect: egyptian
+  locale_pack_ref: lp_ar_eg_v1
+  voice_profile_ref: vp_warm_female_v1
+  pronunciation: []
+objective:
+  primary: { kind: collect_structured_feedback, description: "Complete all five survey questions with explicit consent." }
+  secondary: [ { kind: minimize_call_duration, description: "Target under 3 minutes." } ]
+  optimization_bounds: { truthfulness: required, no_invented_urgency: true, respect_opt_out: true }
+data:
+  required:
+    - { name: consent, type: boolean, validation: must_be_true_before_q1, clarification_hint: "Ask permission to proceed.", provenance_required: USER_STATED, sensitivity: low }
+    - { name: q1_overall, type: integer, validation: "1..5", clarification_hint: "Scale one to five.", provenance_required: USER_STATED, sensitivity: low }
+    - { name: q2_staff, type: integer, validation: "1..5", clarification_hint: "Scale one to five.", provenance_required: USER_STATED, sensitivity: low }
+    - { name: q3_wait_time, type: integer, validation: "1..5", clarification_hint: "Scale one to five.", provenance_required: USER_STATED, sensitivity: low }
+    - { name: q4_recommend, type: boolean, validation: none, clarification_hint: "Yes or no.", provenance_required: USER_STATED, sensitivity: low }
+    - { name: q5_comment, type: string, validation: "max 500 chars", clarification_hint: "Anything to add?", provenance_required: USER_STATED, sensitivity: medium }
+  optional: []
+knowledge:
+  sources: []
+  requirements: []
+  source_priority: [approved_structured]
+  freshness: { stale_behavior: STATE_LIMITATION }
+tools:
+  required:
+    - { tool_id: record_field, purpose: store each answer }
+    - { tool_id: submit_record, purpose: persist completed survey }
+  optional:
+    - { tool_id: schedule_callback, purpose: customer asks to be called later }
+  permissions:
+    record_field:      { impact: write, confirmation: none, authorization_scope: activity }
+    submit_record:     { impact: write, confirmation: none, authorization_scope: activity }
+    schedule_callback: { impact: write, confirmation: confirm_before_execute, authorization_scope: activity }
+policies:
+  allowed_claims: [ { claim_type: purpose_of_call, scope: activity, source_requirement: KNOWLEDGE_APPROVED } ]
+  prohibited_claims: [ { claim_type: promotion_or_offer, scope: all } ]
+  disclosures: [ { when: OPENING, text_ref: disc_survey_purpose_ar_eg } ]
+  clarification_policy: always_when_ambiguous
+  unknown_question_policy: { default: STATE_LIMITATION, overrides: [ { topic_pattern: complaint, behavior: OFFER_HUMAN_HANDOFF } ] }
+  uncertainty_policy: { missing: ASK_CLARIFYING_QUESTION, conflicting: ASK_CLARIFYING_QUESTION, stale: STATE_LIMITATION, ambiguous: ASK_CLARIFYING_QUESTION }
+  escalation: [ { trigger: explicit_complaint, action: request_handoff, priority: normal } ]
+  opt_out: { phrases_ref: optout_ar_eg_v1, action: CLOSE_GRACEFULLY }
+  contact_policy_hooks: { consent_required: true, attempt_limit: 2, contact_window: "10:00-20:00 Africa/Cairo", suppression_ref: sup_default }
+coverage:
+  questions:
+    - { id: cq1, category: purpose, pattern: "why are you calling", handling: KNOWLEDGE, answer_ref: disc_survey_purpose_ar_eg, status: COVERED }
+    - { id: cq2, category: data_use, pattern: "what happens to my answers", handling: KNOWLEDGE, answer_ref: kb_data_use_ar_eg, status: COVERED }
+  objections:
+    - { id: ob1, pattern: "no time now", approved_response_ref: resp_offer_callback, allowed_alternatives: [schedule_callback, CLOSE_GRACEFULLY], status: COVERED }
+  exceptions:
+    - { id: ex1, situation: wrong_person, behavior: CLOSE_GRACEFULLY }
+completion:
+  success_rules: [ "consent == true AND q1..q5 recorded AND submit_record accepted" ]
+  failure_rules: [ "consent == false" ]
+  exit_rules:    [ "opt_out", "wrong_person", "callback_scheduled" ]
+outcome_schema:
+  primary: [completed, partially_completed, callback_requested, rejected, no_answer, abandoned, human_required, technical_failure]
+  secondary: [consent_declined, wrong_person]
+  fields: [ { name: q1_overall, required: true }, { name: q5_comment, required: false } ]
+  next_actions: [close, schedule_callback, handoff]
+handoff_rules: [ { trigger: explicit_complaint, destination_ref: dest_cs_team, priority: normal, context_projection: [q1_overall, q5_comment] } ]
+activity_machine: { table_ref: generic_default_v1 }
+constrained_flow: { enabled: true, steps: [consent, q1_overall, q2_staff, q3_wait_time, q4_recommend, q5_comment] }
+evaluation:
+  cases: [ happy_path_all_five, declines_consent, asks_for_callback, interrupts_mid_question ]
+  simulation_personas: [ busy_parent, chatty_retiree, suspicious_customer ]
+  adversarial_cases: [ tries_to_extract_other_customers_data, asks_for_discount ]
+version_metadata:
+  sources: []
+  decisions:
+    - { item_path: policies.contact_policy_hooks.attempt_limit, proposed_by: copilot, approved_by: operator_demo, ts: 2026-09-22T00:00:00Z, rationale: "Two attempts max per PDPL guidance." }
+  rejected_suggestions: []
+  pinned: { policy_versions: {}, knowledge_versions: {}, locale_pack: lp_ar_eg_v1, voice_profile: vp_warm_female_v1, composition_config: comp_s2s_openai_v1 }
+  readiness: { state: DRAFT }
+```
+
+---
+
+**END OF SPECIFICATION v3.0** — *Evidence, not optimism. The Core knows nothing about surveys, clinics or restaurants; only this file does.*
