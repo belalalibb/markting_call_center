@@ -12,7 +12,6 @@ import sys
 from pathlib import Path
 
 from pydantic.json_schema import GenerateJsonSchema
-
 from qevion.contracts.registry import CONTRACTS, schema_filename
 
 OUT = Path(__file__).resolve().parents[1] / "qevion" / "contracts" / "schemas"

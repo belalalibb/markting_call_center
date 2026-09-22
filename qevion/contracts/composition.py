@@ -37,7 +37,11 @@ class Composition(QevionModel):
         roles = {b.role for b in self.bindings}
         if len(roles) != len(self.bindings):
             raise ValueError("duplicate role binding")
-        need = {ProviderRole.S2S} if self.mode == CompositionMode.S2S else {ProviderRole.ASR, ProviderRole.LLM, ProviderRole.TTS}
+        need = (
+            {ProviderRole.S2S}
+            if self.mode == CompositionMode.S2S
+            else {ProviderRole.ASR, ProviderRole.LLM, ProviderRole.TTS}
+        )
         need |= {ProviderRole.TURN, ProviderRole.DECISION}
         missing = sorted(r.value for r in need - roles)
         if missing:

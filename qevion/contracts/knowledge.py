@@ -130,7 +130,9 @@ class RetrievalQuery(QevionModel):
     subject: str | None = None
     predicate: str | None = None
     entity_type: str | None = None
-    text: str | None = Field(default=None, description="keyword match against subject/predicate/value; no embeddings (D13)")
+    text: str | None = Field(
+        default=None, description="keyword match against subject/predicate/value; no embeddings (D13)"
+    )
     approved_only: bool = True
     limit: int = Field(default=10, ge=1, le=100)
 

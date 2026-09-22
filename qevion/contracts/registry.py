@@ -3,7 +3,20 @@
 
 from __future__ import annotations
 
-from qevion.contracts import activity, composition, control, event, knowledge, outcome, policy, provider, telemetry, tenant, tool, transport
+from qevion.contracts import (
+    activity,
+    composition,
+    control,
+    event,
+    knowledge,
+    outcome,
+    policy,
+    provider,
+    telemetry,
+    tenant,
+    tool,
+    transport,
+)
 from qevion.contracts.common import QevionModel
 
 CONTRACTS: dict[str, type[QevionModel]] = {

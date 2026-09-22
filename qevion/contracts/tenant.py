@@ -93,7 +93,9 @@ class VoiceProfile(QevionModel):
     schema_: Literal["qevion.voice_profile.v1"] = Field(default="qevion.voice_profile.v1", alias="schema")
     voice_profile_id: str
     display_name: str
-    provider_voice_map: dict[str, str] = Field(description="adapter name → provider voice id, e.g. {openai_realtime: 'marin'}")
+    provider_voice_map: dict[str, str] = Field(
+        description="adapter name → provider voice id, e.g. {openai_realtime: 'marin'}"
+    )
     speaking_rate: float = Field(default=1.0, ge=0.5, le=2.0)
     persona_notes: str = ""
     locale: str = "ar-EG"

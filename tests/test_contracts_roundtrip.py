@@ -11,14 +11,19 @@ import pytest
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
 from pydantic import BaseModel
-
 from qevion.contracts.registry import CONTRACTS, schema_filename
 
 SCHEMAS = Path(__file__).resolve().parents[1] / "qevion" / "contracts" / "schemas"
 
 # Minimal valid instances for models with required fields (kept tiny; hypothesis covers breadth elsewhere).
 _MINIMAL: dict[str, dict[str, Any]] = {
-    "qevion.event.v1": {"tenant_id": "t", "seq": 0, "kind": "runtime", "type": "session.created", "source": "core"},
+    "qevion.event.v1": {
+        "tenant_id": "t",
+        "seq": 0,
+        "kind": "runtime",
+        "type": "session.created",
+        "source": "core",
+    },
     "qevion.policy.v1": {
         "unknown_question_policy": {"default": "STATE_LIMITATION"},
         "uncertainty_policy": {
@@ -29,14 +34,28 @@ _MINIMAL: dict[str, dict[str, Any]] = {
         },
     },
     "qevion.tenant.v1": {"tenant_id": "t", "name": "T"},
-    "qevion.line.v1": {"line_id": "l", "tenant_id": "t", "name": "L", "channel": "browser_voice", "direction": "inbound"},
+    "qevion.line.v1": {
+        "line_id": "l",
+        "tenant_id": "t",
+        "name": "L",
+        "channel": "browser_voice",
+        "direction": "inbound",
+    },
     "qevion.locale_pack.v1": {"locale_pack_id": "lp", "language": "ar", "locale": "ar-EG"},
-    "qevion.voice_profile.v1": {"voice_profile_id": "vp", "display_name": "V", "provider_voice_map": {"mock": "v"}},
+    "qevion.voice_profile.v1": {
+        "voice_profile_id": "vp",
+        "display_name": "V",
+        "provider_voice_map": {"mock": "v"},
+    },
     "qevion.capability_registry.v1": {"adapters": []},
     "qevion.composition.v1": {
         "composition_id": "c",
         "mode": "s2s",
-        "bindings": [{"role": "s2s", "adapter": "mock"}, {"role": "turn", "adapter": "mock"}, {"role": "decision", "adapter": "rules"}],
+        "bindings": [
+            {"role": "s2s", "adapter": "mock"},
+            {"role": "turn", "adapter": "mock"},
+            {"role": "decision", "adapter": "rules"},
+        ],
     },
     "qevion.s2s.v1": {"provider": "mock", "model": "m"},
     "qevion.s2s_event.v1": {"type": "session_ready"},
@@ -51,41 +70,86 @@ _MINIMAL: dict[str, dict[str, Any]] = {
     "qevion.transport.hello.v1": {"tenant_id": "t", "activity_id": "a"},
     "qevion.transport.client.v1": {"type": "ping"},
     "qevion.transport.server.v1": {"type": "pong", "session_id": "s", "server_ts_ms": 0},
-    "qevion.tool.v1": {"tool_id": "record_field", "description": "d", "parameters": {"type": "object"}, "impact": "write"},
+    "qevion.tool.v1": {
+        "tool_id": "record_field",
+        "description": "d",
+        "parameters": {"type": "object"},
+        "impact": "write",
+    },
     "qevion.tool_invocation.v1": {
-        "call_id": "c", "tool_id": "t", "session_id": "s", "tenant_id": "t", "activity_id": "a", "requested_at_ms": 0,
+        "call_id": "c",
+        "tool_id": "t",
+        "session_id": "s",
+        "tenant_id": "t",
+        "activity_id": "a",
+        "requested_at_ms": 0,
     },
     "qevion.tool_outcome.v1": {"call_id": "c", "tool_id": "t", "status": "completed"},
     "qevion.tool_backend.v1": {"tenant_id": "t", "tool_id": "t", "backend": "in_memory"},
     "qevion.knowledge_source.v1": {"source_id": "s", "tenant_id": "t", "kind": "file", "name": "n"},
     "qevion.knowledge_fact.v1": {
-        "fact_id": "f", "tenant_id": "t", "kind": "attribute", "subject": "s", "predicate": "p", "value": 1, "source_id": "s",
+        "fact_id": "f",
+        "tenant_id": "t",
+        "kind": "attribute",
+        "subject": "s",
+        "predicate": "p",
+        "value": 1,
+        "source_id": "s",
     },
     "qevion.knowledge_gap.v1": {
-        "gap_id": "g", "tenant_id": "t", "gap_class": "UNKNOWN", "description": "d", "question_for_operator": "q",
+        "gap_id": "g",
+        "tenant_id": "t",
+        "gap_class": "UNKNOWN",
+        "description": "d",
+        "question_for_operator": "q",
     },
-    "qevion.knowledge_contradiction.v1": {"contradiction_id": "c", "tenant_id": "t", "fact_ids": ["a", "b"], "description": "d"},
+    "qevion.knowledge_contradiction.v1": {
+        "contradiction_id": "c",
+        "tenant_id": "t",
+        "fact_ids": ["a", "b"],
+        "description": "d",
+    },
     "qevion.handoff.v1": {
-        "handoff_id": "h", "session_id": "s", "tenant_id": "t", "activity_id": "a", "reason": "r",
-        "proposed_by": "policy", "destination_ref": "d",
+        "handoff_id": "h",
+        "session_id": "s",
+        "tenant_id": "t",
+        "activity_id": "a",
+        "reason": "r",
+        "proposed_by": "policy",
+        "destination_ref": "d",
         "context": {"transcript_digest": "x", "activity_state": "ENGAGED", "dialog_state": "IDLE"},
     },
     "qevion.handoff_result.v1": {"handoff_id": "h", "accepted": True, "destination": "d"},
     "qevion.sink.v1": {"schema": "qevion.outcome_sink.v1", "sink_id": "s", "kind": "memory"},
     "qevion.outcome.v1": {
-        "outcome_id": "o", "session_id": "s", "tenant_id": "t", "activity_id": "a", "activity_version": "1.0.0",
-        "direction": "inbound", "channel": "browser_voice", "primary": "completed",
+        "outcome_id": "o",
+        "session_id": "s",
+        "tenant_id": "t",
+        "activity_id": "a",
+        "activity_version": "1.0.0",
+        "direction": "inbound",
+        "channel": "browser_voice",
+        "primary": "completed",
         "timestamps": {"session_started": "2026-09-22T00:00:00Z"},
     },
     "qevion.preflight.v1": {"activity_id": "a", "activity_version": "1.0.0", "status": "READY"},
     "qevion.credential_scope.v1": {"provider": "mock", "source": "env"},
     "qevion.metrics.v1": {
-        "session_id": "s", "segment": "x", "watermark_from": "t0_user_speech_onset", "watermark_to": "t1_barge_in_detected", "value_ms": 1,
+        "session_id": "s",
+        "segment": "x",
+        "watermark_from": "t0_user_speech_onset",
+        "watermark_to": "t1_barge_in_detected",
+        "value_ms": 1,
     },
     "qevion.usage.v1": {"session_id": "s", "tenant_id": "t", "provider": "mock", "role": "s2s"},
     "qevion.simulation_report.v1": {
-        "report_id": "r", "tenant_id": "t", "activity_id": "a", "activity_version": "1.0.0", "composition_id": "c",
-        "scenarios": [], "passed": True,
+        "report_id": "r",
+        "tenant_id": "t",
+        "activity_id": "a",
+        "activity_version": "1.0.0",
+        "composition_id": "c",
+        "scenarios": [],
+        "passed": True,
     },
 }
 _MINIMAL["qevion.interaction_record.v1"] = {"record_id": "r", "outcome": _MINIMAL["qevion.outcome.v1"]}
@@ -136,7 +200,10 @@ def test_no_schema_drift() -> None:
 
 @pytest.mark.req("QV-EVT-001")
 @settings(max_examples=50, suppress_health_check=[HealthCheck.too_slow])
-@given(seq=st.integers(min_value=0, max_value=10**9), payload=st.dictionaries(st.text(min_size=1, max_size=8), st.integers()))
+@given(
+    seq=st.integers(min_value=0, max_value=10**9),
+    payload=st.dictionaries(st.text(min_size=1, max_size=8), st.integers()),
+)
 def test_event_roundtrip_property(seq: int, payload: dict[str, int]) -> None:
     from qevion.contracts.event import Event
 
@@ -146,7 +213,6 @@ def test_event_roundtrip_property(seq: int, payload: dict[str, int]) -> None:
 
 def test_event_rejects_bad_type_and_negative_seq() -> None:
     from pydantic import ValidationError
-
     from qevion.contracts.event import Event
 
     with pytest.raises(ValidationError):

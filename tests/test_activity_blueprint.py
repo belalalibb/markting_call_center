@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import pytest
 from pydantic import ValidationError
-
 from qevion.contracts.activity import ActivityBlueprint, ReadinessState
 from qevion.contracts.control import READINESS_TRANSITIONS, can_transition
 

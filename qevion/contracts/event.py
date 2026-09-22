@@ -35,7 +35,9 @@ class Event(QevionModel):
     turn_id: str | None = None
     kind: EventKind
     type: str = Field(pattern=r"^[a-z_]+(\.[a-z_]+)+$", description="Dotted type from the §37.2 catalog")
-    source: str = Field(description="core | transport:<name> | turn:<name> | provider:<role>:<name> | tool:<id> | copilot | control")
+    source: str = Field(
+        description="core | transport:<name> | turn:<name> | provider:<role>:<name> | tool:<id> | copilot | control"
+    )
     payload: dict[str, Any] = Field(default_factory=dict)
 
 

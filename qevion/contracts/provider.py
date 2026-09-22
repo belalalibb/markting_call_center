@@ -49,7 +49,9 @@ class S2SSessionConfig(QevionModel):
     voice: str | None = None
     input_format: AudioFormat = Field(default_factory=AudioFormat)
     output_format: AudioFormat = Field(default_factory=AudioFormat)
-    instructions: str = Field(default="", description="rendered by Core instruction composer, regenerable from Blueprint")
+    instructions: str = Field(
+        default="", description="rendered by Core instruction composer, regenerable from Blueprint"
+    )
     tools: list[dict[str, Any]] = Field(default_factory=list, description="tool.v1 declarations rendered for provider")
     server_vad: bool = Field(default=False, description="False = QEVION turn plane owns endpointing")
     temperature: float | None = None
@@ -235,5 +237,3 @@ class DecisionResult(QevionModel):
     @property
     def is_unknown(self) -> bool:
         return self.source == DecisionSource.UNKNOWN
-
-

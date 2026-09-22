@@ -46,12 +46,13 @@ markers = ["req(id): links a test to a QV-* requirement id"]
 addopts = "-q"
 
 [tool.ruff]
-line-length = 110
+line-length = 120
 target-version = "py312"
 src = ["qevion", "tests"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "N", "S", "T20"]
+extend-ignore = ["E501"]  # ruff-format owns wrapping; long descriptive Field(...) strings allowed
 ignore = ["S101"]  # asserts allowed in tests
 per-file-ignores = { "tests/*" = ["S", "T20"], "scripts/*" = ["T20", "S"] }
 

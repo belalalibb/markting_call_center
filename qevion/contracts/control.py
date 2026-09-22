@@ -64,10 +64,20 @@ class PreflightResult(QevionModel):
 READINESS_TRANSITIONS: dict[ReadinessState, frozenset[ReadinessState]] = {
     ReadinessState.DRAFT: frozenset({ReadinessState.DISCOVERY_IN_PROGRESS, ReadinessState.RETIRED}),
     ReadinessState.DISCOVERY_IN_PROGRESS: frozenset(
-        {ReadinessState.NEEDS_INFORMATION, ReadinessState.NEEDS_CONFIGURATION, ReadinessState.BLOCKED, ReadinessState.RETIRED}
+        {
+            ReadinessState.NEEDS_INFORMATION,
+            ReadinessState.NEEDS_CONFIGURATION,
+            ReadinessState.BLOCKED,
+            ReadinessState.RETIRED,
+        }
     ),
     ReadinessState.NEEDS_INFORMATION: frozenset(
-        {ReadinessState.NEEDS_CONFIGURATION, ReadinessState.DISCOVERY_IN_PROGRESS, ReadinessState.BLOCKED, ReadinessState.RETIRED}
+        {
+            ReadinessState.NEEDS_CONFIGURATION,
+            ReadinessState.DISCOVERY_IN_PROGRESS,
+            ReadinessState.BLOCKED,
+            ReadinessState.RETIRED,
+        }
     ),
     ReadinessState.NEEDS_CONFIGURATION: frozenset(
         {
@@ -81,7 +91,12 @@ READINESS_TRANSITIONS: dict[ReadinessState, frozenset[ReadinessState]] = {
         {ReadinessState.NEEDS_INFORMATION, ReadinessState.NEEDS_CONFIGURATION, ReadinessState.RETIRED}
     ),
     ReadinessState.READY_FOR_SIMULATION: frozenset(
-        {ReadinessState.SIMULATION_FAILED, ReadinessState.READY_FOR_ACTIVATION, ReadinessState.BLOCKED, ReadinessState.RETIRED}
+        {
+            ReadinessState.SIMULATION_FAILED,
+            ReadinessState.READY_FOR_ACTIVATION,
+            ReadinessState.BLOCKED,
+            ReadinessState.RETIRED,
+        }
     ),
     ReadinessState.SIMULATION_FAILED: frozenset(
         {ReadinessState.NEEDS_CONFIGURATION, ReadinessState.READY_FOR_SIMULATION, ReadinessState.RETIRED}
