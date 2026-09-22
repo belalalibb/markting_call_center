@@ -1,0 +1,94 @@
+# QEVION Traceability Matrix (§56). Machine-readable; updated at every checkpoint.
+# status: planned | implemented | evidenced | accepted | waived | retired
+schema: qevion.registry.traceability.v1
+updated_at: "2026-09-22"
+sources:
+  SPEC_V23: docs/archive/QEVION_VOICE_RUNTIME_POC_SPEC_v2.3_ARCHIVED.md
+  MP_X2: docs/inputs/important_rebuild_master_prompt.md#X2
+  MP_X3: docs/inputs/important_rebuild_master_prompt.md#X3
+  INSPECTION: recovery/analysis/pre_approval_inspection_2026-09-22.md
+  SPEC_V3: QEVION_PLATFORM_SPEC_v3.md
+# Prefix-level mapping from v2.3 (per-ID expansion happens as tests are tagged @req)
+v23_prefix_map:
+  GR:  { disposition: carried,      v3: [QV-META, QV-GOLD] }
+  SC:  { disposition: generalized,  v3: ["§2", "§50"] }
+  AS:  { disposition: generalized,  v3: ["§2", "§50"] }
+  AR:  { disposition: generalized,  v3: [QV-ARCH] }
+  FN:  { disposition: superseded,   v3: [QV-REF, QV-LIC] }
+  MT:  { disposition: carried,      v3: [QV-TR] }
+  CV:  { disposition: carried,      v3: [QV-VERS] }
+  EV:  { disposition: carried,      v3: [QV-EVT] }
+  PC:  { disposition: generalized,  v3: [QV-PROV] }
+  TC:  { disposition: carried,      v3: [QV-TR] }
+  TD:  { disposition: generalized,  v3: [QV-TURN] }
+  TL:  { disposition: generalized,  v3: [QV-TOOL] }
+  HH:  { disposition: carried,      v3: [QV-HAND] }
+  VP:  { disposition: carried,      v3: [QV-VOICE] }
+  TN:  { disposition: superseded,   v3: [QV-ACT, "§7", "§8"] }
+  SM:  { disposition: generalized,  v3: [QV-RT] }
+  IN:  { disposition: carried,      v3: [QV-INT] }
+  CM:  { disposition: generalized,  v3: [QV-CTX, QV-FLD] }
+  NC:  { disposition: carried,      v3: [QV-CI] }
+  LG:  { disposition: carried,      v3: [QV-LANG] }
+  MT2: { disposition: carried,      v3: ["§7", QV-SEC] }
+  PV:  { disposition: carried,      v3: [QV-PRIV] }
+  CA:  { disposition: carried,      v3: [QV-COST] }
+  SE:  { disposition: carried,      v3: [QV-SEC, QV-CRED] }
+  LB:  { disposition: carried,      v3: [QV-PERF] }
+  AP:  { disposition: carried,      v3: [QV-PROV] }
+  AQ:  { disposition: carried,      v3: [QV-VOICE, QV-PERF] }
+  TS:  { disposition: generalized,  v3: [QV-TEST] }
+  EH:  { disposition: carried,      v3: [QV-EVAL] }
+  FC:  { disposition: carried,      v3: [QV-ERR] }
+  RS:  { disposition: carried,      v3: [QV-ERR, QV-REPLAY] }
+  OB:  { disposition: carried,      v3: [QV-OBS] }
+  CG:  { disposition: carried,      v3: [QV-COST] }
+  CFG: { disposition: superseded,   v3: [QV-VER, QV-LIFE] }
+  AC:  { disposition: superseded,   v3: [QV-ACC] }
+  XD:  { disposition: superseded,   v3: ["RecoveryProtocol", "§51", QV-EVID] }
+  DG:  { disposition: carried,      v3: ["§51.1"] }
+  IB:  { disposition: generalized,  v3: [QV-TOOL, QV-HAND, QV-TEL] }
+  CO:  { disposition: generalized,  v3: ["§43.7"] }
+  SP:  { disposition: superseded,   v3: [QV-ACT, QV-RT] }
+  RK:  { disposition: carried,      v3: [QV-RISK] }
+# Operator decisions → ADRs
+decisions:
+  D1:  { topic: generic Core Activity/Field/Policy/Outcome, adr: ADR-0002, spec: ["§7", "§19"] }
+  D2:  { topic: provider role ports, adr: ADR-0002, spec: ["§32"] }
+  D3:  { topic: thin WS/AudioWorklet transport; Pipecat/LiveKit future adapters, adr: ADR-0001, spec: ["§29"] }
+  D4:  { topic: terminology tenant_id/line_id/activity_id/activity_version, adr: ADR-0002, spec: ["§7", "§8"] }
+  D5:  { topic: Python 3.12+/FastAPI/Pydantic v2 + single TS web app 3 modes, adr: ADR-0001, spec: ["§43.7", "Appendix C"] }
+  D6:  { topic: decision.v1 deterministic-first; TypeSafe optional, adr: ADR-0004, spec: ["§32"] }
+  D7:  { topic: telephony seam only, adr: ADR-0003, spec: ["§35"] }
+  D8:  { topic: TypeSafe deferred, adr: ADR-0004, spec: ["§49"] }
+  D9:  { topic: CredentialResolver env→admin→ephemeral UI, adr: ADR-0002, spec: ["§39.6"] }
+  D10: { topic: outbound = direction + contact hooks + simulated dial, adr: ADR-0003, spec: ["§35"] }
+  D11: { topic: sandbox URL as preview, adr: ADR-0001, spec: ["§51", "§52"] }
+  D12: { topic: submit_record generic write tool, adr: ADR-0002, spec: ["§24"] }
+  D13: { topic: structured retrieval only (no vector RAG in POC), adr: ADR-0002, spec: ["§15"] }
+  D14: { topic: budget guards $10/5min/20 sessions, adr: ADR-0002, spec: ["§42"] }
+  D15: { topic: edge-tts rejected, adr: ADR-0002, spec: ["§49"] }
+# Acceptance criteria tracking
+acceptance:
+  QV-ACC-001: { phase: P0,   status: planned, evidence: [] }
+  QV-ACC-002: { phase: P0,   status: planned, evidence: [] }
+  QV-ACC-003: { phase: P0.2, status: planned, evidence: [] }
+  QV-ACC-004: { phase: P0.2, status: planned, evidence: [] }
+  QV-ACC-005: { phase: P1,   status: planned, evidence: [] }
+  QV-ACC-006: { phase: P1,   status: planned, evidence: [] }
+  QV-ACC-007: { phase: P1,   status: planned, evidence: [] }
+  QV-ACC-008: { phase: P1,   status: planned, evidence: [] }
+  QV-ACC-009: { phase: P1,   status: planned, evidence: [] }
+  QV-ACC-010: { phase: P1,   status: planned, evidence: [] }
+  QV-ACC-011: { phase: P2,   status: planned, evidence: [] }
+  QV-ACC-012: { phase: P2,   status: planned, evidence: [] }
+  QV-ACC-013: { phase: P2,   status: planned, evidence: [] }
+  QV-ACC-014: { phase: P3,   status: planned, evidence: [] }
+  QV-ACC-015: { phase: P3,   status: planned, evidence: [] }
+  QV-ACC-016: { phase: P3,   status: planned, evidence: [] }
+  QV-ACC-017: { phase: P4,   status: planned, evidence: [] }
+  QV-ACC-018: { phase: P4,   status: planned, evidence: [] }
+  QV-ACC-019: { phase: P4,   status: planned, evidence: [] }
+  QV-ACC-020: { phase: P5,   status: planned, evidence: [] }
+  QV-ACC-021: { phase: P5,   status: planned, evidence: [] }
+  QV-ACC-022: { phase: P6,   status: planned, evidence: [], depends_on: A5 }
