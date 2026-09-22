@@ -4,10 +4,10 @@
 
 | Field | Value |
 |---|---|
-| Project phase | P0 — Foundation |
-| Current stage | **P0 COMPLETE** (CP-0003) → P1 Generic Core (CP-0004) |
-| Current objective | P1: dialog machine, data-driven activity machine, FieldStore+provenance, Entity Focus Stack, PendingObjectives, Claim Governor, ConfirmationInterpreter, 11-step tool pipeline, Outcome Engine, InteractionRecord; Activities A–C run on mocks unchanged → CP-0004 |
-| Last verified checkpoint | CP-0003 (P0.2 mocks for every port) — `recovery/checkpoints/CP-0003.md`, tag `cp/CP-0003` |
+| Project phase | P1 — Generic Core |
+| Current stage | **P1 COMPLETE** (CP-0004) → P2 Knowledge + Blueprint + Preflight (CP-0005) |
+| Current objective | P2: `qevion/knowledge/` ingestion pipeline (parse→normalize→entities→facts→relationships→gaps→contradictions→ambiguity→customer questions→operational requirements) with provenance; `qevion/control/` Blueprint validator, Preflight READY/BLOCKED with reason codes, readiness lifecycle, Capability Registry mapping, versioning/pinning → CP-0005 |
+| Last verified checkpoint | CP-0004 (P1 Generic Core) — `recovery/checkpoints/CP-0004.md`, tag `cp/CP-0004` |
 | Last known good Git SHA | see `recovery/checkpoints/index.jsonl` last line (CP-0001) |
 | Approval | Operator approved full plan + decisions D1–D15 on 2026-09-22 (see `recovery/analysis/pre_approval_inspection_2026-09-22.md`) |
 
@@ -26,8 +26,10 @@
 
 - **CP-0003:** adapters — `decision/rules.py` (deterministic, ADR-0004), `providers/mocks.py` (scripted s2s w/ tool round-trip + cancel, llm, asr, tts), `turn/energy.py` (turn.v1 state machine + barge-in; mock alias), `transports/memory.py`, `tools/memory_backend.py` (fault injection), `sinks/memory.py` (memory+JSONL outcome, memory handoff), `admin/credentials.py` (env→admin→ephemeral, never logs), `telephony/simulated.py`; `config/compositions/*.yaml`; 67 tests; `scripts/ci_local.sh`; **CI green run 35777982470**; evidence `evidence/P0/CP-0003/`
 
+- **CP-0004 (P1 Generic Core):** `qevion/core/` — `field_store.py` (provenance strength, corrections, execution readiness), `dialog_machine.py` (fixed), `activity_machine.py` (data-driven `generic_default_v1` + table validator), `context.py` (EntityFocusStack, PendingObjectives), `governance.py` (ClaimGovernor, ConfirmationInterpreter via decision port), `tool_pipeline.py` (11 steps, BudgetGuard, idempotency), `outcome_engine.py` (rules via decision port, generic primary precedence, InteractionRecord), `instruction_composer.py` (sectioned, fingerprinted), `platform_tools.py` (14 tool.v1 declarations), `session.py` (orchestrator; 7-step interruption with t0..t4; confirmation gate; authority model). Adapters: memory read-tool backends. Activities A (order intake) + B (appointment) YAML. Tests: 93 total incl. 12 end-to-end scenarios A/B/C on mocks — **CI_LOCAL PASS**; evidence `evidence/P1/CP-0004/`; QV-ACC-006..010 accepted.
+
 ## In progress
-- P1 (CP-0004 prep): all core primitives + `session.py` orchestrator + Activities A/B YAML landed (84bdd82…abcfbc6). Remaining: platform tool declaration catalog, memory backends for read tools, end-to-end scenario tests A–C on mocks, CP-0004 record/tag/snapshot/evidence.
+- CP-0004 record + tag + snapshot (this commit)
 
 ## Incidents
 - 2026-09-22 #1: sandbox reset lost ~1h of uncommitted P0 work. Classified: test/environment. Countermeasure: protocol §8.1 commit-immediately. Redone in small increments.
@@ -46,8 +48,8 @@
 - Real-provider evidence (QV-ACC-022) requires operator-supplied test key (A5) — Admin ephemeral UI lands in P3.
 
 ## Pending (ordered)
-1. **P1 Core (CP-0004)** in `qevion/core/`: `dialog_machine.py`, `activity_machine.py` (generic default table + Blueprint table_ref/inline), `field_store.py` (provenance, corrections), `focus_stack.py`, `pending_objectives.py`, `claim_governor.py`, `confirmation.py`, `tool_pipeline.py` (11 steps, events), `outcome_engine.py`, `interaction_record.py`, `instruction_composer.py`, `session.py` (orchestrates ports via contracts only); example Activities A (restaurant) + B (clinic) YAML; scenario tests on mocks; core grep gate; import-linter
-2. P2 → CP-0005 · P3 → CP-0006 · P4 → CP-0007 · P5 → CP-0008 · P6 → CP-0009
+1. **P2 (CP-0005)**: `qevion/knowledge/` (models already in contracts/knowledge.py): parsers (txt/md/csv/yaml/json; pdf via optional dep), normalizer, entity/fact extraction (structured-first, deterministic; LLM port optional & never business truth), relationships, gap classifier (REQUIRED_FOR_EXECUTION/IMPORTANT_FOR_QUALITY/OPTIONAL_IMPROVEMENT/POLICY_RISK/DATA_CONFLICT/UNKNOWN), contradiction + ambiguity detection, customer-question mining, operational-requirements derivation; `qevion/control/`: Blueprint validator (cross-field), Preflight (reason codes §11), readiness lifecycle machine, Capability Registry + mapping (SUPPORTED_WITH_CONFIGURATION/REQUIRES_TOOL/…), version pinning/diff; tests + evidence.
+2. P3 → CP-0006 · P4 → CP-0007 · P5 → CP-0008 · P6 → CP-0009
 
 ## Exact next action
-`qevion/core/platform_tools.py` (tool.v1 declarations for the 14 generic tools) → memory backends for lookup/get/list/compare/recommend/compute_quote → `tests/test_core_session_scenarios.py` (A/B/C on mocks) → ci_local → CP-0004.
+`checkpoint.sh CP-0004 P1 "Generic Core: machines, FieldStore, pipeline, outcome, session orchestrator; A/B/C on mocks"` → fill record → commit → `tag_checkpoint.sh CP-0004` → `snapshot.sh CP-0004`; then P2 step 1: `qevion/control/preflight.py` + reason codes + tests.
