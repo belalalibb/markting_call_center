@@ -33,9 +33,19 @@ _DIALOG: dict[DialogState, dict[str, DialogState]] = {
         "nothing_to_say": D.LISTENING,
         "close": D.CLOSED,
     },
-    D.SPEAKING: {"barge_in": D.INTERRUPTED, "response_done": D.LISTENING, "tool_requested": D.WAITING_TOOL, "close": D.CLOSED},
+    D.SPEAKING: {
+        "barge_in": D.INTERRUPTED,
+        "response_done": D.LISTENING,
+        "tool_requested": D.WAITING_TOOL,
+        "close": D.CLOSED,
+    },
     D.INTERRUPTED: {"reconciled": D.LISTENING, "close": D.CLOSED},
-    D.WAITING_TOOL: {"tool_returned": D.THINKING, "tool_failed": D.THINKING, "barge_in": D.INTERRUPTED, "close": D.CLOSED},
+    D.WAITING_TOOL: {
+        "tool_returned": D.THINKING,
+        "tool_failed": D.THINKING,
+        "barge_in": D.INTERRUPTED,
+        "close": D.CLOSED,
+    },
     D.WAITING_CONFIRMATION: {
         "confirmed": D.THINKING,
         "denied": D.THINKING,
