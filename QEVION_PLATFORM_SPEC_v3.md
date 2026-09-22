@@ -1350,3 +1350,38 @@ Retired outright (R): v2.3 §5 recommendation to build on Pipecat; v2.3 §15 `te
 | 102–103 | Historical failure interpretation, README as context | Recovery Protocol §9, README |
 | 104–110 | Research/output requirements, quality, anti-superficial, self-review, file rule, output rule | §0, §53, this Appendix |
 | 111–112 | Final closure check, final instruction | §52 + CP-0001 record |
+
+### B.2 X³ (Configuration Copilot master prompt) §1–§50 → v3 sections
+
+| X³ § | Topic | v3 home |
+|---|---|---|
+| 1–2 | Product experience, example interaction model | §14 QV-COP-001..004 |
+| 3 | Dynamic discovery — no fixed questionnaire | QV-COP-005 |
+| 4–5 | Core-aware / provider-aware configuration | QV-COP-006, §16 QV-CAP |
+| 6 | Admin provider control | §6 Admin plane, §39.6 QV-CRED, Admin test-key UI |
+| 7 | Document / file ingestion | §15 QV-KNOW pipeline |
+| 8 | Knowledge gap detection | QV-KNOW gap classes |
+| 9–10 | Customer question / objection discovery | §13 QV-COV |
+| 11 | Unspecified question handling | §11 `unknown_question_policy` |
+| 12 | Conversation coverage model | §13 QV-COV |
+| 13–15 | Call quality, efficiency, lead/outcome quality | §11 QV-OBJ, §44 QV-EVAL |
+| 16 | "What could go wrong?" review | §12 preflight + §46 red-team + §47 risks |
+| 17–19 | Capability mapping, integration discovery, provider fit | §16 QV-CAP mapping results |
+| 20–21 | Simulation before activation, adversarial simulation | §17 QV-SIM |
+| 22–23 | Activity Blueprint, validation | §9–§10 QV-ACT, validator |
+| 24 | Readiness state | §13 lifecycle QV-LIFE |
+| 25 | Operator control | §17 approval, §43.7 Operator Console |
+| 26 | No silent business policy creation | QV-COP-010, Decision{proposed_by, approved_by} |
+| 27–29 | Gap→question loop, quality loop, feedback from real outcomes | QV-COP-011..013, §48 QV-LEARN |
+| 30–31 | Activity versioning, provider independence of Blueprint | §18 QV-VER, QV-ACT provider-neutral rule |
+| 32–34 | Document-grounded config, conflict detection, source priority | §15 `source_priority`, contradictions |
+| 35 | Question prioritization | QV-COP-014 (REQUIRED_FOR_EXECUTION first) |
+| 36–38 | Conversational UX, progressive disclosure, minimum required config | QV-COP-015..017 |
+| 39–40 | "Stop asking" intelligence, "ask the owner" escape hatch | QV-COP-018..019 |
+| 41–42 | Copilot security, Copilot does not bypass Core | QV-COP-020, QV-ARCH (Copilot ≠ runtime), §39 |
+| 43 | Configuration chat provider failures | QV-COP-021, §27 QV-ERR |
+| 44–45 | Copilot observability, configuration evaluation | QV-COP-022, §41, §44 |
+| 46 | Superficial-compliance attacks | §46 red-team matrix (config rows) |
+| 47 | Required output contract | `qevion.activity.v1` + `copilot.session.v1` (§37 inventory) |
+| 48 | End-to-end configuration flow | §14 flow diagram, QV-ACC-014/015 |
+| 49–50 | Core architectural principle, master quality objective | §1, §3 |
