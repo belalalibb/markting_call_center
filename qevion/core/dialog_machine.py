@@ -43,6 +43,7 @@ _DIALOG: dict[DialogState, dict[str, DialogState]] = {
     D.WAITING_TOOL: {
         "tool_returned": D.THINKING,
         "tool_failed": D.THINKING,
+        "confirmation_needed": D.WAITING_CONFIRMATION,  # confirm_before_execute tool requested mid-response
         "barge_in": D.INTERRUPTED,
         "close": D.CLOSED,
     },

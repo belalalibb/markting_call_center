@@ -66,7 +66,7 @@ coverage:
 completion:
   success_rules: [ "consent == true AND q1..q5 recorded AND submit_record accepted" ]
   failure_rules: [ "consent == false" ]
-  exit_rules:    [ "opt_out", "wrong_person", "callback_scheduled" ]
+  exit_rules:    [ "opt_out", "wrong_person", "callback_scheduled => callback_requested" ]
 outcome_schema:
   primary: [completed, partially_completed, callback_requested, rejected, no_answer, abandoned, human_required, technical_failure]
   secondary: [consent_declined, wrong_person]
