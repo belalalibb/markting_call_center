@@ -28,3 +28,8 @@ data/runtime/
 *.sqlite
 *.db
 *.log
+
+# evidence: track only indexes + small CI reports (QV-EVID-003)
+!evidence/**/index.json
+!evidence/**/junit.xml
+!evidence/**/licenses.json

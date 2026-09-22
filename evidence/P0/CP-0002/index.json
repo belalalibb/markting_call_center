@@ -1,0 +1,38 @@
+{
+  "checkpoint": "CP-0002",
+  "items": [
+    {
+      "path": "evidence/P0/CP-0002/junit.xml",
+      "sha256": "73df47816d7f18141cdbc8d258ff1360b0de1d20a2e2554398d83b3870736126",
+      "kind": "pytest-junit",
+      "produced_by": "local .venv (py3.13) mirrored by GitHub Actions run 35775450363",
+      "produced_at": "2026-09-22T19:43:16.060875+00:00",
+      "criterion_ids": [
+        "QV-ACC-003",
+        "QV-ACC-004"
+      ]
+    },
+    {
+      "path": "evidence/P0/CP-0002/licenses.json",
+      "sha256": "bc75a088128a4d0706051942edc2030ba8080149f38ff718c332a00e401eedbe",
+      "kind": "ci-report",
+      "produced_by": "local .venv (py3.13) mirrored by GitHub Actions run 35775450363",
+      "produced_at": "2026-09-22T19:43:16.060970+00:00",
+      "criterion_ids": [
+        "QV-LIC-002"
+      ]
+    },
+    {
+      "path": "https://github.com/belalalibb/markting_call_center/actions/runs/35775450363",
+      "sha256": null,
+      "kind": "ci-report",
+      "produced_by": "GitHub Actions",
+      "produced_at": "2026-09-22T19:43:16.060982+00:00",
+      "criterion_ids": [
+        "QV-ACC-002",
+        "QV-ACC-003",
+        "QV-ACC-004"
+      ]
+    }
+  ]
+}
