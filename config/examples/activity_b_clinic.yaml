@@ -1,0 +1,118 @@
+# Activity B — inbound clinic appointment booking (spec §54). Core-neutrality fixture.
+# Distinguishing: slot TOOL_VERIFIED, strict uncertainty_policy=ASK, medical questions → handoff, escalation on symptoms.
+schema: qevion.activity.v1
+identity:
+  tenant_id: t_demo
+  line_id: l_booking_01
+  activity_id: act_appointment_booking
+  name: Appointment booking line
+  description: Book a visit for a listed service in an available slot; never give medical advice.
+  version: 1.0.0
+  status: DRAFT
+direction: inbound
+channels: [browser_voice, text]
+locale:
+  language: ar
+  locale: ar-EG
+  dialect: egyptian
+  locale_pack_ref: lp_ar_eg_v1
+  voice_profile_ref: vp_professional_male_v1
+  pronunciation: []
+objective:
+  primary: { kind: book_slot, description: "Reserve one available slot for a listed service under the caller's name." }
+  secondary: [ { kind: reduce_no_shows, description: "Read back date and time once, clearly." } ]
+  optimization_bounds: { truthfulness: required, no_invented_urgency: true, respect_opt_out: true }
+data:
+  required:
+    - { name: patient_name, type: string, validation: "max 80 chars", clarification_hint: "Full name as it should appear on the booking.", provenance_required: USER_STATED, sensitivity: high }
+    - { name: service, type: enum, enum_values: [general_consultation, follow_up, lab_test, vaccination], validation: none, clarification_hint: "Which listed service?", provenance_required: KNOWLEDGE_APPROVED, sensitivity: medium }
+    - { name: preferred_window, type: string, validation: "max 60 chars", clarification_hint: "Which day and roughly what time?", provenance_required: USER_STATED, sensitivity: low }
+    - { name: slot, type: datetime, validation: none, clarification_hint: "Confirm the exact slot offered.", provenance_required: TOOL_VERIFIED, sensitivity: medium }
+  optional:
+    - { name: callback_phone, type: string, validation: "regex:^01[0-9]{9}$", clarification_hint: "A number for reminders.", provenance_required: USER_STATED, sensitivity: high }
+knowledge:
+  sources:
+    - { source_id: ks_services_v2, kind: structured, version: "2", priority: 10 }
+    - { source_id: ks_faq_visits, kind: file, version: "1", priority: 50 }
+  requirements:
+    - { domain: services_offered, description: "Listed services and their durations.", status: SATISFIED }
+    - { domain: visit_preparation, description: "Approved preparation instructions per service.", status: PARTIAL }
+  source_priority: [live_api, approved_structured, approved_document]
+  freshness: { max_age_days: 30, stale_behavior: STATE_LIMITATION }
+tools:
+  required:
+    - { tool_id: lookup_knowledge, purpose: confirm the service is listed }
+    - { tool_id: list_entities, purpose: list available slots for the preferred window }
+    - { tool_id: record_field, purpose: store each collected datum }
+    - { tool_id: verify_field, purpose: reserve and verify the chosen slot }
+    - { tool_id: submit_record, purpose: persist the booking }
+  optional:
+    - { tool_id: request_handoff, purpose: medical questions or urgent symptoms }
+    - { tool_id: collect_question, purpose: non-urgent questions the line cannot answer }
+  permissions:
+    lookup_knowledge: { impact: read, confirmation: none, authorization_scope: activity }
+    list_entities:    { impact: read, confirmation: none, authorization_scope: activity }
+    record_field:     { impact: write, confirmation: none, authorization_scope: activity }
+    verify_field:     { impact: read, confirmation: none, authorization_scope: activity }
+    submit_record:    { impact: write, confirmation: confirm_before_execute, authorization_scope: activity }
+    request_handoff:  { impact: escalation, confirmation: none, authorization_scope: activity }
+    collect_question: { impact: write, confirmation: none, authorization_scope: activity }
+policies:
+  allowed_claims:
+    - { claim_type: service_listed, scope: activity, source_requirement: KNOWLEDGE_APPROVED }
+    - { claim_type: slot_available, scope: activity, source_requirement: TOOL_VERIFIED }
+    - { claim_type: visit_preparation, scope: activity, source_requirement: KNOWLEDGE_APPROVED }
+    - { claim_type: booking_confirmed, scope: activity, source_requirement: TOOL_VERIFIED }
+  prohibited_claims:
+    - { claim_type: medical_advice, scope: all }
+    - { claim_type: diagnosis, scope: all }
+    - { claim_type: medication_guidance, scope: all }
+  disclosures: [ { when: OPENING, text_ref: disc_booking_line_not_medical_ar_eg } ]
+  clarification_policy: always_when_ambiguous
+  unknown_question_policy:
+    default: OFFER_HUMAN_HANDOFF
+    overrides:
+      - { topic_pattern: price, behavior: STATE_LIMITATION }
+      - { topic_pattern: parking, behavior: COLLECT_QUESTION }
+  uncertainty_policy: { missing: ASK_CLARIFYING_QUESTION, conflicting: ASK_CLARIFYING_QUESTION, stale: ASK_CLARIFYING_QUESTION, ambiguous: ASK_CLARIFYING_QUESTION }
+  escalation:
+    - { trigger: urgent_symptoms, action: request_handoff, priority: urgent }
+    - { trigger: medical_question, action: request_handoff, priority: high }
+  opt_out: { phrases_ref: optout_ar_eg_v1, action: CLOSE_GRACEFULLY }
+coverage:
+  questions:
+    - { id: cq1, category: services, pattern: "do you do", handling: KNOWLEDGE, answer_ref: ks_services_v2, status: COVERED }
+    - { id: cq2, category: preparation, pattern: "should I fast", handling: KNOWLEDGE, answer_ref: ks_faq_visits, status: ASK_OWNER }
+    - { id: cq3, category: medical, pattern: "what does this symptom mean", handling: HANDOFF, status: DECLINED }
+  objections:
+    - { id: ob1, pattern: "nothing sooner", approved_response_ref: resp_offer_waitlist, allowed_alternatives: [COLLECT_QUESTION, CLOSE_GRACEFULLY], status: COVERED }
+  exceptions:
+    - { id: ex1, situation: no_slots_in_window, behavior: ASK_CLARIFYING_QUESTION }
+    - { id: ex2, situation: urgent_symptoms, behavior: OFFER_HUMAN_HANDOFF }
+completion:
+  success_rules: [ "patient_name recorded AND service recorded AND slot recorded AND submit_record accepted" ]
+  failure_rules: [ "no_slots_in_window" ]
+  exit_rules:    [ "opt_out", "urgent_symptoms => human_required" ]
+outcome_schema:
+  primary: [completed, partially_completed, rejected, abandoned, human_required, technical_failure, no_answer]
+  secondary: [waitlist_requested, question_collected]
+  fields:
+    - { name: booking_id, source_field: submit_record.record_id, required: false }
+    - { name: slot, required: true }
+  next_actions: [close, handoff]
+handoff_rules:
+  - { trigger: urgent_symptoms, destination_ref: dest_nurse_line, priority: urgent, context_projection: [patient_name, callback_phone] }
+  - { trigger: medical_question, destination_ref: dest_reception_desk, priority: high, context_projection: [patient_name, service] }
+activity_machine: { table_ref: generic_default_v1 }
+constrained_flow: null
+evaluation:
+  cases: [ book_follow_up_happy_path, no_slot_in_window_then_alternative, medical_question_handoff, user_changes_day_mid_flow, interrupts_slot_readback ]
+  simulation_personas: [ anxious_first_timer, elderly_caller_slow_speech, caregiver_booking_for_parent ]
+  adversarial_cases: [ asks_for_diagnosis, asks_to_book_unlisted_service ]
+version_metadata:
+  sources: [ ks_services_v2, ks_faq_visits ]
+  decisions:
+    - { item_path: policies.unknown_question_policy.default, proposed_by: copilot, approved_by: operator_demo, ts: 2026-09-22T00:00:00Z, rationale: "Any unknown on a health line goes to a human." }
+  rejected_suggestions: [ "auto-suggest medication timing from FAQ" ]
+  pinned: { policy_versions: {}, knowledge_versions: { ks_services_v2: "2", ks_faq_visits: "1" }, locale_pack: lp_ar_eg_v1, voice_profile: vp_professional_male_v1, composition_config: comp_s2s_openai_v1 }
+  readiness: { state: DRAFT }
