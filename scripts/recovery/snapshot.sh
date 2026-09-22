@@ -32,4 +32,4 @@ os.makedirs("recovery/snapshots", exist_ok=True)
 json.dump(manifest, open(f"recovery/snapshots/{cid}.manifest.json","w"), indent=2, ensure_ascii=False)
 print(f"manifest -> recovery/snapshots/{cid}.manifest.json ({len(files)} tracked files)")
 PY
-if [[ -d /mnt/aidrive ]]; then cp "$OUT" /mnt/aidrive/ && echo "copied -> /mnt/aidrive/$(basename "$OUT")"; else echo "aidrive not mounted; archive at $OUT"; fi
+if [[ -d /mnt/aidrive ]] && cp "$OUT" /mnt/aidrive/ 2>/dev/null; then echo "copied -> /mnt/aidrive/$(basename "$OUT")"; else echo "aidrive unavailable (non-blocking); archive at $OUT"; fi
