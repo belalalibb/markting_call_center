@@ -13,7 +13,7 @@ from typing import Any
 
 from qevion.contracts.activity import ActivityBlueprint, ReadinessState
 from qevion.contracts.common import utc_now
-from qevion.contracts.control import PreflightResult, can_transition
+from qevion.contracts.control import READINESS_TRANSITIONS, PreflightResult, can_transition
 from qevion.contracts.event import EventType
 
 S = ReadinessState
@@ -122,14 +122,36 @@ class ReadinessMachine:
         if self.state is target:
             return None
         if not self.can(target):
-            # e.g. DRAFT → READY_FOR_SIMULATION must pass through discovery/configuration first
-            for step in (S.DISCOVERY_IN_PROGRESS, S.NEEDS_CONFIGURATION):
-                if self.state is not step and self.can(step) and can_transition(step, target):
-                    self.transition(step, reason=f"advancing toward {target.value}", actor=actor)
-                    break
+            # e.g. DRAFT → READY_FOR_SIMULATION must pass through discovery/configuration first: walk the
+            # shortest legal path through *non-terminal, non-activation* states, recording every hop.
+            for step in self._path_to(target):
+                self.transition(step, reason=f"advancing toward {target.value}", actor=actor)
         if not self.can(target):
             raise IllegalReadinessTransitionError(self.state, target, "no legal path from current state")
         return self.transition(target, reason=reason, actor=actor, refs={"preflight_result_ref": ref})
+
+    def _path_to(self, target: S) -> list[S]:
+        """BFS over the transition table; intermediate hops exclude ACTIVE/SUSPENDED/RETIRED (never implicit)."""
+        from collections import deque
+
+        banned = {S.ACTIVE, S.SUSPENDED, S.RETIRED, S.READY_FOR_ACTIVATION}
+        prev: dict[S, S | None] = {self.state: None}
+        q: deque[S] = deque([self.state])
+        while q:
+            cur = q.popleft()
+            for nxt in READINESS_TRANSITIONS[cur]:
+                if nxt in prev:
+                    continue
+                if nxt is target:
+                    path = [cur] if cur is not self.state else []
+                    while path and prev[path[0]] not in (None, self.state):
+                        path.insert(0, prev[path[0]])  # type: ignore[arg-type]
+                    return path
+                if nxt in banned:
+                    continue
+                prev[nxt] = cur
+                q.append(nxt)
+        return []
 
     def apply_simulation(self, passed: bool, *, ref: str, actor: str = "control:simulation") -> ReadinessChange:
         target = S.READY_FOR_ACTIVATION if passed else S.SIMULATION_FAILED
