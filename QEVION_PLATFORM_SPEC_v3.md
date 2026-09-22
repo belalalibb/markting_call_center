@@ -1085,3 +1085,53 @@ Manual live mode (selectors: composition, activity version, line, direction, loc
 |---|---|
 | QV-LEARN-001 | The learning loop (Execution → Evaluation → Lesson → Candidate → Replay & Verification → Gold → Retrieval → Re-test → Gap discovery) is DEFERRED in implementation; its seam exists now: `coverage.miss`, `claim.checked`, `failure.classified`, `user.correction`, handoff frequency, incomplete outcomes, abandonment points, repeated objections feed the Copilot as **signals** that produce **proposals** on a new Activity draft. |
 | QV-LEARN-002 | No autonomous change to policies, business rules, objectives, prohibited claims, eligibility, or outcome schemas. Every policy-affecting change carries proposal, evidence, rationale, review, approval, version, audit trail. AI recommends; operators approve; approvals create versions. |
+
+---
+
+# PART X — EXECUTION
+
+## §49. Reference Registry and License Gate
+
+Full registry: `docs/registry/references.yaml` + `docs/registry/licenses.yaml` (machine-readable). Nothing is SELECTED merely for being listed.
+
+| ID | Requirement |
+|---|---|
+| QV-REF-001 | Every candidate is evaluated on: maintenance, latest activity, maturity, architecture fit, Python compatibility, streaming/realtime behavior, quality (Arabic/Egyptian where relevant), latency, hardware, scalability, deployment complexity, observability, security, ecosystem, licensing (code / model / weights / data / voice / hosted service), commercial suitability. |
+| QV-REF-002 | Decision status ∈ `CANDIDATE, VERIFIED CANDIDATE, SELECTED, REJECTED, DEFERRED, UNVERIFIED`. The spec says "use X" only when X is an architecture requirement; otherwise: required capability, selection criteria, acceptable adapters, verification expectations. |
+| QV-LIC-001 | **License gate:** separate dimensions — source-code, model, weights, dataset, voice, commercial restrictions, redistribution, derivatives, attribution, hosted-service ToS. "Open source" ≠ free commercial use. Unclear → `UNVERIFIED`; unsuitable → `REJECTED`; Preflight reports `LICENSE_BLOCKED_COMPONENT` for enabled non-commercial components. |
+| QV-LIC-002 | Registry entries are Admin-visible; non-mock providers ship **disabled by default**; Admin enables and supplies credentials/hardware; operator may customize entries. |
+
+### 49.1 Registry summary (2026-09-22)
+
+| Reference | Category | Status | License notes |
+|---|---|---|---|
+| OpenAI Realtime API | s2s | SELECTED (first real s2s) | commercial API |
+| OpenAI Chat/Responses | llm (config_chat, reasoning) | SELECTED (first llm) | commercial API |
+| Google Gemini Live | s2s | VERIFIED CANDIDATE (stub + fixtures) | commercial API |
+| Silero VAD | turn | SELECTED (default) | MIT |
+| Smart Turn v3.x | turn (semantic) | VERIFIED CANDIDATE | BSD-2; weights per card; Arabic quality UNVERIFIED |
+| TypeSafe (Jev) | decision | DEFERRED / OPTIONAL adapter | commercial API |
+| Pipecat / LiveKit | future transport adapters | CANDIDATE (never core) | BSD-2 / Apache-2.0 |
+| Habibi-TTS | tts Egyptian | VERIFIED CANDIDATE — **EGY model only** | code MIT; EGY/MSA/ALG/IRQ/MAR Apache-2.0; Unified/SAU/UAE **CC-BY-NC-SA**; GPU |
+| VoiceTuT-TTS | tts Egyptian + code-switch | CANDIDATE | Apache-2.0; OmniVoice base + data UNVERIFIED; GPU; T4 TTFA 1.68 s |
+| QwenCleo-ASR | asr Egyptian + code-switch | CANDIDATE | Apache-2.0 (Qwen3-ASR terms); GPU; vLLM nightly streaming |
+| faster-whisper / whisper.cpp | asr general | CANDIDATE — PARTIAL Egyptian | MIT |
+| Azure Speech `ar-EG` · ElevenLabs · Gemini TTS · OpenAI TTS · Cartesia | tts/asr commercial | CANDIDATE | commercial |
+| edge-tts | tts | **REJECTED for product** (unofficial endpoint; commercial use violates MS ToS) | — |
+| Coqui XTTS-v2 | tts | REJECTED | CPML non-commercial |
+| Chatterbox | tts multilingual | CANDIDATE | MIT; Egyptian UNVERIFIED |
+| Egyptian Tacotron2 / Klaam | research | REJECTED | unmaintained |
+| Piper / Kokoro | tts | UNVERIFIED (ar-EG) | MIT / Apache-2.0 |
+| llama.cpp / vLLM | local llm | DEFERRED (llm adapter seam) | MIT / Apache-2.0 |
+| PostgreSQL / pgvector / Qdrant | storage / semantic retrieval | DEFERRED (`retrieval.v1` seam) | permissive |
+| pytest · Hypothesis · Playwright · import-linter · gitleaks · pip-audit · ruff · mypy | quality tooling | SELECTED | permissive |
+| promptfoo / DeepEval | eval tooling | CANDIDATE | MIT / Apache-2.0 |
+| OpenTelemetry / Langfuse | observability | OTel mapping SELECTED; Langfuse CANDIDATE | Apache-2.0 / MIT |
+| FFmpeg | dev audio tooling | SELECTED (tooling only) | LGPL/GPL |
+| FreeSWITCH / Asterisk / Kamailio | future telephony | DEFERRED (external via adapter) | MPL / GPL |
+| FLEURS ar_EG · Common Voice ar · MADAR · MGB-2 · CALLHOME Egyptian | eval datasets | CANDIDATE — verify license/redistribution/commercial each | UNVERIFIED |
+| RFC 2119/8174 · JSON Schema 2020-12 · SemVer · CloudEvents · W3C Trace Context/OTel · 12-factor · ADR · OWASP LLM Top 10 2025 · OWASP API Top 10 · NIST AI RMF · ISO 42001/27001 · PDPL 151/2020 + ER 816/2025 · GDPR · CaMeL | standards | reference | — |
+
+## §50. POC Scope
+
+Proves: (1) real conversational voice runtime with measured interruption on a real provider; (2) generic Core executing three materially different Activities unchanged; (3) Copilot turning intent + files into a validated, simulated Blueprint without inventing facts; (4) independently replaceable provider roles; (5) structured outcomes/handoffs consumable downstream; (6) tenant isolation, budget, privacy posture, secret discipline; (7) evidence, replay, recovery discipline. Does NOT prove telephony, campaigns, billing, RBAC, production readiness, compliance certification.
