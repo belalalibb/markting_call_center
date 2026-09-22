@@ -18,6 +18,11 @@ from qevion.contracts.tool import PlatformTool, ToolInvocation, ToolOutcome, Too
 class MemoryStore:
     """Shared tenant-scoped store; one instance per test/session bundle."""
 
+    entities: list[dict[str, Any]] = field(
+        default_factory=list
+    )  # approved entities: {entity_id, entity_type, name, ...}
+    facts: list[dict[str, Any]] = field(default_factory=list)  # approved facts: {domain, key, value, source_id}
+    verify_reject: set[str] = field(default_factory=set)  # field names verify_field should reject (fixture control)
     records: list[dict[str, Any]] = field(default_factory=list)
     callbacks: list[dict[str, Any]] = field(default_factory=list)
     questions: list[dict[str, Any]] = field(default_factory=list)
@@ -66,13 +71,47 @@ class MemoryToolBackend:
             "activity_id": invocation.activity_id,
         }
         match self.tool_id:
+            case PlatformTool.LOOKUP_KNOWLEDGE:
+                out = _ok(invocation, self._lookup(args), Provenance.KNOWLEDGE_APPROVED)
+            case PlatformTool.GET_ENTITY:
+                ent = self._find_entity(args)
+                out = _ok(invocation, {"found": ent is not None, "entity": ent}, Provenance.KNOWLEDGE_APPROVED)
+            case PlatformTool.LIST_ENTITIES:
+                ents = self._filter_entities(args.get("entity_type"), args.get("filters") or {})
+                lim = args.get("limit")
+                ents = ents[: int(lim)] if isinstance(lim, int) and lim > 0 else ents
+                out = _ok(invocation, {"count": len(ents), "entities": ents}, Provenance.KNOWLEDGE_APPROVED)
+            case PlatformTool.COMPARE_ENTITIES:
+                ids = [str(i) for i in args.get("entity_ids", [])]
+                ents = [e for e in self.store.entities if e.get("entity_id") in ids]
+                attrs = args.get("attributes") or sorted({k for e in ents for k in e} - {"entity_id"})
+                table = {a: {e["entity_id"]: e.get(a) for e in ents} for a in attrs}
+                out = _ok(
+                    invocation,
+                    {
+                        "entities": [e["entity_id"] for e in ents],
+                        "missing": [i for i in ids if i not in {e["entity_id"] for e in ents}],
+                        "table": table,
+                    },
+                    Provenance.KNOWLEDGE_APPROVED,
+                )
+            case PlatformTool.RECOMMEND:
+                ents = self._filter_entities(args.get("entity_type"), args.get("constraints") or {})
+                lim = args.get("limit")
+                ents = ents[: int(lim)] if isinstance(lim, int) and lim > 0 else ents[:3]
+                out = _ok(
+                    invocation, {"recommendations": ents, "basis": "constraints_only"}, Provenance.KNOWLEDGE_APPROVED
+                )
+            case PlatformTool.COMPUTE_QUOTE:
+                out = self._quote(invocation, args)
             case PlatformTool.RECORD_FIELD:
                 # Recording is a user statement, not verification.
                 out = _ok(invocation, {"name": args.get("name"), "value": args.get("value")}, Provenance.USER_STATED)
             case PlatformTool.VERIFY_FIELD:
                 # Mock verification: accepts anything non-empty; real backends call business systems.
-                ok = args.get("value") not in (None, "")
-                out = _ok(invocation, {"name": args.get("name"), "verified": ok})
+                name = str(args.get("name"))
+                ok = args.get("value") not in (None, "") and name not in self.store.verify_reject
+                out = _ok(invocation, {"name": name, "verified": ok})
             case PlatformTool.SUBMIT_RECORD:
                 rec = {
                     **base,
@@ -117,9 +156,72 @@ class MemoryToolBackend:
         out.latency_ms = int((time.perf_counter() - t0) * 1000)
         return out
 
+    # -- generic read helpers (no business meaning; pure data plumbing) ------------------------------
+    def _find_entity(self, args: dict[str, Any]) -> dict[str, Any] | None:
+        eid, name, etype = args.get("entity_id"), args.get("name"), args.get("entity_type")
+        for e in self.store.entities:
+            if etype and e.get("entity_type") != etype:
+                continue
+            if eid and e.get("entity_id") == eid:
+                return e
+            if name and str(e.get("name", "")).lower() == str(name).lower():
+                return e
+        return None
+
+    def _filter_entities(self, etype: Any, filters: dict[str, Any]) -> list[dict[str, Any]]:
+        out = []
+        for e in self.store.entities:
+            if etype and e.get("entity_type") != etype:
+                continue
+            if all(e.get(k) == v for k, v in filters.items()):
+                out.append(e)
+        return out
+
+    def _lookup(self, args: dict[str, Any]) -> dict[str, Any]:
+        q = str(args.get("query", "")).lower()
+        domain = args.get("domain")
+        hits = [
+            f
+            for f in self.store.facts
+            if (not domain or f.get("domain") == domain)
+            and (q in str(f.get("key", "")).lower() or q in str(f.get("value", "")).lower())
+        ]
+        ents = [e for e in self.store.entities if q and q in str(e.get("name", "")).lower()]
+        return {"found": bool(hits or ents), "facts": hits, "entities": ents}
+
+    def _quote(self, invocation: ToolInvocation, args: dict[str, Any]) -> ToolOutcome:
+        """Total = Σ unit_value × quantity from *approved entities only*; unknown items make the quote UNKNOWN."""
+        lines: list[dict[str, Any]] = []
+        unknown: list[str] = []
+        by_id = {e.get("entity_id"): e for e in self.store.entities}
+        by_name = {str(e.get("name", "")).lower(): e for e in self.store.entities}
+        for it in args.get("items") or []:
+            ref = it.get("entity_id") or it.get("name") if isinstance(it, dict) else it
+            qty = int(it.get("quantity", 1)) if isinstance(it, dict) else 1
+            ent = by_id.get(ref) or by_name.get(str(ref).lower())
+            if ent is None or "unit_value" not in ent:
+                unknown.append(str(ref))
+                continue
+            lines.append({"entity_id": ent["entity_id"], "quantity": qty, "line_total": ent["unit_value"] * qty})
+        if unknown:
+            return ToolOutcome(
+                call_id=invocation.call_id,
+                tool_id=self.tool_id,
+                status=ToolOutcomeStatus.UNKNOWN,
+                output={"unknown_items": unknown, "lines": lines},
+                error="items not in approved catalog",
+            )
+        return _ok(invocation, {"lines": lines, "total": sum(x["line_total"] for x in lines)})
+
 
 def memory_backends(store: MemoryStore, tool_ids: list[str] | None = None) -> dict[str, MemoryToolBackend]:
     ids = tool_ids or [
+        PlatformTool.LOOKUP_KNOWLEDGE,
+        PlatformTool.GET_ENTITY,
+        PlatformTool.LIST_ENTITIES,
+        PlatformTool.COMPARE_ENTITIES,
+        PlatformTool.RECOMMEND,
+        PlatformTool.COMPUTE_QUOTE,
         PlatformTool.RECORD_FIELD,
         PlatformTool.VERIFY_FIELD,
         PlatformTool.SUBMIT_RECORD,
