@@ -1,0 +1,112 @@
+# Activity A — inbound restaurant order intake (spec §54). Core-neutrality fixture.
+# Distinguishing: KNOWLEDGE_APPROVED items, address USER_STATED→TOOL_VERIFIED, compute_quote, entity focus, out-of-stock exception.
+schema: qevion.activity.v1
+identity:
+  tenant_id: t_demo
+  line_id: l_orders_01
+  activity_id: act_order_intake
+  name: Phone order intake
+  description: Take a delivery order, confirm items and total, verify the address, submit it.
+  version: 1.0.0
+  status: DRAFT
+direction: inbound
+channels: [browser_voice, text]
+locale:
+  language: ar
+  locale: ar-EG
+  dialect: egyptian
+  locale_pack_ref: lp_ar_eg_v1
+  voice_profile_ref: vp_warm_female_v1
+  pronunciation:
+    - { term: "combo", hint: "كومبو", scope: activity }
+objective:
+  primary: { kind: capture_valid_order, description: "Capture a complete, priced, address-verified order and submit it." }
+  secondary: [ { kind: upsell_within_policy, description: "Offer approved add-ons once, never pressure." } ]
+  optimization_bounds: { truthfulness: required, no_invented_urgency: true, respect_opt_out: true }
+data:
+  required:
+    - { name: items, type: list, validation: none, clarification_hint: "Which items and how many of each?", provenance_required: KNOWLEDGE_APPROVED, sensitivity: low }
+    - { name: quantity, type: integer, validation: "1..50", clarification_hint: "How many?", provenance_required: USER_STATED, sensitivity: low }
+    - { name: address, type: string, validation: "max 200 chars", clarification_hint: "Full delivery address including district.", provenance_required: TOOL_VERIFIED, sensitivity: high }
+    - { name: phone, type: string, validation: "regex:^01[0-9]{9}$", clarification_hint: "Eleven digits starting with zero one.", provenance_required: USER_STATED, sensitivity: high }
+  optional:
+    - { name: notes, type: string, validation: "max 200 chars", clarification_hint: "Any special instructions?", provenance_required: USER_STATED, sensitivity: low }
+knowledge:
+  sources:
+    - { source_id: ks_catalog_v3, kind: structured, version: "3", priority: 10 }
+  requirements:
+    - { domain: item_availability, description: "Which catalog items can be ordered right now.", status: SATISFIED }
+    - { domain: prices, description: "Approved price per item and add-on.", status: SATISFIED }
+  source_priority: [live_api, approved_structured]
+  freshness: { stale_behavior: STATE_LIMITATION }
+tools:
+  required:
+    - { tool_id: lookup_knowledge, purpose: resolve item names and prices from the approved catalog }
+    - { tool_id: record_field, purpose: store each collected datum }
+    - { tool_id: verify_field, purpose: verify the delivery address against the coverage zone }
+    - { tool_id: compute_quote, purpose: compute the order total }
+    - { tool_id: submit_record, purpose: persist the order }
+  optional:
+    - { tool_id: request_handoff, purpose: complaints or allergy questions }
+  permissions:
+    lookup_knowledge: { impact: read, confirmation: none, authorization_scope: activity }
+    record_field:     { impact: write, confirmation: none, authorization_scope: activity }
+    verify_field:     { impact: read, confirmation: none, authorization_scope: activity }
+    compute_quote:    { impact: read, confirmation: none, authorization_scope: activity }
+    submit_record:    { impact: write, confirmation: confirm_before_execute, authorization_scope: activity }
+    request_handoff:  { impact: escalation, confirmation: none, authorization_scope: activity }
+policies:
+  allowed_claims:
+    - { claim_type: item_availability, scope: activity, source_requirement: KNOWLEDGE_APPROVED }
+    - { claim_type: price, scope: activity, source_requirement: ANY_APPROVED }
+    - { claim_type: order_total, scope: activity, source_requirement: TOOL_VERIFIED }
+    - { claim_type: delivery_eta, scope: activity, source_requirement: TOOL_VERIFIED }
+  prohibited_claims:
+    - { claim_type: allergen_safety, scope: all }
+    - { claim_type: discount_not_in_catalog, scope: all }
+  disclosures: [ { when: OPENING, text_ref: disc_order_line_greeting_ar_eg } ]
+  clarification_policy: always_when_ambiguous
+  unknown_question_policy:
+    default: STATE_LIMITATION
+    overrides:
+      - { topic_pattern: allerg, behavior: OFFER_HUMAN_HANDOFF }
+      - { topic_pattern: complaint, behavior: OFFER_HUMAN_HANDOFF }
+  uncertainty_policy: { missing: ASK_CLARIFYING_QUESTION, conflicting: STATE_LIMITATION, stale: STATE_LIMITATION, ambiguous: ASK_CLARIFYING_QUESTION }
+  escalation: [ { trigger: allergy_question, action: request_handoff, priority: high } ]
+  opt_out: { phrases_ref: optout_ar_eg_v1, action: CLOSE_GRACEFULLY }
+coverage:
+  questions:
+    - { id: cq1, category: hours, pattern: "when do you close", handling: KNOWLEDGE, answer_ref: kb_hours, status: COVERED }
+    - { id: cq2, category: delivery, pattern: "do you deliver to", handling: TOOL, answer_ref: verify_field, status: COVERED }
+    - { id: cq3, category: medical, pattern: "is it safe for", handling: HANDOFF, status: DECLINED }
+  objections:
+    - { id: ob1, pattern: "too expensive", approved_response_ref: resp_price_is_catalog, allowed_alternatives: [STATE_LIMITATION], status: COVERED }
+  exceptions:
+    - { id: ex1, situation: item_out_of_stock, behavior: ASK_CLARIFYING_QUESTION }
+    - { id: ex2, situation: address_out_of_zone, behavior: STATE_LIMITATION }
+completion:
+  success_rules: [ "items recorded AND address recorded AND phone recorded AND submit_record accepted" ]
+  failure_rules: [ "address_out_of_zone" ]
+  exit_rules:    [ "opt_out", "user_hung_up => abandoned" ]
+outcome_schema:
+  primary: [accepted, rejected, partially_completed, abandoned, human_required, technical_failure, no_answer]
+  secondary: [address_out_of_zone, upsell_accepted]
+  fields:
+    - { name: order_id, source_field: submit_record.record_id, required: false }
+    - { name: phone, required: true }
+  next_actions: [close, handoff]
+handoff_rules:
+  - { trigger: allergy_question, destination_ref: dest_shift_manager, priority: high, context_projection: [items, notes] }
+activity_machine: { table_ref: generic_default_v1 }
+constrained_flow: null
+evaluation:
+  cases: [ two_items_happy_path, address_out_of_zone, corrects_quantity_mid_order, interrupts_total_readback, allergy_question_handoff ]
+  simulation_personas: [ hurried_office_worker, indecisive_family_orderer, price_haggler ]
+  adversarial_cases: [ asks_for_unlisted_discount, claims_item_is_allergen_free ]
+version_metadata:
+  sources: [ ks_catalog_v3 ]
+  decisions:
+    - { item_path: tools.permissions.submit_record.confirmation, proposed_by: copilot, approved_by: operator_demo, ts: 2026-09-22T00:00:00Z, rationale: "Read back total and address before submitting." }
+  rejected_suggestions: []
+  pinned: { policy_versions: {}, knowledge_versions: { ks_catalog_v3: "3" }, locale_pack: lp_ar_eg_v1, voice_profile: vp_warm_female_v1, composition_config: comp_s2s_openai_v1 }
+  readiness: { state: DRAFT }
