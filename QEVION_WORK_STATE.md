@@ -29,12 +29,13 @@
 - **CP-0004 (P1 Generic Core):** `qevion/core/` — `field_store.py` (provenance strength, corrections, execution readiness), `dialog_machine.py` (fixed), `activity_machine.py` (data-driven `generic_default_v1` + table validator), `context.py` (EntityFocusStack, PendingObjectives), `governance.py` (ClaimGovernor, ConfirmationInterpreter via decision port), `tool_pipeline.py` (11 steps, BudgetGuard, idempotency), `outcome_engine.py` (rules via decision port, generic primary precedence, InteractionRecord), `instruction_composer.py` (sectioned, fingerprinted), `platform_tools.py` (14 tool.v1 declarations), `session.py` (orchestrator; 7-step interruption with t0..t4; confirmation gate; authority model). Adapters: memory read-tool backends. Activities A (order intake) + B (appointment) YAML. Tests: 93 total incl. 12 end-to-end scenarios A/B/C on mocks — **CI_LOCAL PASS**; evidence `evidence/P1/CP-0004/`; QV-ACC-006..010 accepted.
 
 ## In progress
-- CP-0004 record + tag + snapshot (this commit)
+- **P2 (CP-0005 prep)** landed: `qevion/control/preflight.py` (13 checks, 20 reason codes; 31 tests), `readiness.py` (lifecycle machine, ActivationGates, BFS legal path; QV-ACC-013), `capabilities.py` (registry builder + RequirementMapping). CI_LOCAL PASS @ d08e6f2 (137 tests). Remaining: `qevion/knowledge/` ingestion pipeline + gap/contradiction classes (QV-ACC-012), Blueprint cross-field validator is covered by Preflight; version pinning/diff; evidence + CP-0005.
 
 ## Incidents
 - 2026-09-22 #1: sandbox reset lost ~1h of uncommitted P0 work. Classified: test/environment. Countermeasure: protocol §8.1 commit-immediately. Redone in small increments.
 - 2026-09-22 #2: two tool interruptions on large (>150-line) heredoc appends; §51–52 append lost once. Countermeasure: appends ≤ ~80 lines per commit, push immediately, verify with `grep -n "^## §"` before each append. No data lost after adoption.
 - 2026-09-22 #6: CI run 35777148614 failed (ruff import order in a test appended after the lint pass). Class: process. Fix: `scripts/ci_local.sh` + protocol §8.2a gate-before-push.
+- 2026-09-22 #8: sandbox resets #7/#8 (after fa2a6d0, after 38afdb9); one uncommitted file (capabilities.py, ~5 min) re-created; GitHub transient `commit_refs` push error once — retry succeeded.
 - 2026-09-22 #7: sandbox reset #6 after abcfbc6; resume < 3 min, zero loss.
 - 2026-09-22 #5: sandbox resets #3/#4/#5 between sessions; each resume < 3 min, zero rebuild (protocol holding).
 - 2026-09-22 #4: second sandbox reset after commit 1232994; lost only uncommitted skeletons/CI yaml (~5 min). Protocol worked: resume in <3 min, zero rebuild.
@@ -52,4 +53,4 @@
 2. P3 → CP-0006 · P4 → CP-0007 · P5 → CP-0008 · P6 → CP-0009
 
 ## Exact next action
-`checkpoint.sh CP-0004 P1 "Generic Core: machines, FieldStore, pipeline, outcome, session orchestrator; A/B/C on mocks"` → fill record → commit → `tag_checkpoint.sh CP-0004` → `snapshot.sh CP-0004`; then P2 step 1: `qevion/control/preflight.py` + reason codes + tests.
+`qevion/knowledge/pipeline.py`: parsers (csv/yaml/json/md/txt) → normalize → entities/facts with provenance+locator → contradictions (same subject/predicate, different value; priority resolution) → gaps (per Activity requirement/field) → customer-question mining; `tests/test_knowledge_pipeline.py` with seeded fixtures (QV-ACC-012) → ci_local → CP-0005.
