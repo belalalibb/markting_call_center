@@ -1,0 +1,30 @@
+# secrets — never tracked
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+.git-credentials
+# python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+dist/
+build/
+# node
+node_modules/
+web/dist/
+# heavy evidence artifacts (index is committed)
+evidence/artifacts/
+*.wav
+*.mp3
+recordings/
+# runtime data
+data/runtime/
+*.sqlite
+*.db
+*.log
