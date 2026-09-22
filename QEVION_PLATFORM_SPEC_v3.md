@@ -1385,3 +1385,63 @@ Retired outright (R): v2.3 §5 recommendation to build on Pipecat; v2.3 §15 `te
 | 47 | Required output contract | `qevion.activity.v1` + `copilot.session.v1` (§37 inventory) |
 | 48 | End-to-end configuration flow | §14 flow diagram, QV-ACC-014/015 |
 | 49–50 | Core architectural principle, master quality objective | §1, §3 |
+
+## Appendix C — Repository Structure
+
+```
+/
+├── QEVION_PLATFORM_SPEC_v3.md            # this document (authoritative)
+├── QEVION_SESSION_RECOVERY_PROTOCOL.md   # permanent resume protocol
+├── QEVION_WORK_STATE.md                  # live state (updated every checkpoint)
+├── README.md
+├── pyproject.toml · .importlinter · .env.example · .gitignore
+├── .github/workflows/ci.yml              # ruff · mypy · pytest · gitleaks · license scan
+├── qevion/
+│   ├── contracts/        # Pydantic v2 models for every *.v1 contract; JSON Schemas generated → contracts/schemas/
+│   ├── core/             # generic runtime core — imports contracts + stdlib ONLY (import-linter enforced)
+│   │   ├── dialog_machine.py · activity_machine.py · field_store.py · focus_stack.py
+│   │   ├── pending_objectives.py · claim_governor.py · confirmation.py
+│   │   ├── tool_pipeline.py · outcome_engine.py · interaction_record.py
+│   ├── copilot/          # Configuration Copilot (discovery, mapping, drafting, questions) — never in runtime path
+│   ├── knowledge/        # ingestion pipeline, facts, gaps, contradictions, structured retrieval
+│   ├── control/          # validator, preflight, readiness lifecycle, approval, versioning, capability registry
+│   ├── admin/            # tenants, lines, credential store, CredentialResolver
+│   ├── adapters/
+│   │   ├── providers/    # openai_realtime/ · gemini_live/ (stub) · mocks/  — per role port s2s|llm|asr|tts|turn|decision
+│   │   ├── transports/   # ws_pcm16/ · (pipecat/, livekit/ future)
+│   │   ├── turn/         # silero/ · smart_turn/ (candidate) · provider_delegated/
+│   │   ├── tools/        # tool backends: knowledge, entity, quote, record (in-memory), http (future)
+│   │   └── sinks/        # outcome/handoff sinks: file, memory, webhook (future)
+│   ├── runtime/          # FastAPI app, session manager, WS endpoints, budget guards
+│   ├── observability/    # event bus, OTel-style tracing, redaction
+│   ├── replay/           # recorder + deterministic replayer
+│   ├── eval/             # evaluation harness, latency tables, red-team runner
+│   └── simulation/       # simulated customer, scenario runner, adversarial packs
+├── config/
+│   ├── examples/         # activity_a_restaurant.yaml · activity_b_clinic.yaml · activity_c_survey.yaml · activity_d_utility.yaml
+│   ├── capabilities/     # capability registry (providers × languages × features)
+│   └── policies/         # default budget guards, privacy defaults
+├── web/                  # single TypeScript app; modes: config-center · operator-console · admin
+│   └── src/audio/        # AudioWorklet PCM16 capture/playback
+├── tests/                # unit · property · contract round-trip · scenario · replay
+├── docs/
+│   ├── adr/              # 0001-transport-topology … 0004-decision-port-and-typesafe
+│   ├── registry/         # references.yaml · licenses.yaml · traceability.yaml
+│   ├── archive/          # SPEC v2.3 (archived)
+│   └── inputs/           # master prompt (input, non-normative)
+├── evidence/             # <phase>/<CP-ID>/… (audio never committed)
+├── recovery/
+│   ├── checkpoints/      # CP-NNNN.md + index.jsonl
+│   ├── snapshots/        # CP-NNNN.manifest.json
+│   ├── analysis/         # inspection reports
+│   └── services.json
+└── scripts/recovery/     # checkpoint.sh · tag_checkpoint.sh · snapshot.sh · restore.sh · verify.sh
+```
+
+Import rules (enforced by `.importlinter`): `contracts` ← nothing internal; `core` → `contracts` only; `copilot`, `knowledge`, `control`, `admin` → `contracts` (+ each other where listed in §6 ownership matrix), never `core` internals; `adapters/*` → `contracts` only; `runtime` composes everything; nothing imports `runtime` or `web`.
+
+## Appendix D — Requirement-ID Prefix Index (v3)
+
+`QV-META` reading rules · `QV-GOLD` golden rules · `QV-ARCH` architecture · `QV-ACT` activity blueprint · `QV-LIFE` readiness lifecycle · `QV-PRE` preflight · `QV-OBJ` objectives · `QV-POL` policies · `QV-COV` coverage · `QV-COP` copilot · `QV-KNOW` knowledge · `QV-CAP` capability registry · `QV-SIM` simulation · `QV-VER` versioning/approval · `QV-RT` runtime core · `QV-FLD` field store · `QV-CTX` context · `QV-CI` conversational intelligence · `QV-TRUTH` business truth · `QV-TOOL` tools · `QV-CONF` confirmation · `QV-HAND` handoff · `QV-OUT` outcome · `QV-ERR` error model · `QV-VOICE` voice · `QV-TR` transport · `QV-TURN` turn plane · `QV-INT` interruption · `QV-PROV` provider ports · `QV-COMP` composition · `QV-LANG` language · `QV-TEL` telephony seam · `QV-OUT-DIR` outbound direction · `QV-CAMP` campaign boundary · `QV-EVT` events · `QV-VERS` contract versioning · `QV-SEC` security · `QV-PRIV` privacy · `QV-CRED` credentials · `QV-OBS` observability · `QV-PERF` latency · `QV-COST` cost · `QV-TEST` testing · `QV-EVAL` evaluation · `QV-REPLAY` replay · `QV-RISK` risks · `QV-LEARN` learning loop · `QV-REF` references · `QV-LIC` licenses · `QV-ACC` acceptance · `QV-EVID` evidence · `A-n` assumptions · `W-n` waivers · `D-n` operator decisions · `C-n` inspection conflicts · `CP-NNNN` checkpoints · `ADR-NNNN` decisions.
+
+Every ID is grep-able; cite as `QV-XXX-NNN` in commits, tests (`@pytest.mark.req("QV-ACC-005")`), ADRs and evidence indexes.
