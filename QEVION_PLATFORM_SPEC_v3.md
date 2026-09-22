@@ -1135,3 +1135,22 @@ Full registry: `docs/registry/references.yaml` + `docs/registry/licenses.yaml` (
 ## §50. POC Scope
 
 Proves: (1) real conversational voice runtime with measured interruption on a real provider; (2) generic Core executing three materially different Activities unchanged; (3) Copilot turning intent + files into a validated, simulated Blueprint without inventing facts; (4) independently replaceable provider roles; (5) structured outcomes/handoffs consumable downstream; (6) tenant isolation, budget, privacy posture, secret discipline; (7) evidence, replay, recovery discipline. Does NOT prove telephony, campaigns, billing, RBAC, production readiness, compliance certification.
+
+## §51. Implementation Gates and Phases
+
+| Phase | Scope | Exit gate (evidence required) | Checkpoint |
+|---|---|---|---|
+| **P0.1** | Recovery Protocol, Work State, checkpoint scripts, spec v3, registries, ADRs, README | verify.sh green; spec §0–§56 + Appendices present; `cp/CP-0001` tag; snapshot manifest | CP-0001 |
+| **P0.2** | pyproject, `qevion/contracts` (Pydantic v2) + JSON Schemas + round-trip tests, mocks for every port, import-linter, CI (ruff/mypy/pytest/gitleaks/license scan), `.env.example` | CI green on main; schema round-trip 100%; `lint-imports` clean | CP-0002/0003 |
+| **P1** | Generic Core: dialog machine, activity machine (data-driven), FieldStore+provenance, Entity Focus Stack, PendingObjectives, Claim Governor, ConfirmationInterpreter, tool pipeline, platform tools, Outcome Engine, InteractionRecord | Core grep gate (no domain terms); 3 example Activities run on mocks unchanged; property tests | CP-0004 |
+| **P2** | Knowledge ingestion pipeline, Blueprint validator, Capability Registry, Preflight, readiness lifecycle | Preflight emits every reason code in tests; contradiction/gap detection fixtures pass | CP-0005 |
+| **P3** | Copilot (discovery, mapping, draft, question generation), Web app (Config Center, Operator Console, Admin with ephemeral test-key UI) | Copilot produces validated Blueprint from fixture intent+files with zero invented facts; Web served at sandbox URL | CP-0006 |
+| **P4** | Voice Runtime: AudioWorklet PCM16 24 kHz → WS → runtime → OpenAI Realtime; Silero VAD; turn.v1; 7-step interruption with 5 timestamps | Interruption latency table populated from real provider session (operator key); replay of recorded session deterministic | CP-0007 |
+| **P5** | Simulation harness, Activation flow, Outbound direction semantics + simulated dial + contact hooks | Simulation gates block a deliberately broken Blueprint; outbound Activity completes on mocks | CP-0008 |
+| **P6** | Evaluation, red-team matrix run, evidence bundle, verified Preview URL | All QV-ACC pass or are explicitly waived in Assumptions Ledger; evidence bundle indexed | CP-0009 |
+
+Rules: phases execute in order; a phase may start before the previous phase's optional items (marked in §55) but never before its exit gate; every exit gate produces a checkpoint record per `QEVION_SESSION_RECOVERY_PROTOCOL.md`.
+
+### §51.1 Decision Gate
+
+Before P1 begins the operator's approved decisions D1–D15 are frozen into `docs/adr/`. Any change afterwards requires a new ADR superseding the old one and a spec version bump (QV-VERS). Deferred items (TypeSafe adapter, Pipecat/LiveKit adapters, telephony) are recorded as `status: deferred` and MUST NOT block the exit gates above.
