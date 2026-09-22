@@ -55,7 +55,7 @@ class ClaimGovernor:
         else:
             beh = self._miss_behavior(claim_type, provenance)
             check = ClaimCheck(claim_type, "blocked", f"apply:{beh.value}", res.reason)
-        self.log.append(ClaimDecisionEntry(ts_ms=ts_ms, claim_type=claim_type, state=check.state, action=check.action))  # type: ignore[arg-type]
+        self.log.append(ClaimDecisionEntry(ts_ms=ts_ms, claim_type=claim_type, state=check.state, action=check.action))
         return check
 
     def _miss_behavior(self, claim_type: str, provenance: Provenance) -> Behavior:
