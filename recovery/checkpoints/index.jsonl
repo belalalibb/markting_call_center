@@ -1,1 +1,2 @@
 {"id":"CP-0001","ts":"2026-09-22T19:18:24Z","phase":"P0","git_sha":"08094594a1967e816579ff1b246ea130b48fbc19","title":"P0.1 foundation: recovery infra + spec v3 + registries + ADRs","status":"VERIFIED"}
+{"id":"CP-0002","ts":"2026-09-22T19:43:50Z","phase":"P0.2","git_sha":"34f76f613611c4b829f2ae988db30eeceea3a876","title":"contracts (40 v1) + JSON Schemas + tests + CI green","status":"VERIFIED"}
