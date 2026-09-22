@@ -27,12 +27,13 @@
 - **CP-0003:** adapters — `decision/rules.py` (deterministic, ADR-0004), `providers/mocks.py` (scripted s2s w/ tool round-trip + cancel, llm, asr, tts), `turn/energy.py` (turn.v1 state machine + barge-in; mock alias), `transports/memory.py`, `tools/memory_backend.py` (fault injection), `sinks/memory.py` (memory+JSONL outcome, memory handoff), `admin/credentials.py` (env→admin→ephemeral, never logs), `telephony/simulated.py`; `config/compositions/*.yaml`; 67 tests; `scripts/ci_local.sh`; **CI green run 35777982470**; evidence `evidence/P0/CP-0003/`
 
 ## In progress
-- CP-0003 record + tag (this commit)
+- P1 (CP-0004 prep): all core primitives + `session.py` orchestrator + Activities A/B YAML landed (84bdd82…abcfbc6). Remaining: platform tool declaration catalog, memory backends for read tools, end-to-end scenario tests A–C on mocks, CP-0004 record/tag/snapshot/evidence.
 
 ## Incidents
 - 2026-09-22 #1: sandbox reset lost ~1h of uncommitted P0 work. Classified: test/environment. Countermeasure: protocol §8.1 commit-immediately. Redone in small increments.
 - 2026-09-22 #2: two tool interruptions on large (>150-line) heredoc appends; §51–52 append lost once. Countermeasure: appends ≤ ~80 lines per commit, push immediately, verify with `grep -n "^## §"` before each append. No data lost after adoption.
 - 2026-09-22 #6: CI run 35777148614 failed (ruff import order in a test appended after the lint pass). Class: process. Fix: `scripts/ci_local.sh` + protocol §8.2a gate-before-push.
+- 2026-09-22 #7: sandbox reset #6 after abcfbc6; resume < 3 min, zero loss.
 - 2026-09-22 #5: sandbox resets #3/#4/#5 between sessions; each resume < 3 min, zero rebuild (protocol holding).
 - 2026-09-22 #4: second sandbox reset after commit 1232994; lost only uncommitted skeletons/CI yaml (~5 min). Protocol worked: resume in <3 min, zero rebuild.
 - 2026-09-22 #3: verify.sh false positive (`sk-` pattern matched "risk-management"). Fixed with `\b` boundary — f0bc8ef.
@@ -49,4 +50,4 @@
 2. P2 → CP-0005 · P3 → CP-0006 · P4 → CP-0007 · P5 → CP-0008 · P6 → CP-0009
 
 ## Exact next action
-`checkpoint.sh CP-0003 P0.2 "mocks for every port + CI"` → fill → commit → tag → snapshot; then P1 step 1: `qevion/core/field_store.py` + tests.
+`qevion/core/platform_tools.py` (tool.v1 declarations for the 14 generic tools) → memory backends for lookup/get/list/compare/recommend/compute_quote → `tests/test_core_session_scenarios.py` (A/B/C on mocks) → ci_local → CP-0004.
