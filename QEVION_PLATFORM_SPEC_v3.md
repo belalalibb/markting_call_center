@@ -1183,3 +1183,28 @@ Every criterion is testable and maps to an evidence artifact under `evidence/<ph
 | QV-ACC-020 | Simulation blocks a Blueprint with a seeded policy violation; Activation refused | P5 | pytest |
 | QV-ACC-021 | Budget guards ($10 / 5 min / 20 sessions/day defaults) terminate sessions and emit events | P5 | pytest |
 | QV-ACC-022 | **Real-provider evidence** (needs operator test key): one full OpenAI Realtime session with interruption, recorded + replayed | P6 | evidence bundle |
+
+## §53. Evidence Model
+
+**QV-EVID-001** "Evidence or it didn't happen." Every claim of completion in `QEVION_WORK_STATE.md`, a checkpoint record, or a PR/commit message MUST reference an artifact path.
+
+**QV-EVID-002** Layout: `evidence/<phase>/<CP-ID>/<artifact>` with an `index.json` per checkpoint listing `{path, sha256, kind, produced_by, produced_at, criterion_ids[]}`. Kinds: `pytest-junit`, `ci-report`, `latency-table`, `replay-diff`, `interaction-record`, `screenshot`, `drill-log`, `diff-report`, `grep-report`, `manifest`.
+
+**QV-EVID-003** Raw audio (`*.wav`) and provider payloads containing customer speech are NOT committed; only hashes, metrics and redacted transcripts are. `.gitignore` enforces this.
+
+**QV-EVID-004** Evidence for real-provider runs (QV-ACC-022) MUST record `provider`, `model`, `session_id` (provider-issued), timestamp table, cost estimate, and the CredentialResolver source class (`env|admin_store|ephemeral_ui`) — never the key itself.
+
+**QV-EVID-005** A checkpoint record is invalid if any listed criterion lacks an evidence path or is not explicitly waived in §55.
+
+## §54. Example Activities (Core-neutrality fixtures)
+
+These four Blueprints ship under `config/examples/` and are used by QV-ACC-006. They are deliberately different in direction, data and completion semantics so that any domain leak into Core is exposed.
+
+| # | Activity | Direction | Objective | Required data (provenance) | Completion | Distinguishing feature |
+|---|---|---|---|---|---|---|
+| **A** | Restaurant order intake | inbound | capture a valid order | items (KNOWLEDGE_APPROVED), quantity (USER_STATED), address (USER_STATED→TOOL_VERIFIED), phone (USER_STATED) | `submit_record` accepted + total confirmed | `compute_quote`, entity focus over menu items, exceptions (out-of-stock) |
+| **B** | Clinic appointment booking | inbound | book a slot | patient name, preferred window, service (KNOWLEDGE_APPROVED), slot (TOOL_VERIFIED) | slot reserved via tool | strict `uncertainty_policy=ASK`, handoff on medical questions (unknown_question_policy=ESCALATE) |
+| **C** | Customer satisfaction survey | outbound | collect 5 answers | consent (USER_STATED, mandatory first), q1–q5 (USER_STATED) | all five recorded or ABANDONED with partial outcome | outbound direction semantics, `schedule_callback`, no knowledge lookup, constrained_flow |
+| **D** | Utility bill inquiry (deferred fixture) | inbound | answer balance questions | account_id (USER_STATED→TOOL_VERIFIED) | question answered from TOOL_VERIFIED only | pure `get_entity` lookups, zero `submit_record`, Claim Governor stress |
+
+Rule: A–C are P1 exit-gate fixtures; D is added in P2 to stress Preflight and the Claim Governor. None of the four names, fields or vocabularies may appear in `qevion/core`.
