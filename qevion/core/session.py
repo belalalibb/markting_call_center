@@ -539,4 +539,121 @@ class SessionTools(SessionLifecycle):
         return hid
 
 
-# --- part 5 ---
+class SessionInterruption(SessionTools):
+    """§31 seven-step interruption protocol + confirmation gate (QV-CONF)."""
+
+    async def interrupt(self, *, onset_ms: int, detected_ms: int | None = None) -> InterruptionRecord | None:
+        rid = self._current_response
+        if self.dialog.state is not DialogState.SPEAKING or rid is None or not self._provider:
+            return None
+        tr = self._responses[rid]
+        rec = InterruptionRecord(
+            response_id=rid, t0_user_speech_onset=onset_ms, t1_barge_in_detected=detected_ms or self.clock()
+        )
+        # 1 DETECT
+        await self.emit(EventType.INTERRUPTION_DETECTED, {"response_id": rid, "audio_ms_sent": tr.audio_ms_sent})
+        await self.dialog_fire("barge_in", "user speech during assistant response")
+        # 2 CANCEL
+        self._playout_stopped.clear()
+        await self._provider.cancel_response(rid)
+        await self._send(ServerMessageType.STOP_PLAYOUT, response_id=rid)
+        rec.t2_cancel_sent = self.clock()
+        await self.emit(EventType.ASSISTANT_RESPONSE_CANCELLED, {"response_id": rid, "t2_ms": rec.t2_cancel_sent})
+        try:
+            await asyncio.wait_for(self._playout_stopped.wait(), timeout=_CANCEL_FORCE_MS / 1000)
+        except TimeoutError:
+            rec.forced = True
+            await self.emit(
+                EventType.FAILURE_CLASSIFIED, {"class": "playout_stop_timeout", "response_id": rid, "forced": True}
+            )
+        rec.t3_playout_stopped = self.clock()
+        # 3 RECONCILE — keep only what the user plausibly heard; the unheard tail never persists as context.
+        tr.cancelled = True
+        rec.played_ms = tr.audio_ms_sent
+        elapsed = rec.t1_barge_in_detected - tr.started_ms
+        heard_ratio = 1.0 if tr.audio_ms_sent == 0 else min(1.0, max(0.0, elapsed / tr.audio_ms_sent))
+        heard_len = int(len(tr.text) * heard_ratio)
+        rec.heard_text_len, rec.unheard_text_len = heard_len, len(tr.text) - heard_len
+        tr.text = tr.text[:heard_len]
+        rec.t4_state_reconciled = self.clock()
+        self.facts.interruption_count += 1
+        self.interruptions.append(rec)
+        t1 = rec.t1_barge_in_detected
+        self._latency("barge_in_to_cancel", Watermark.T1_BARGE_IN_DETECTED, Watermark.T2_CANCEL_SENT_TO_PROVIDER, rec.t2_cancel_sent - t1)
+        self._latency("barge_in_to_playout_stop", Watermark.T1_BARGE_IN_DETECTED, Watermark.T3_PLAYOUT_STOPPED_CLIENT, rec.t3_playout_stopped - t1)
+        self._latency("barge_in_to_reconciled", Watermark.T1_BARGE_IN_DETECTED, Watermark.T4_STATE_RECONCILED, rec.t4_state_reconciled - t1)
+        await self.emit(
+            EventType.LATENCY_SAMPLE,
+            {
+                "segment": "interruption",
+                "t0": rec.t0_user_speech_onset,
+                "t1": t1,
+                "t2": rec.t2_cancel_sent,
+                "t3": rec.t3_playout_stopped,
+                "t4": rec.t4_state_reconciled,
+                "forced": rec.forced,
+                "heard_len": heard_len,
+                "unheard_len": rec.unheard_text_len,
+            },
+        )
+        self._current_response = None
+        # 4 ACCEPT → caller commits the new turn (5); FieldStore untouched by construction (6); provider responds (7).
+        return rec
+
+    def heard_context(self) -> list[str]:
+        """What the user actually heard (QV-INT-002) — reconciled assistant text per response."""
+        return [t.text for t in self._responses.values() if t.text]
+
+    # ------------------------------------------------------------------ confirmation gate
+    async def _confirm_tool(self, inv: ToolInvocation) -> bool | None:
+        loop = asyncio.get_running_loop()
+        fut: asyncio.Future[bool | None] = loop.create_future()
+        self._pending_confirm[inv.call_id] = fut
+        await self.activity_fire(ActivityTrigger.CONFIRM_NEEDED, f"tool {inv.tool_id}", authority="core:confirmation_gate")
+        await self.dialog_fire("confirmation_needed")
+        await self._send(
+            ServerMessageType.CONFIRMATION_REQUEST,
+            payload={"call_id": inv.call_id, "tool_id": inv.tool_id, "arguments": inv.arguments},
+        )
+        try:
+            result = await asyncio.wait_for(fut, timeout=self.deps.confirmation_timeout_ms / 1000)
+        except TimeoutError:
+            result = None
+        finally:
+            self._pending_confirm.pop(inv.call_id, None)
+        auth = "core:confirmation_interpreter"
+        if result is True:
+            await self.activity_fire(ActivityTrigger.CONFIRMED, "user confirmed", authority=auth)
+            await self.dialog_fire("confirmed")
+        elif result is False:
+            await self.activity_fire(ActivityTrigger.DENIED, "user denied", authority=auth)
+            await self.dialog_fire("denied")
+        elif self.dialog.state is DialogState.WAITING_CONFIRMATION:
+            await self.dialog_fire("end_of_turn", "confirmation timeout")
+        return result
+
+    def resolve_confirmation(self, call_id: str, granted: bool | None) -> bool:
+        fut = self._pending_confirm.get(call_id)
+        if fut is None or fut.done():
+            return False
+        fut.set_result(granted)
+        return True
+
+    async def resolve_confirmation_from_text(self, text: str) -> bool:
+        """Interpret a spoken/typed answer to a pending confirmation. Ambiguous → re-ask, never guess."""
+        if not self._pending_confirm:
+            return False
+        res = await self.confirmer.interpret(text)
+        await self.emit(
+            EventType.DECISION_MADE,
+            {"kind": "interpret_confirmation", "source": res.source.value, "value": res.value, "confidence": res.confidence},
+        )
+        call_id = next(iter(self._pending_confirm))
+        if res.ambiguous:
+            await self.activity_fire(ActivityTrigger.AMBIGUITY, "ambiguous confirmation", authority="core:confirmation_interpreter")
+            await self.emit(EventType.USER_SPEECH_DISCARDED, {"reason": "ambiguous confirmation; re-ask"})
+            return True
+        return self.resolve_confirmation(call_id, res.value)
+
+
+# --- part 6 ---
