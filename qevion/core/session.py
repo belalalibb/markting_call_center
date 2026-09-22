@@ -136,4 +136,184 @@ class ResponseTrack:
     done: bool = False
 
 
-# --- part 2 ---
+class SessionCore:
+    """State + events + machines. `Session` (below) adds I/O handling on top."""
+
+    def __init__(self, deps: SessionDeps, *, session_id: str | None = None) -> None:
+        self.deps = deps
+        bp = deps.blueprint
+        self.session_id = session_id or new_id("ses")
+        self.clock: Clock = deps.clock or _monotonic_clock()
+        self.events: list[Event] = []
+        self._seq = 0
+        self.dialog = DialogMachine()
+        self.activity = ActivityMachine.from_blueprint_ref(bp.activity_machine.table_ref, bp.activity_machine.inline)
+        self.fields = FieldStore.from_specs(bp.data.required, bp.data.optional)
+        self.focus = EntityFocusStack()
+        self.objectives = PendingObjectives()
+        self.governor = ClaimGovernor(bp.policies, deps.decision)
+        lp = deps.locale_pack
+        self.confirmer = ConfirmationInterpreter(
+            deps.decision,
+            yes_phrases=list(lp.confirmation_phrases) if lp else [],
+            no_phrases=list(lp.negation_phrases) if lp else [],
+        )
+        self.composer = InstructionComposer(bp, deps.tool_declarations, deps.locale_pack, deps.voice_profile)
+        self.outcome_engine = OutcomeEngine(bp, deps.decision)
+        self.pipeline = ToolPipeline(
+            declarations=deps.tool_declarations,
+            tools_block=bp.tools,
+            backends=deps.tool_backends,
+            emit=self._emit_tool,
+            budget=deps.budget,
+            confirm=self._confirm_tool,
+            tenant_allowed_tools=deps.tenant_allowed_tools,
+        )
+        self.facts = SessionFacts(session_id=self.session_id, channel=deps.channel, started_at_ms=0)
+        self.interruptions: list[InterruptionRecord] = []
+        self.latency: list[LatencySample] = []
+        self.record: InteractionRecord | None = None
+        self.turn_id: str | None = None
+        self._turn_no = 0
+        self._provider: S2SSession | None = None
+        self._responses: dict[str, ResponseTrack] = {}
+        self._current_response: str | None = None
+        self._speech_onset_ms: int | None = None
+        self._pending_confirm: dict[str, asyncio.Future[bool | None]] = {}
+        self._playout_stopped = asyncio.Event()
+        self._closed = False
+        self._instructions_fp: str | None = None
+
+    # ------------------------------------------------------------------ events
+    async def emit(
+        self,
+        type_: str,
+        payload: dict[str, Any] | None = None,
+        *,
+        source: str = "core",
+        kind: EventKind = EventKind.RUNTIME,
+    ) -> Event:
+        bp = self.deps.blueprint
+        ev = Event(
+            seq=self._seq,
+            tenant_id=bp.identity.tenant_id,
+            session_id=self.session_id,
+            line_id=bp.identity.line_id,
+            activity_id=bp.identity.activity_id,
+            activity_version=bp.identity.version,
+            turn_id=self.turn_id,
+            kind=kind,
+            type=type_,
+            source=source,
+            payload={"ts_ms": self.clock(), **(payload or {})},
+        )
+        self._seq += 1
+        self.events.append(ev)
+        self.facts.event_count = len(self.events)
+        if self.deps.event_sink:
+            await self.deps.event_sink(ev)
+        return ev
+
+    async def _emit_tool(self, type_: str, payload: dict[str, Any]) -> None:
+        await self.emit(type_, payload, source=f"tool:{payload.get('tool_id', '?')}")
+
+    async def _confirm_tool(self, inv: ToolInvocation) -> bool | None:  # overridden in Session
+        return None
+
+    async def _transition(self, t: Transition, *, push_state: bool = True) -> None:
+        await self.emit(
+            EventType.STATE_CHANGED,
+            {
+                "machine": t.machine,
+                "from": t.from_state,
+                "to": t.to_state,
+                "trigger": t.trigger,
+                "reason": t.reason,
+                "authority": t.authority,
+            },
+        )
+        if t.machine == "activity":
+            self.facts.activity_state = ActivityState(t.to_state)
+        if push_state:
+            await self._send_state()
+
+    async def dialog_fire(self, trigger: str, reason: str | None = None) -> bool:
+        if not self.dialog.can(trigger):
+            await self.emit(
+                EventType.FAILURE_CLASSIFIED,
+                {"class": "illegal_dialog_transition", "trigger": trigger, "state": self.dialog.state.value},
+            )
+            return False
+        await self._transition(self.dialog.fire(trigger, self.clock(), reason))
+        return True
+
+    async def activity_fire(self, trigger: ActivityTrigger, reason: str, *, authority: str) -> bool:
+        """Only Core-validated authorities may call this (QV-RT-003)."""
+        t = self.activity.fire_if_possible(trigger, self.clock(), reason)
+        if t is None:
+            return False
+        t.authority = authority
+        await self._transition(t)
+        return True
+
+    # ------------------------------------------------------------------ transport helpers
+    async def _send(self, type_: ServerMessageType, **kw: Any) -> None:
+        if self._closed:
+            return
+        try:
+            await self.deps.transport.send(
+                ServerMessage(type=type_, session_id=self.session_id, server_ts_ms=self.clock(), **kw)
+            )
+        except ConnectionError:
+            await self.emit(EventType.TRANSPORT_DISCONNECTED, {"reason": "send failed"})
+
+    async def _send_state(self) -> None:
+        await self._send(
+            ServerMessageType.STATE,
+            payload={
+                "dialog": self.dialog.state.value,
+                "activity": self.activity.state.value,
+                "missing_required": self.fields.missing_required(),
+                "recorded": sorted(self.fields.recorded_names()),
+                "turn_id": self.turn_id,
+            },
+        )
+
+    # ------------------------------------------------------------------ instructions (QV-RT-006)
+    def _snapshot(self) -> RuntimeSnapshot:
+        return RuntimeSnapshot(
+            activity_state=self.activity.state,
+            missing_required=self.fields.missing_required(),
+            unsatisfied=[(n, need) for n, need, _ in self.fields.unsatisfied_required()],
+            focus_ambiguous=self.focus.is_ambiguous(),
+            pending_confirmation=next(iter(self._pending_confirm), None),
+        )
+
+    async def refresh_instructions(self) -> bool:
+        """Re-render and push instructions if anything changed. Returns True when pushed."""
+        composed = self.composer.compose(self._snapshot())
+        if composed.fingerprint == self._instructions_fp:
+            return False
+        self._instructions_fp = composed.fingerprint
+        if self._provider:
+            await self._provider.update_instructions(composed.text)
+        return True
+
+    def _all_flags(self) -> set[str]:
+        return self.facts.flags | flags_from_tools(self.pipeline.history)
+
+    def _latency(self, segment: str, a: Watermark, b: Watermark, value_ms: int) -> None:
+        self.latency.append(
+            LatencySample(
+                session_id=self.session_id,
+                segment=segment,
+                watermark_from=a,
+                watermark_to=b,
+                value_ms=max(0, value_ms),
+                turn_id=self.turn_id,
+                provider=self.deps.s2s_config.provider,
+            )
+        )
+
+
+# --- part 3 ---
