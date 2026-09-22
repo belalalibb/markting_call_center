@@ -1,3 +1,4 @@
 {"id":"CP-0001","ts":"2026-09-22T19:18:24Z","phase":"P0","git_sha":"08094594a1967e816579ff1b246ea130b48fbc19","title":"P0.1 foundation: recovery infra + spec v3 + registries + ADRs","status":"VERIFIED"}
 {"id":"CP-0002","ts":"2026-09-22T19:43:50Z","phase":"P0.2","git_sha":"34f76f613611c4b829f2ae988db30eeceea3a876","title":"contracts (40 v1) + JSON Schemas + tests + CI green","status":"VERIFIED"}
 {"id":"CP-0003","ts":"2026-09-22T20:07:02Z","phase":"P0.2","git_sha":"950e05f8aeb20ce22b1e353c3dc68e5f1ce72e32","title":"mock/default adapter for every port + local CI gate","status":"VERIFIED"}
+{"id":"CP-0004","ts":"2026-09-22T22:08:06Z","phase":"P1","git_sha":"af6e8c346641cc876913ba2560b2624665d853ec","title":"Generic Core: machines, FieldStore, pipeline, outcome, session orchestrator; A/B/C on mocks","status":"VERIFIED"}
