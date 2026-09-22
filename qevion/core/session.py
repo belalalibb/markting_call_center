@@ -316,4 +316,100 @@ class SessionCore:
         )
 
 
-# --- part 3 ---
+class SessionLifecycle(SessionCore):
+    """start / close / completion evaluation."""
+
+    async def start(self) -> None:
+        self.facts.started_at_ms = self.clock()
+        await self.emit(EventType.SESSION_CREATED, {"channel": self.deps.channel.value})
+        composed = self.composer.compose(self._snapshot())
+        self._instructions_fp = composed.fingerprint
+        cfg = self.deps.s2s_config.model_copy(
+            update={"instructions": composed.text, "tools": self.composer.provider_tools()}
+        )
+        self._provider = await self.deps.s2s.open(cfg, self.deps.credential)
+        await self.emit(
+            EventType.PROVIDER_SESSION_CREATED,
+            {"provider": cfg.provider, "model": cfg.model, "instructions_fp": composed.static_fingerprint},
+            source=f"provider:s2s:{cfg.provider}",
+        )
+        await self.dialog_fire("session_started")
+        await self.emit(EventType.SESSION_STARTED)
+        await self._send(ServerMessageType.READY, payload={"activity_id": self.deps.blueprint.identity.activity_id})
+        await self.activity_fire(ActivityTrigger.OPENED, "session started", authority="core")
+
+    async def close(self, reason: str = "closed") -> InteractionRecord:
+        if self.record is not None:
+            return self.record
+        self._closed = True
+        self.facts.ended_at_ms = self.clock()
+        for fut in self._pending_confirm.values():
+            if not fut.done():
+                fut.set_result(None)
+        if self.dialog.state is not DialogState.CLOSED and self.dialog.can("close"):
+            await self._transition(self.dialog.fire("close", self.clock(), reason), push_state=False)
+        if not self.activity.terminal:
+            await self._finalize_activity(reason)
+        if self._provider:
+            await self._provider.close()
+            await self.emit(EventType.PROVIDER_SESSION_CLOSED)
+        self.record = await self.outcome_engine.build(
+            store=self.fields,
+            tool_history=self.pipeline.history,
+            facts=self.facts,
+            outcome_id=new_id("out"),
+            record_id=new_id("rec"),
+        )
+        await self.emit(
+            EventType.OUTCOME_PRODUCED,
+            {"primary": self.record.outcome.primary, "secondary": self.record.outcome.secondary},
+        )
+        ref = await self.deps.outcome_sink.write_record(self.record)
+        await self.emit(EventType.INTERACTION_RECORD_PRODUCED, {"ref": ref})
+        await self.emit(EventType.SESSION_ENDED, {"reason": reason, "turns": self.facts.turn_count})
+        try:
+            await self.deps.transport.close(reason)
+        except ConnectionError:
+            pass
+        return self.record
+
+    async def _finalize_activity(self, reason: str) -> None:
+        """Drive the activity machine to a terminal state from facts (never from model text)."""
+        verdict = await self.outcome_engine.completion(self.fields, self._all_flags())
+        if verdict.exit_rule is not None:
+            trig = ActivityTrigger.EXIT_RULE_MET
+        elif verdict.failure:
+            trig = ActivityTrigger.FAILURE_RULE_MET
+        elif verdict.success:
+            trig = ActivityTrigger.SUCCESS_RULE_MET
+        else:
+            trig = ActivityTrigger.USER_LEFT
+        for step in (trig, ActivityTrigger.CLOSED):
+            t = self.activity.fire_if_possible(step, self.clock(), reason)
+            if t:
+                t.authority = "core:completion_rules"
+                await self._transition(t, push_state=False)
+            if self.activity.terminal:
+                break
+
+    async def evaluate_completion(self) -> None:
+        """Evaluate completion rules from facts after each assistant response (QV-RT-004)."""
+        if self.activity.terminal or self._closed:
+            return
+        verdict = await self.outcome_engine.completion(self.fields, self._all_flags())
+        auth = "core:completion_rules"
+        if verdict.exit_rule is not None:
+            await self.activity_fire(ActivityTrigger.EXIT_RULE_MET, verdict.exit_rule, authority=auth)
+        elif verdict.failure:
+            await self.activity_fire(ActivityTrigger.FAILURE_RULE_MET, "failure rule", authority=auth)
+        elif verdict.success:
+            await self.activity_fire(ActivityTrigger.SUCCESS_RULE_MET, "success rule", authority=auth)
+        elif self.fields.ready_for_execution() and self.activity.state in (
+            ActivityState.COLLECTING,
+            ActivityState.ENGAGED,
+        ):
+            await self.activity_fire(ActivityTrigger.FIELDS_COMPLETE, "all required satisfied", authority="core:field_store")
+        await self.refresh_instructions()
+
+
+# --- part 4 ---
