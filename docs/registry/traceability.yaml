@@ -72,8 +72,8 @@ decisions:
 acceptance:
   QV-ACC-001: { phase: P0,   status: planned, evidence: [] }
   QV-ACC-002: { phase: P0,   status: evidenced, evidence: [evidence/P0/CP-0002/index.json] }
-  QV-ACC-003: { phase: P0.2, status: evidenced, evidence: [evidence/P0/CP-0002/junit.xml] }
-  QV-ACC-004: { phase: P0.2, status: evidenced, evidence: [evidence/P0/CP-0002/index.json] }
+  QV-ACC-003: { phase: P0.2, status: accepted, evidence: [evidence/P0/CP-0002/junit.xml, evidence/P0/CP-0003/junit.xml] }
+  QV-ACC-004: { phase: P0.2, status: accepted, evidence: [evidence/P0/CP-0002/index.json, evidence/P0/CP-0003/index.json] }
   QV-ACC-005: { phase: P1,   status: planned, evidence: [] }
   QV-ACC-006: { phase: P1,   status: planned, evidence: [] }
   QV-ACC-007: { phase: P1,   status: planned, evidence: [] }

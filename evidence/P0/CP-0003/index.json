@@ -1,0 +1,49 @@
+{
+  "checkpoint": "CP-0003",
+  "items": [
+    {
+      "path": "evidence/P0/CP-0003/junit.xml",
+      "sha256": "1232db905bb9c89fc5f454f0d8fe892c463f2e3f0aad904662fd3e35a2c78d30",
+      "kind": "pytest-junit",
+      "produced_by": "scripts/ci_local.sh",
+      "produced_at": "2026-09-22T20:07:00.971334+00:00",
+      "criterion_ids": [
+        "QV-ACC-003",
+        "QV-ACC-004",
+        "QV-ACC-007",
+        "QV-ACC-009",
+        "QV-CRED-001"
+      ]
+    },
+    {
+      "path": "evidence/P0/CP-0003/licenses.json",
+      "sha256": "bc75a088128a4d0706051942edc2030ba8080149f38ff718c332a00e401eedbe",
+      "kind": "ci-report",
+      "produced_by": "pip-licenses + license_gate.py",
+      "produced_at": "2026-09-22T20:07:00.971334+00:00",
+      "criterion_ids": [
+        "QV-LIC-002"
+      ]
+    },
+    {
+      "path": "https://github.com/belalalibb/markting_call_center/actions/runs/35777982470",
+      "sha256": null,
+      "kind": "ci-report",
+      "produced_by": "GitHub Actions",
+      "produced_at": "2026-09-22T20:07:00.971334+00:00",
+      "criterion_ids": [
+        "QV-ACC-002",
+        "QV-ACC-003",
+        "QV-ACC-004"
+      ]
+    },
+    {
+      "path": "https://github.com/belalalibb/markting_call_center/actions/runs/35777148614",
+      "sha256": null,
+      "kind": "ci-report",
+      "produced_by": "GitHub Actions (FAILED run, classified: process \u2014 lint after append; fixed b0995fa)",
+      "produced_at": "2026-09-22T20:07:00.971334+00:00",
+      "criterion_ids": []
+    }
+  ]
+}

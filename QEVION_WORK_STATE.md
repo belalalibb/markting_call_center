@@ -5,9 +5,9 @@
 | Field | Value |
 |---|---|
 | Project phase | P0 — Foundation |
-| Current stage | P0.2 contracts+CI COMPLETE (CP-0002) → mocks for every port (CP-0003) |
-| Current objective | Mock adapters for every port (s2s/llm/asr/tts/turn/decision/transport/tool backend/sinks/telephony/credential resolver) + tests → CP-0003; then P1 generic Core |
-| Last verified checkpoint | CP-0002 (P0.2 contracts + CI) — `recovery/checkpoints/CP-0002.md`, tag `cp/CP-0002` |
+| Current stage | **P0 COMPLETE** (CP-0003) → P1 Generic Core (CP-0004) |
+| Current objective | P1: dialog machine, data-driven activity machine, FieldStore+provenance, Entity Focus Stack, PendingObjectives, Claim Governor, ConfirmationInterpreter, 11-step tool pipeline, Outcome Engine, InteractionRecord; Activities A–C run on mocks unchanged → CP-0004 |
+| Last verified checkpoint | CP-0003 (P0.2 mocks for every port) — `recovery/checkpoints/CP-0003.md`, tag `cp/CP-0003` |
 | Last known good Git SHA | see `recovery/checkpoints/index.jsonl` last line (CP-0001) |
 | Approval | Operator approved full plan + decisions D1–D15 on 2026-09-22 (see `recovery/analysis/pre_approval_inspection_2026-09-22.md`) |
 
@@ -24,12 +24,16 @@
 
 - **P0.2:** `pyproject.toml`, `.importlinter` (5 contracts KEPT), `.env.example`, `qevion/contracts/*` (40 registered v1 contracts + port Protocols), `scripts/gen_schemas.py` → 40 JSON Schemas (2020-12) + drift check, 50 tests (round-trip + JSON Schema validation + blueprint fixtures + readiness), `config/examples/activity_c_survey.yaml`, `.github/workflows/ci.yml` (ruff, mypy strict, lint-imports, schema drift, pytest, verify.sh, license gate, gitleaks) — **CI green on main run 35775450363** — evidence `evidence/P0/CP-0002/`
 
+- **CP-0003:** adapters — `decision/rules.py` (deterministic, ADR-0004), `providers/mocks.py` (scripted s2s w/ tool round-trip + cancel, llm, asr, tts), `turn/energy.py` (turn.v1 state machine + barge-in; mock alias), `transports/memory.py`, `tools/memory_backend.py` (fault injection), `sinks/memory.py` (memory+JSONL outcome, memory handoff), `admin/credentials.py` (env→admin→ephemeral, never logs), `telephony/simulated.py`; `config/compositions/*.yaml`; 67 tests; `scripts/ci_local.sh`; **CI green run 35777982470**; evidence `evidence/P0/CP-0003/`
+
 ## In progress
-- CP-0002 record + tag (this commit)
+- CP-0003 record + tag (this commit)
 
 ## Incidents
 - 2026-09-22 #1: sandbox reset lost ~1h of uncommitted P0 work. Classified: test/environment. Countermeasure: protocol §8.1 commit-immediately. Redone in small increments.
 - 2026-09-22 #2: two tool interruptions on large (>150-line) heredoc appends; §51–52 append lost once. Countermeasure: appends ≤ ~80 lines per commit, push immediately, verify with `grep -n "^## §"` before each append. No data lost after adoption.
+- 2026-09-22 #6: CI run 35777148614 failed (ruff import order in a test appended after the lint pass). Class: process. Fix: `scripts/ci_local.sh` + protocol §8.2a gate-before-push.
+- 2026-09-22 #5: sandbox resets #3/#4/#5 between sessions; each resume < 3 min, zero rebuild (protocol holding).
 - 2026-09-22 #4: second sandbox reset after commit 1232994; lost only uncommitted skeletons/CI yaml (~5 min). Protocol worked: resume in <3 min, zero rebuild.
 - 2026-09-22 #3: verify.sh false positive (`sk-` pattern matched "risk-management"). Fixed with `\b` boundary — f0bc8ef.
 
@@ -41,9 +45,8 @@
 - Real-provider evidence (QV-ACC-022) requires operator-supplied test key (A5) — Admin ephemeral UI lands in P3.
 
 ## Pending (ordered)
-1. **CP-0003** mocks: `qevion/adapters/providers/mocks.py` (s2s/llm/asr/tts), `adapters/turn/mock.py`, `adapters/decision/rules.py` (deterministic default, ADR-0004), `adapters/transports/memory.py`, `adapters/tools/memory_backend.py`, `adapters/sinks/memory.py`, `admin/credentials.py` (CredentialResolver env→store→ephemeral), `adapters/telephony/simulated.py`; Protocol-conformance tests
-2. **P1** generic Core → CP-0004 (dialog machine, activity machine table, FieldStore, focus stack, pending objectives, claim governor, confirmation, tool pipeline, outcome engine, interaction record; Activities A–C on mocks)
-3. P2 → CP-0005 · P3 → CP-0006 · P4 → CP-0007 · P5 → CP-0008 · P6 → CP-0009
+1. **P1 Core (CP-0004)** in `qevion/core/`: `dialog_machine.py`, `activity_machine.py` (generic default table + Blueprint table_ref/inline), `field_store.py` (provenance, corrections), `focus_stack.py`, `pending_objectives.py`, `claim_governor.py`, `confirmation.py`, `tool_pipeline.py` (11 steps, events), `outcome_engine.py`, `interaction_record.py`, `instruction_composer.py`, `session.py` (orchestrates ports via contracts only); example Activities A (restaurant) + B (clinic) YAML; scenario tests on mocks; core grep gate; import-linter
+2. P2 → CP-0005 · P3 → CP-0006 · P4 → CP-0007 · P5 → CP-0008 · P6 → CP-0009
 
 ## Exact next action
-`scripts/recovery/checkpoint.sh CP-0002 P0.2 "contracts + schemas + CI green"` → fill → commit → tag → snapshot → then write mock adapters (CP-0003 step 1).
+`checkpoint.sh CP-0003 P0.2 "mocks for every port + CI"` → fill → commit → tag → snapshot; then P1 step 1: `qevion/core/field_store.py` + tests.
