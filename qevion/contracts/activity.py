@@ -138,4 +138,127 @@ class ToolsBlock(QevionModel):
         return self
 
 
-# --- part 2 appended below ---
+class CoverageQuestion(QevionModel):
+    id: str
+    category: str
+    entity_ref: str | None = None
+    pattern: str
+    handling: Literal["KNOWLEDGE", "TOOL", "CLARIFY", "LIMITATION", "HANDOFF"]
+    answer_ref: str | None = None
+    status: Literal["COVERED", "ASK_OWNER", "DECLINED"] = "ASK_OWNER"
+
+
+class CoverageObjection(QevionModel):
+    id: str
+    pattern: str
+    approved_response_ref: str | None = None
+    allowed_alternatives: list[str] = Field(default_factory=list)
+    status: Literal["COVERED", "ASK_OWNER", "DECLINED"] = "ASK_OWNER"
+
+
+class CoverageException(QevionModel):
+    id: str
+    situation: str
+    behavior: str
+
+
+class CoverageBlock(QevionModel):
+    questions: list[CoverageQuestion] = Field(default_factory=list)
+    objections: list[CoverageObjection] = Field(default_factory=list)
+    exceptions: list[CoverageException] = Field(default_factory=list)
+
+
+class Completion(QevionModel):
+    success_rules: list[str] = Field(default_factory=list)
+    failure_rules: list[str] = Field(default_factory=list)
+    exit_rules: list[str] = Field(default_factory=list)
+
+
+class OutcomeField(QevionModel):
+    name: str
+    source_field: str | None = None
+    required: bool = False
+
+
+class OutcomeSchema(QevionModel):
+    primary: list[str] = Field(min_length=1)
+    secondary: list[str] = Field(default_factory=list)
+    fields: list[OutcomeField] = Field(default_factory=list)
+    next_actions: list[str] = Field(default_factory=lambda: ["close"])
+
+
+class HandoffRule(QevionModel):
+    trigger: str
+    destination_ref: str
+    priority: Literal["low", "normal", "high", "urgent"] = "normal"
+    context_projection: list[str] = Field(default_factory=list)
+
+
+class ActivityMachineRef(QevionModel):
+    table_ref: str | None = "generic_default_v1"
+    inline: dict[str, Any] | None = None
+
+
+class ConstrainedFlow(QevionModel):
+    enabled: bool = False
+    steps: list[str] = Field(default_factory=list)
+
+
+class Evaluation(QevionModel):
+    cases: list[str] = Field(default_factory=list)
+    simulation_personas: list[str] = Field(default_factory=list)
+    adversarial_cases: list[str] = Field(default_factory=list)
+
+
+class Pinned(QevionModel):
+    policy_versions: dict[str, str] = Field(default_factory=dict)
+    knowledge_versions: dict[str, str] = Field(default_factory=dict)
+    locale_pack: str | None = None
+    voice_profile: str | None = None
+    composition_config: str | None = None
+
+
+class Readiness(QevionModel):
+    state: ReadinessState = ReadinessState.DRAFT
+    preflight_result_ref: str | None = None
+    simulation_report_ref: str | None = None
+
+
+class VersionMetadata(QevionModel):
+    sources: list[str] = Field(default_factory=list)
+    decisions: list[Decision] = Field(default_factory=list)
+    rejected_suggestions: list[str] = Field(default_factory=list)
+    pinned: Pinned = Field(default_factory=Pinned)
+    readiness: Readiness = Field(default_factory=Readiness)
+
+
+class ActivityBlueprint(QevionModel):
+    """Top-level `qevion.activity.v1` (§9.1)."""
+
+    schema_: Literal["qevion.activity.v1"] = Field(default="qevion.activity.v1", alias="schema")
+    identity: Identity
+    direction: Direction
+    channels: list[Channel] = Field(min_length=1)
+    locale: Locale
+    objective: Objective
+    data: DataBlock = Field(default_factory=DataBlock)
+    knowledge: KnowledgeBlock = Field(default_factory=KnowledgeBlock)
+    tools: ToolsBlock = Field(default_factory=ToolsBlock)
+    policies: PolicyBlock
+    coverage: CoverageBlock = Field(default_factory=CoverageBlock)
+    completion: Completion = Field(default_factory=Completion)
+    outcome_schema: OutcomeSchema
+    handoff_rules: list[HandoffRule] = Field(default_factory=list)
+    activity_machine: ActivityMachineRef = Field(default_factory=ActivityMachineRef)
+    constrained_flow: ConstrainedFlow | None = None
+    evaluation: Evaluation = Field(default_factory=Evaluation)
+    version_metadata: VersionMetadata = Field(default_factory=VersionMetadata)
+
+    @model_validator(mode="after")
+    def _outbound_needs_contact_hooks(self) -> ActivityBlueprint:
+        if self.direction == Direction.OUTBOUND and self.policies.contact_policy_hooks is None:
+            raise ValueError("outbound activity requires policies.contact_policy_hooks (ADR-0003)")
+        return self
+
+    def unapproved_decisions(self) -> list[Decision]:
+        return [d for d in self.version_metadata.decisions if d.approved_by is None]
