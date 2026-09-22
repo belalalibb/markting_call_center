@@ -84,7 +84,7 @@ class FieldStore:
         cur = self._values.get(name)
         if cur is None and value is ...:
             raise KeyError(f"cannot verify unrecorded field: {name}")
-        v = cur.value if value is ... else value
+        v = value if value is not ... else (cur.value if cur is not None else None)
         return self.record(name, v, Provenance.TOOL_VERIFIED, tool_call_id=tool_call_id, ts_ms=ts_ms)
 
     def reject(self, name: str, *, ts_ms: int | None = None) -> None:
