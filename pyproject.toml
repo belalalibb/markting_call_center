@@ -29,6 +29,7 @@ dev = [
   "import-linter>=2.0",
   "pip-licenses>=4.4",
   "types-PyYAML",
+  "jsonschema>=4.22",
 ]
 vad = ["onnxruntime>=1.18"]
 
