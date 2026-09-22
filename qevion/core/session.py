@@ -412,4 +412,131 @@ class SessionLifecycle(SessionCore):
         await self.refresh_instructions()
 
 
-# --- part 4 ---
+class SessionTools(SessionLifecycle):
+    """Tool round-trips and the only code path that mutates Core state from tool results."""
+
+    async def run_tool(self, call_id: str, tool_id: str, arguments: dict[str, Any]) -> ToolOutcome:
+        bp = self.deps.blueprint
+        out = await self.pipeline.run(
+            ToolCallRequest(call_id=call_id, tool_id=tool_id, arguments=arguments),
+            session_id=self.session_id,
+            tenant_id=bp.identity.tenant_id,
+            activity_id=bp.identity.activity_id,
+            turn_id=self.turn_id,
+            ts_ms=self.clock(),
+        )
+        await self._apply_tool_outcome(out, arguments)
+        if self._provider and out.error != "confirmation pending":
+            await self._provider.send_tool_result(
+                ToolCallResult(call_id=call_id, output={**out.output, "status": out.status.value}, error=out.error)
+            )
+        if self.dialog.state is DialogState.WAITING_TOOL:
+            await self.dialog_fire("tool_returned" if out.status is ToolOutcomeStatus.COMPLETED else "tool_failed")
+        return out
+
+    async def _apply_tool_outcome(self, out: ToolOutcome, args: dict[str, Any]) -> None:
+        """Step 6 COHERE holds by construction: nothing but validated tool outcomes touch the FieldStore."""
+        now = self.clock()
+        if out.status is not ToolOutcomeStatus.COMPLETED:
+            failed = out.status in (ToolOutcomeStatus.FAILED, ToolOutcomeStatus.TIMEOUT, ToolOutcomeStatus.UNKNOWN)
+            if failed and self.activity.state is ActivityState.EXECUTING:
+                await self.activity_fire(ActivityTrigger.EXECUTION_FAILED, out.status.value, authority="core:tool_pipeline")
+            return
+        match out.tool_id:
+            case PlatformTool.RECORD_FIELD:
+                await self._record_field(str(args.get("name", "")), args.get("value"), out)
+            case PlatformTool.VERIFY_FIELD:
+                name = str(args.get("name", ""))
+                if out.output.get("verified") is True and name in self.fields.specs and self.fields.get(name):
+                    self.fields.verify(name, tool_call_id=out.call_id, ts_ms=now)
+                    await self.emit(EventType.FIELD_VERIFIED, {"name": name, "call_id": out.call_id})
+            case PlatformTool.CLARIFY:
+                await self.activity_fire(ActivityTrigger.AMBIGUITY, "clarify tool", authority="core:tool_pipeline")
+            case PlatformTool.REQUEST_HANDOFF:
+                await self.request_handoff(
+                    str(args.get("reason", "requested")), str(args.get("destination_ref", "default")), HandoffProposer.MODEL
+                )
+            case PlatformTool.COLLECT_QUESTION:
+                topic = str(args.get("topic", ""))
+                self.facts.coverage_misses.append(CoverageMissEntry(ts_ms=now, topic=topic, behavior_applied="COLLECT_QUESTION"))
+                await self.emit(EventType.COVERAGE_MISS, {"topic": topic})
+            case PlatformTool.SCHEDULE_CALLBACK:
+                self.facts.flags.add("callback_scheduled")
+            case _:
+                pass
+        if (
+            self.activity.state is ActivityState.EXECUTING
+            and out.provenance is Provenance.TOOL_VERIFIED
+            and out.output.get("accepted") is True
+        ):
+            await self.activity_fire(ActivityTrigger.EXECUTED, out.tool_id, authority="core:tool_pipeline")
+
+    async def _record_field(self, name: str, value: Any, out: ToolOutcome) -> None:
+        spec = self.fields.specs.get(name)
+        if spec is None:
+            await self.emit(EventType.FAILURE_CLASSIFIED, {"class": "unknown_field", "name": name})
+            return
+        res = await self.deps.decision.decide(
+            DecisionRequest(
+                kind=DecisionKind.VALIDATE_FIELD,
+                inputs={"value": value, "type": spec.type, "validation": spec.validation, "enum_values": spec.enum_values},
+            )
+        )
+        await self.emit(
+            EventType.DECISION_MADE,
+            {"kind": "validate_field", "field": name, "source": res.source.value, "ok": res.value is not None},
+        )
+        if res.source is DecisionSource.UNKNOWN or res.value is None:
+            self.objectives.add(ObjectiveKind.COLLECT_FIELD, name, priority=1, ts_ms=self.clock(), note=res.reason)
+            await self.activity_fire(ActivityTrigger.FIELD_NEEDED, f"{name} invalid: {res.reason}", authority="core:decision")
+            return
+        fv = self.fields.record(
+            name, res.value, out.provenance, turn_id=self.turn_id, tool_call_id=out.call_id, ts_ms=self.clock()
+        )
+        self.objectives.complete(ObjectiveKind.COLLECT_FIELD, name)
+        if fv.corrected_from is not None:
+            await self.emit(EventType.FIELD_CORRECTED, {"name": name, "provenance": fv.provenance.value})
+            await self.emit(EventType.USER_CORRECTION, {"field": name})
+        else:
+            await self.emit(EventType.FIELD_RECORDED, {"name": name, "provenance": fv.provenance.value})
+        if spec.type == "entity_ref":
+            self.focus.push(str(res.value), name, self.clock(), source="user")
+        if self.fields.missing_required():
+            await self.activity_fire(ActivityTrigger.FIELD_NEEDED, "more required fields", authority="core:field_store")
+
+    async def request_handoff(self, reason: str, destination_ref: str, proposed_by: HandoffProposer) -> str | None:
+        hid = new_id("ho")
+        req = HandoffRequest(
+            handoff_id=hid,
+            session_id=self.session_id,
+            tenant_id=self.deps.blueprint.identity.tenant_id,
+            activity_id=self.deps.blueprint.identity.activity_id,
+            reason=reason,
+            proposed_by=proposed_by,
+            destination_ref=destination_ref,
+            context=ConversationSnapshotRef(
+                transcript_digest=_digest("".join(t.text for t in self._responses.values()))["text_sha256_12"],
+                fields=self.fields.all(),
+                activity_state=self.activity.state.value,
+                dialog_state=self.dialog.state.value,
+                entity_focus=[e.entity_id for e in self.focus.candidates()],
+                turn_count=self.facts.turn_count,
+            ),
+        )
+        await self.emit(EventType.HANDOFF_REQUESTED, {"handoff_id": hid, "reason": reason, "destination": destination_ref})
+        accepted = True
+        if self.deps.handoff_sink:
+            res = await self.deps.handoff_sink.handoff(req)
+            accepted = res.accepted
+            await self.emit(EventType.HANDOFF_ACKNOWLEDGED, {"handoff_id": hid, "accepted": accepted})
+        if not accepted:
+            return None
+        self.facts.handoff_ref = hid
+        self.facts.handoff_ids.append(hid)
+        self.facts.routing_history.append(RouteEntry(ts_ms=self.clock(), target="human", ref=destination_ref, reason=reason))
+        await self.emit(EventType.ROUTE_REQUESTED, {"target": "human", "ref": destination_ref})
+        await self.activity_fire(ActivityTrigger.HANDOFF, reason, authority="core:handoff")
+        return hid
+
+
+# --- part 5 ---
