@@ -123,6 +123,7 @@ class RuntimeStore:
         # F-13: live transcripts to the operator console (connected client only, never persisted). Default ON in
         # development; set QEVION_OPERATOR_TRANSCRIPTS=0 for deployments where operators must not see caller text.
         self.operator_transcripts = os.environ.get("QEVION_OPERATOR_TRANSCRIPTS", "1") != "0"
+        self.mock_fast_generation = False
         self.tenants: dict[str, Tenant] = {}
         self.activities: dict[str, ActivityRecord] = {}
         self.knowledge = KnowledgeStore()
@@ -401,7 +402,12 @@ class RuntimeStore:
             raise KeyError(f"s2s adapter {s2s_b.adapter!r} not registered")
         if s2s_b.adapter == "mock":
             # Voice channels get realtime-paced mock audio so playout/interruption behave like a live provider.
-            s2s = MockS2SAdapter(script or _default_script(bp), realtime=channel is Channel.BROWSER_VOICE)
+            # `mock_fast_generation` (tests / audit probes) mimics a live provider that generates audio faster than
+            # realtime, so provider `response.done` arrives while the client is still playing (F-02).
+            s2s = MockS2SAdapter(
+                script or _default_script(bp),
+                realtime=channel is Channel.BROWSER_VOICE and not self.mock_fast_generation,
+            )
         turn_ad = self.turn_adapters.get(turn_b.adapter if turn_b else "energy", self._turn)
         decision = self.decision_adapters.get(dec_b.adapter if dec_b else "rules", self._decision)
         credential, cred_src = self.credentials.resolve(s2s_b.adapter, bp.identity.tenant_id)

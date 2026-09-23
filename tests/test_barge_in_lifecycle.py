@@ -14,7 +14,7 @@ import struct
 from typing import Any
 
 import pytest
-from qevion.adapters.providers.mocks import MockS2SAdapter, MockScriptStep
+from qevion.adapters.providers.mocks import MockScriptStep
 from qevion.adapters.transports.memory import MemoryTransportSession
 from qevion.contracts.common import Channel
 from qevion.contracts.provider import S2SEvent, S2SEventType
@@ -31,7 +31,7 @@ def _tone() -> bytes:
 async def _session(steps: list[MockScriptStep]) -> tuple[Any, MemoryTransportSession, Any, asyncio.Task[Any]]:
     store = RuntimeStore()
     _seed(store)
-    store.s2s_adapters["mock"] = MockS2SAdapter(script=steps, realtime=False)
+    store.mock_fast_generation = True  # live-provider-like: generation finishes long before playout
     tr = MemoryTransportSession()
     key = next(k for k in store.activities if k.startswith("act_order_intake"))
     live = store.build_session(
@@ -40,6 +40,7 @@ async def _session(steps: list[MockScriptStep]) -> tuple[Any, MemoryTransportSes
         session_id="ses_b",
         channel=Channel.BROWSER_VOICE,
         composition_id="comp_mock_s2s_v1",
+        script=steps,
     )
     task = asyncio.create_task(live.session.run())
     await asyncio.sleep(0.05)

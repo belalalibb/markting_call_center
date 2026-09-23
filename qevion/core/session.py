@@ -889,7 +889,8 @@ class Session(SessionInterruption):
                     return
                 self._responses[rid] = ResponseTrack(response_id=rid, started_ms=self.clock())
                 self._current_response = rid
-                self._audible = rid
+                # F-02: only audio channels have an audible tail after generation (text has no playout)
+                self._audible = rid if self.deps.channel is not Channel.TEXT else None
                 self._playout_stopped.clear()
                 await self.emit(EventType.ASSISTANT_RESPONSE_STARTED, {"response_id": rid}, source=src)
                 await self.dialog_fire("response_started")
