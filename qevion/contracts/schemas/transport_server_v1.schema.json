@@ -12,7 +12,8 @@
         "confirmation_request",
         "error",
         "bye",
-        "pong"
+        "pong",
+        "ping"
       ],
       "title": "ServerMessageType",
       "type": "string"

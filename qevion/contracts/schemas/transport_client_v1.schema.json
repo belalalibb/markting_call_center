@@ -9,7 +9,8 @@
         "playout_stopped",
         "confirm",
         "bye",
-        "ping"
+        "ping",
+        "pong"
       ],
       "title": "ClientMessageType",
       "type": "string"

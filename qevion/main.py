@@ -92,4 +92,31 @@ def _seed(store: RuntimeStore) -> None:
 
 app = build(seed_examples=os.environ.get("QEVION_SEED", "1") != "0")
 
-__all__ = ["app", "build"]
+# WebSocket keepalive tuning for browser_voice sessions (QV-INT). uvicorn defaults (20 s ping / 20 s timeout) are
+# fine on a LAN but a proxied browser under audio load missed Pongs in the field (1011). Wider windows + a larger
+# frame queue; the application heartbeat in runtime.app covers liveness. Used by `python -m qevion.main`.
+UVICORN_WS_KWARGS: dict[str, object] = {
+    "ws_ping_interval": float(os.environ.get("QEVION_WS_PING_INTERVAL_S", "25")),
+    "ws_ping_timeout": float(os.environ.get("QEVION_WS_PING_TIMEOUT_S", "60")),
+    "ws_max_queue": int(os.environ.get("QEVION_WS_MAX_QUEUE", "256")),
+    "ws_max_size": 16 * 1024 * 1024,
+}
+
+
+def serve() -> None:
+    """`python -m qevion.main` — uvicorn with the keepalive settings above (equivalent CLI flags in README)."""
+    import uvicorn  # noqa: PLC0415 - composition root only
+
+    uvicorn.run(
+        "qevion.main:app",
+        host=os.environ.get("QEVION_HOST", "0.0.0.0"),  # noqa: S104 - sandbox/container binding
+        port=int(os.environ.get("QEVION_PORT", "8000")),
+        log_level=os.environ.get("QEVION_LOG_LEVEL", "info").lower(),
+        **UVICORN_WS_KWARGS,  # type: ignore[arg-type]
+    )
+
+
+if __name__ == "__main__":
+    serve()
+
+__all__ = ["UVICORN_WS_KWARGS", "app", "build", "serve"]

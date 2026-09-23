@@ -8,6 +8,7 @@ runtime package itself never imports copilot (import-linter: Copilot != runtime)
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import time
 from collections.abc import AsyncIterator
 from typing import Any
@@ -21,15 +22,31 @@ from qevion.contracts.activity import ActivityBlueprint, ReadinessState
 from qevion.contracts.common import Channel, new_id
 from qevion.contracts.simulation import ActivationThresholds
 from qevion.contracts.tenant import Tenant
-from qevion.contracts.transport import ClientMessage, ServerMessage, ServerMessageType
+from qevion.contracts.transport import ClientMessage, ClientMessageType, ServerMessage, ServerMessageType
 from qevion.control.readiness import IllegalReadinessTransitionError
 from qevion.runtime.store import NAMED_SCRIPTS, LiveSession, RuntimeStore
 
 START = time.time()
 
 
+# Keepalive lifecycle (QV-INT). Two independent layers:
+#  * protocol pings (uvicorn `--ws-ping-interval/--ws-ping-timeout`; see `qevion.main.uvicorn_ws_kwargs`) — the
+#    1011 "keepalive ping timeout" seen in the field is *this* layer failing because our ASGI pump stopped calling
+#    `receive()` (uvicorn pauses socket reads after every queued frame until the app reads it, so a stalled pump
+#    also stalls the client's Pong);
+#  * application heartbeat (`ping`/`pong` ServerMessage/ClientMessage) so the console and evidence can see liveness
+#    even through proxies that swallow control frames.
+HEARTBEAT_INTERVAL_S = 10.0
+HEARTBEAT_STALE_S = 45.0  # no inbound frame of any kind for this long → transport considered dead
+INBOUND_QUEUE_MAX = 400  # ≈ 8 s of 20 ms audio frames; oldest audio is dropped, control messages never are
+
+
 class WsTransport:
-    """TransportSession over a FastAPI WebSocket: JSON text frames = ClientMessage, binary = PCM16."""
+    """TransportSession over a FastAPI WebSocket: JSON text frames = ClientMessage, binary = PCM16.
+
+    Inbound frames are queued without ever blocking the ASGI receive loop (bounded; oldest *audio* dropped on
+    overflow) so the server keeps answering protocol pings/pongs while the Core is busy. Liveness is tracked from
+    every inbound frame (`last_inbound`) and from application `pong`s (`heartbeat_rtt_ms`)."""
 
     def __init__(self, ws: WebSocket) -> None:
         self._ws = ws
@@ -37,11 +54,71 @@ class WsTransport:
         self.sent: list[ServerMessage] = []
         self.audio_bytes = 0
         self.closed = False
+        self.last_inbound = time.monotonic()
+        self.dropped_audio_frames = 0
+        self.heartbeats_sent = 0
+        self.heartbeat_rtt_ms: float | None = None
+        self._ping_sent_at: float | None = None
+        # Filled by the runtime once the session is built; merged into the Core's `ready` payload so the client
+        # shows what it is *actually* connected to (composition/channel/credential), not what it selected.
+        self.session_facts: dict[str, Any] = {}
 
     def push(self, item: ClientMessage | bytes | None) -> None:
+        self.last_inbound = time.monotonic()
+        if item is not None and self._q.qsize() >= INBOUND_QUEUE_MAX:
+            # Drop the oldest *audio* frame (never control messages, never the EOF sentinel) to keep the pump
+            # non-blocking; the turn plane tolerates gaps, a stalled receive loop does not (→ 1011).
+            kept: list[ClientMessage | bytes | None] = []
+            dropped = False
+            while not self._q.empty():
+                old = self._q.get_nowait()
+                if not dropped and isinstance(old, bytes):
+                    dropped = True
+                    self.dropped_audio_frames += 1
+                    continue
+                kept.append(old)
+            for k in kept:
+                self._q.put_nowait(k)
         self._q.put_nowait(item)
 
+    def note_pong(self) -> None:
+        if self._ping_sent_at is not None:
+            self.heartbeat_rtt_ms = round((time.monotonic() - self._ping_sent_at) * 1000, 1)
+            self._ping_sent_at = None
+
+    @property
+    def stale(self) -> bool:
+        return (time.monotonic() - self.last_inbound) > HEARTBEAT_STALE_S
+
+    async def heartbeat(self, session_id: str) -> None:
+        """Server-initiated application ping every HEARTBEAT_INTERVAL_S; closes the transport when stale."""
+        try:
+            while not self.closed:
+                await asyncio.sleep(HEARTBEAT_INTERVAL_S)
+                if self.closed:
+                    return
+                if self.stale:
+                    await self.close("heartbeat_stale")
+                    return
+                self._ping_sent_at = time.monotonic()
+                self.heartbeats_sent += 1
+                try:
+                    await self.send(
+                        ServerMessage(
+                            type=ServerMessageType.PING,
+                            session_id=session_id,
+                            server_ts_ms=int(time.time() * 1000),
+                            payload={"n": self.heartbeats_sent},
+                        )
+                    )
+                except ConnectionError:
+                    return
+        except asyncio.CancelledError:
+            return
+
     async def send(self, message: ServerMessage) -> None:
+        if message.type is ServerMessageType.READY and self.session_facts:
+            message = message.model_copy(update={"payload": {**self.session_facts, **message.payload}})
         self.sent.append(message)
         if self.closed:
             raise ConnectionError("ws closed")
@@ -499,35 +576,70 @@ def create_app(store: RuntimeStore | None = None) -> FastAPI:
     return app
 
 
+def _session_facts(live: LiveSession) -> dict[str, Any]:
+    return {
+        "composition_id": live.composition_id,
+        "channel": live.session.deps.channel.value,
+        "s2s_provider": live.session.deps.s2s_config.provider,
+        "s2s_model": live.session.deps.s2s_config.model,
+        "credential_source": live.credential_source,
+        "decision_credential_source": live.decision_credential_source,
+        "heartbeat_interval_s": HEARTBEAT_INTERVAL_S,
+    }
+
+
 async def _pump(ws: WebSocket, transport: WsTransport, live: LiveSession) -> None:
-    """Client→transport pump shared by inbound and outbound WS sessions."""
+    """Client→transport pump shared by inbound and outbound WS sessions.
+
+    The receive loop must never wait on the Core: uvicorn pauses socket reads after each queued frame until the
+    app calls `receive()`, so a pump blocked elsewhere also blocks the client's protocol Pong → 1011. The loop
+    therefore only decodes + enqueues (bounded, non-blocking) and answers application pings itself."""
+    transport.session_facts = _session_facts(live)
     live.task = asyncio.create_task(_run_guarded(live))
+    hb = asyncio.create_task(transport.heartbeat(live.session_id))
     try:
         while not live.task.done():
             msg = await ws.receive()
             if msg.get("type") == "websocket.disconnect":
+                live.close_code = int(msg.get("code") or 1005)
+                live.close_reason = str(msg.get("reason") or "")[:120]
                 break
             if msg.get("bytes") is not None:
                 transport.push(msg["bytes"])
             elif msg.get("text") is not None:
                 try:
-                    transport.push(ClientMessage.model_validate_json(msg["text"]))
+                    cm = ClientMessage.model_validate_json(msg["text"])
                 except ValidationError:
+                    transport.last_inbound = time.monotonic()
                     err = ServerMessage(
                         type=ServerMessageType.ERROR,
                         session_id=live.session_id,
                         server_ts_ms=int(time.time() * 1000),
                         text="invalid client message",
                     )
-                    await ws.send_text(err.model_dump_json(by_alias=True))
-    except WebSocketDisconnect:
-        pass
+                    with contextlib.suppress(Exception):
+                        await ws.send_text(err.model_dump_json(by_alias=True))
+                    continue
+                if cm.type is ClientMessageType.PONG:
+                    transport.last_inbound = time.monotonic()
+                    transport.note_pong()
+                    continue
+                transport.push(cm)
+    except WebSocketDisconnect as e:
+        live.close_code = e.code
+        live.close_reason = (e.reason or "")[:120]
     finally:
+        hb.cancel()
         transport.push(None)
         try:
             await asyncio.wait_for(live.task, timeout=5)
         except (TimeoutError, asyncio.CancelledError):
             live.task.cancel()
+        live.heartbeat = {
+            "sent": transport.heartbeats_sent,
+            "last_rtt_ms": transport.heartbeat_rtt_ms,
+            "dropped_audio_frames": transport.dropped_audio_frames,
+        }
         await transport.close("session_ended")
 
 
@@ -576,6 +688,10 @@ def _live(s: LiveSession) -> dict[str, Any]:
         "error": s.error,
         "interruptions": [_interruption(i) for i in s.session.interruptions],
         "outbound_attempt_id": s.outbound_attempt_id,
+        "close_code": s.close_code,
+        "close_reason": s.close_reason,
+        "heartbeat": s.heartbeat,
+        "channel": s.session.deps.channel.value,
     }
 
 

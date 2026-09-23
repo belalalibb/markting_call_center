@@ -110,6 +110,9 @@ class LiveSession:
     decision_credential_source: str = "none"
     error: str | None = None
     outbound_attempt_id: str | None = None
+    close_code: int | None = None  # WS close code observed by the server pump (1000 = clean; 1011 = keepalive)
+    close_reason: str = ""
+    heartbeat: dict[str, Any] = field(default_factory=dict)  # sent / last_rtt_ms / dropped_audio_frames
 
 
 class RuntimeStore:

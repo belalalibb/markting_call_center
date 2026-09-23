@@ -23,6 +23,7 @@ class ClientMessageType(StrEnum):
     CONFIRM = "confirm"  # UI confirmation for confirm_before_execute tools
     BYE = "bye"
     PING = "ping"
+    PONG = "pong"  # answer to a server `ping` heartbeat
 
 
 class ServerMessageType(StrEnum):
@@ -37,6 +38,7 @@ class ServerMessageType(StrEnum):
     ERROR = "error"
     BYE = "bye"
     PONG = "pong"
+    PING = "ping"  # server-initiated application heartbeat; client answers `pong` (QV-INT keepalive)
 
 
 class ClientHello(QevionModel):
