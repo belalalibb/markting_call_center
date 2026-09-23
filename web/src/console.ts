@@ -170,6 +170,7 @@ function chatCard(activities: ActivitySummary[], compositions: CompositionSummar
   const sendFrame = (frame: ArrayBuffer) => { if (ws && ws.readyState === WebSocket.OPEN) ws.send(frame); };
   let lastResponseId: string | null = null;
   let audioBytesIn = 0;
+  const agentBubbles = new Map<string, HTMLElement>();
 
   const micOff = async () => {
     if (!voice) return;
@@ -243,17 +244,33 @@ function chatCard(activities: ActivitySummary[], compositions: CompositionSummar
           voiceStatus.textContent = voice ? `${voiceStatus.textContent.replace(/ · ♥.*$/, "")} · ♥ ${heartbeats}` : voiceStatus.textContent;
           break;
         case "transcript": add(m.payload["role"] === "user" ? "user" : "agent", m.text ?? ""); break;
-        case "audio_start":
+        case "audio_start": {
           lastResponseId = m.response_id ?? null;
-          add("agent", m.text ? m.text : "(speaking…)");
+          // F-13: one agent bubble per response, created now, filled/removed on audio_end (silent tool-only
+          // responses produce no "(speaking…)" noise).
+          const b = h("div", { class: "msg agent pending" }, m.text ? m.text : "…");
+          if (m.response_id) agentBubbles.set(m.response_id, b);
+          chat.append(b); chat.scrollTop = chat.scrollHeight;
+          setStatus("agent speaking", "ok");
           // In voice mode the VoiceClient stamps playout_started when the first frame actually reaches the speaker.
           if (!voice) send({ type: "playout_started", response_id: m.response_id });
           break;
-        case "audio_end":
+        }
+        case "audio_end": {
+          const b = m.response_id ? agentBubbles.get(m.response_id) : undefined;
+          const audioMs = Number(m.payload?.["audio_ms"] ?? 0);
+          if (b) {
+            if (audioMs === 0 && !m.text) b.remove();
+            else { b.classList.remove("pending"); b.textContent = m.text ?? `(spoke ${(audioMs / 1000).toFixed(1)} s — transcript off)`; }
+            if (m.response_id) agentBubbles.delete(m.response_id);
+          }
+          setStatus("listening", "ok");
           if (!voice) send({ type: "playout_stopped", response_id: m.response_id });
           break;
+        }
         case "stop_playout":
-          add("sys", "⏹ interrupted — playout stopped");
+          add("sys", "⏹ you interrupted — agent stopped");
+          if (m.response_id) agentBubbles.get(m.response_id)?.classList.add("cut");
           if (voice) voice.stopPlayout(); else send({ type: "playout_stopped", response_id: m.response_id });
           break;
         case "event": {
