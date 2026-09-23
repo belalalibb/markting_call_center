@@ -316,6 +316,18 @@ def test_credential_resolver_order_and_no_leak() -> None:
     assert r.clear_ephemeral() == 0
 
 
+def test_credential_resolver_vendor_alias_shares_key() -> None:
+    """A key stored under the vendor name (`openai`, as the Admin UI does) must resolve for the adapter binding
+    (`openai_realtime`) and vice versa; unrelated providers must not see it."""
+    r = EnvAdminEphemeralResolver(env={})
+    r.set_ephemeral("openai", "FAKE-VENDOR-VALUE-1234", tenant_id=None, ttl_seconds=60)
+    assert r.resolve("openai_realtime", "t") == ("FAKE-VENDOR-VALUE-1234", CredentialSource.EPHEMERAL_UI)
+    assert r.resolve("typesafe", "t") == (None, CredentialSource.NONE)
+    r.clear_ephemeral()
+    r.set_admin("openai_realtime", "FAKE-ADAPTER-VALUE-5678")
+    assert r.resolve("openai", None) == ("FAKE-ADAPTER-VALUE-5678", CredentialSource.ADMIN_STORE)
+
+
 async def test_simulated_telephony() -> None:
     tel = SimulatedTelephonyAdapter(script={"busy_person": SimCallState.BUSY})
     a = await tel.dial("t", "c1", "act")

@@ -74,17 +74,23 @@ class EnvAdminEphemeralResolver:
         v = self._env().get(env_key, "").strip()
         if v:
             return v, CredentialSource.ENV
+        # Adapter names (e.g. `openai_realtime`) and vendor names (`openai`) share one credential: any provider
+        # mapped to the same env var is an alias for admin-store / ephemeral lookups too (found live 2026-09-23:
+        # a key stored under `openai` was invisible to the `openai_realtime` binding).
+        names = [provider, *[p for p, k in _ENV_KEYS.items() if k == env_key and p != provider]]
         for tid in (tenant_id, None):
-            v2 = self.admin_store.get((tid, provider))
-            if v2:
-                return v2, CredentialSource.ADMIN_STORE
+            for name in names:
+                v2 = self.admin_store.get((tid, name))
+                if v2:
+                    return v2, CredentialSource.ADMIN_STORE
         for tid in (tenant_id, None):
-            e = self._ephemeral.get((tid, provider))
-            if e:
-                if e.expires_at < time.time():
-                    del self._ephemeral[(tid, provider)]
-                    continue
-                return e.value, CredentialSource.EPHEMERAL_UI
+            for name in names:
+                e = self._ephemeral.get((tid, name))
+                if e:
+                    if e.expires_at < time.time():
+                        del self._ephemeral[(tid, name)]
+                        continue
+                    return e.value, CredentialSource.EPHEMERAL_UI
         return None, CredentialSource.NONE
 
     def status(self, provider: str, tenant_id: str | None) -> CredentialScope:
