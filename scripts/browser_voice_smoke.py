@@ -154,6 +154,8 @@ async def main() -> int:
         deadline = time.monotonic() + seconds
         spoke_first = False
         spoken_turns = 0
+        audio_ends_at_first = 0
+        first_answer_ms = 0
         while time.monotonic() < deadline:
             await page.wait_for_timeout(1000)
             await poll()
@@ -168,8 +170,13 @@ async def main() -> int:
                 await page.evaluate(f"({SPEAK_JS})(1400)")
                 spoke_first = True
                 spoken_turns += 1
-            # second user turn (spoken) once the agent has answered the first
-            if spoke_first and not second_turn_sent and audio_ends >= 2 and now() > seconds * 400:
+                audio_ends_at_first = audio_ends
+            if spoke_first and first_answer_ms == 0 and audio_ends > audio_ends_at_first:
+                first_answer_ms = now()
+            # second user turn (spoken) once the agent has answered the first (speaking → listening) and
+            # at least 3 s have passed since that answer ended
+            first_cycle_done = spoke_first and audio_ends >= 1
+            if first_cycle_done and not second_turn_sent and first_answer_ms and now() - first_answer_ms >= 3000:
                 await page.evaluate(f"({SPEAK_JS})(1200)")
                 spoken_turns += 1
                 second_turn_sent = True
