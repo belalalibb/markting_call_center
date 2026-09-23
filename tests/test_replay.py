@@ -7,6 +7,7 @@ assert an identical canonical event stream + outcome. A changed Blueprint must s
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
 import pytest
 import yaml
@@ -89,7 +90,10 @@ def test_canonical_payload_normalises_ids_and_drops_volatile_keys() -> None:
 
 
 def test_diff_events_reports_field_level_divergence() -> None:
-    a = [{"seq": 1, "kind": "lifecycle", "type": "x", "source": "core", "payload": {"a": 1}}]
-    b = [{"seq": 1, "kind": "lifecycle", "type": "x", "source": "core", "payload": {"a": 2}}, {"seq": 2}]
+    a: list[dict[str, Any]] = [{"seq": 1, "kind": "lifecycle", "type": "x", "source": "core", "payload": {"a": 1}}]
+    b: list[dict[str, Any]] = [
+        {"seq": 1, "kind": "lifecycle", "type": "x", "source": "core", "payload": {"a": 2}},
+        {"seq": 2},
+    ]
     d = diff_events(a, b)
     assert [(x.index, x.field) for x in d] == [(0, "payload"), (1, "<missing in recording>")]

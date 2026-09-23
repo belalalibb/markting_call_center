@@ -107,9 +107,7 @@ async def replay(
         lifecycle=lifecycle,
     )
     if not result.fingerprint_match:
-        result.divergences.append(
-            EventDivergence(-1, "blueprint_fingerprint", recording.blueprint_fingerprint, fp)
-        )
+        result.divergences.append(EventDivergence(-1, "blueprint_fingerprint", recording.blueprint_fingerprint, fp))
         result.outcome_match = False
         lifecycle.append("replay.diverged")
         return result

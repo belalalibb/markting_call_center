@@ -22,7 +22,20 @@ from qevion.simulation.runner import CaseRun, blueprint_fingerprint
 
 _ID_RE = re.compile(r"\b([a-z]{2,8})_([0-9a-f]{16})\b")
 _VOLATILE_KEYS = frozenset(
-    {"latency_ms", "client_ts_ms", "server_ts_ms", "checked_at", "produced_at", "recorded_at", "ts", "t0", "t1", "t2", "t3", "t4"}
+    {
+        "latency_ms",
+        "client_ts_ms",
+        "server_ts_ms",
+        "checked_at",
+        "produced_at",
+        "recorded_at",
+        "ts",
+        "t0",
+        "t1",
+        "t2",
+        "t3",
+        "t4",
+    }
 )
 
 
@@ -130,7 +143,9 @@ def record(run: CaseRun, bp: ActivityBlueprint, store_seed: dict[str, Any] | Non
         event_count=len(events),
         meta={
             "case_id": run.case.case_id,
-            "persona_kind": str(run.case.persona.kind.value if hasattr(run.case.persona.kind, "value") else run.case.persona.kind),
+            "persona_kind": str(
+                run.case.persona.kind.value if hasattr(run.case.persona.kind, "value") else run.case.persona.kind
+            ),
             "error": run.error,
         },
     )
