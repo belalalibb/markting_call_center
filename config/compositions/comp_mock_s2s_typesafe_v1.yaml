@@ -1,0 +1,11 @@
+# Composition: mock speech-to-speech + rules decision with TypeSafe (Jev) typed-decision fallback.
+# Rules stay authoritative (ADR-0004); Jev is consulted only when rules return UNKNOWN for
+# interpret_confirmation / classify_intent. Needs a credential (env TYPESAFE_API_KEY / admin / ephemeral UI).
+schema: qevion.composition.v1
+composition_id: comp_mock_s2s_typesafe_v1
+mode: s2s
+bindings:
+  - { role: s2s, adapter: mock, model: mock-s2s }
+  - { role: turn, adapter: mock }
+  - { role: decision, adapter: rules+typesafe, model: jev-latest }
+turn: { detector: mock, threshold: 0.5, min_speech_ms: 120, min_silence_ms: 500, barge_in_min_speech_ms: 200 }

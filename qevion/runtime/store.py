@@ -16,6 +16,7 @@ from typing import Any
 import yaml
 
 from qevion.adapters.decision.rules import RulesDecisionAdapter
+from qevion.adapters.decision.typesafe import LayeredDecisionAdapter, TypeSafeDecisionAdapter
 from qevion.adapters.providers.mocks import MockS2SAdapter, MockScriptStep
 from qevion.adapters.providers.openai_realtime import OpenAIRealtimeAdapter
 from qevion.adapters.sinks.memory import MemoryHandoffSink, MemoryOutcomeSink
@@ -105,6 +106,7 @@ class LiveSession:
     outcomes: MemoryOutcomeSink = field(default_factory=MemoryOutcomeSink)
     composition_id: str = ""
     credential_source: str = "none"
+    decision_credential_source: str = "none"
     error: str | None = None
     outbound_attempt_id: str | None = None
 
@@ -140,7 +142,12 @@ class RuntimeStore:
             "silero": SileroTurnAdapter(),
             "smart_turn": SmartTurnAdapter(),
         }
-        self.decision_adapters: dict[str, Any] = {"rules": self._decision}
+        self._typesafe = TypeSafeDecisionAdapter()  # credential injected per session from the resolver
+        self.decision_adapters: dict[str, Any] = {
+            "rules": self._decision,
+            "typesafe": self._typesafe,
+            "rules+typesafe": LayeredDecisionAdapter(self._decision, self._typesafe),
+        }
         self.locale_packs: dict[str, LocalePack] = _load_dir(ROOT / "config/locale_packs", LocalePack, "locale_pack_id")
         self.voice_profiles: dict[str, VoiceProfile] = _load_dir(
             ROOT / "config/voice_profiles", VoiceProfile, "voice_profile_id"
@@ -392,6 +399,13 @@ class RuntimeStore:
         credential, cred_src = self.credentials.resolve(s2s_b.adapter, bp.identity.tenant_id)
         live.composition_id = comp.composition_id
         live.credential_source = cred_src.value
+        if dec_b is not None and "typesafe" in dec_b.adapter:
+            # decision-provider credential is resolved separately from the s2s one; never logged
+            ts_cred, ts_src = self.credentials.resolve("typesafe", bp.identity.tenant_id)
+            self._typesafe.set_credential(ts_cred)
+            if dec_b.model:
+                self._typesafe.model = dec_b.model
+            live.decision_credential_source = ts_src.value
         voice = None
         if bp.locale.voice_profile_ref and bp.locale.voice_profile_ref in self.voice_profiles:
             voice = self.voice_profiles[bp.locale.voice_profile_ref].provider_voice_map.get(s2s_b.adapter)

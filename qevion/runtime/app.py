@@ -291,12 +291,16 @@ def create_app(store: RuntimeStore | None = None) -> FastAPI:
         out = []
         for c in store.compositions.values():
             s2s = next((b for b in c.bindings if b.role.value == "s2s"), None)
+            dec = next((b for b in c.bindings if b.role.value == "decision"), None)
             cred = store.credentials.status(s2s.adapter, None) if s2s else None
+            dec_cred = store.credentials.status("typesafe", None) if dec and "typesafe" in dec.adapter else None
             out.append(
                 {
                     **c.model_dump(mode="json", by_alias=True),
                     "default": c.composition_id == store.default_composition_id,
                     "credential_source": cred.source.value if cred else "none",
+                    "decision_adapter": dec.adapter if dec else None,
+                    "decision_credential_source": dec_cred.source.value if dec_cred else None,
                 }
             )
         return out
@@ -557,6 +561,7 @@ def _live(s: LiveSession) -> dict[str, Any]:
         "outcome": None if rec is None else rec.outcome.model_dump(mode="json", by_alias=True),
         "composition_id": s.composition_id,
         "credential_source": s.credential_source,
+        "decision_credential_source": s.decision_credential_source,
         "error": s.error,
         "interruptions": [_interruption(i) for i in s.session.interruptions],
         "outbound_attempt_id": s.outbound_attempt_id,

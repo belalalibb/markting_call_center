@@ -19,6 +19,7 @@ _ENV_KEYS: dict[str, str] = {
     "openai": "OPENAI_API_KEY",
     "gemini_live": "GEMINI_API_KEY",
     "gemini": "GEMINI_API_KEY",
+    "typesafe": "TYPESAFE_API_KEY",
 }
 
 
