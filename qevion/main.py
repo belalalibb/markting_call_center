@@ -32,7 +32,14 @@ def build(store: RuntimeStore | None = None, *, seed_examples: bool = True, web_
     app = create_app(store)
 
     def _preflight_ctx() -> PreflightContext:
-        return PreflightContext(registry=store.registry, composition=store.composition, strict_capabilities=False)
+        return PreflightContext(
+            registry=store.registry,
+            composition=store.composition,
+            tool_declarations=store.tool_declarations,
+            locale_packs=store.locale_packs,
+            voice_profiles=store.voice_profiles,
+            strict_capabilities=False,
+        )
 
     def _mapper() -> CapabilityMapper:
         return CapabilityMapper(store.registry, store.composition)

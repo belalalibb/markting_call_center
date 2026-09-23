@@ -86,6 +86,7 @@ class ConfigSession:
         self._preflight_ctx = preflight_ctx
         self._mapper = mapper
         self._sink = event_sink
+        self._surfaced: set[str] = set()
         self._emit(EventType.CONFIG_SESSION_STARTED, {"activity_id": activity_id})
 
     # ---------------------------------------------------------------- inputs
@@ -105,9 +106,15 @@ class ConfigSession:
     # ---------------------------------------------------------------- loop
     def next_questions(self, *, limit: int = 3) -> list[CopilotQuestion]:
         qs = self._engine.next_questions(self._inputs(), limit=limit)
-        for q in qs:
-            if q.question_id not in self.state.asked:
-                self.state.asked[q.question_id] = q
+        self.mark_asked(qs)
+        return qs
+
+    def mark_asked(self, questions: list[CopilotQuestion]) -> None:
+        """Register questions surfaced to the operator (emits config.question_asked once per question)."""
+        for q in questions:
+            if q.question_id not in self._surfaced:
+                self._surfaced.add(q.question_id)
+                self.state.asked.setdefault(q.question_id, q)
                 self._emit(
                     EventType.CONFIG_QUESTION_ASKED,
                     {
@@ -117,7 +124,6 @@ class ConfigSession:
                         "blocking": q.blocking,
                     },
                 )
-        return qs
 
     def answer(self, question_id: str, value: Any, *, operator_id: str) -> None:
         q = self._require(question_id)

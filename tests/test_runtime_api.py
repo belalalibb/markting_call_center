@@ -174,7 +174,7 @@ def test_copilot_session_loop_over_http(client: TestClient) -> None:
 
 
 def test_copilot_seeded_from_example_publishes_activity(client: TestClient) -> None:
-    seed = _load_example("activity_b_clinic")
+    seed = _load_example("activity_a_restaurant")
     seed["identity"]["version"] = "2.0.0"
     v = _start(client, activity_id=seed["identity"]["activity_id"], seed=seed, operator_id="op_1")
     assert v["draft_valid"], v["validation_errors"]
@@ -187,11 +187,23 @@ def test_copilot_seeded_from_example_publishes_activity(client: TestClient) -> N
     assert key.endswith("@2.0.0")
     detail = client.get(f"/api/activities/{key}").json()
     assert detail["blueprint"]["version_metadata"]["decisions"]  # decisions travelled with the blueprint
-    # config events landed in the shared event log without business text
     evs = client.get("/api/events", params={"limit": 500}).json()
     kinds = {e["type"] for e in evs}
     assert "config.session_started" in kinds
     assert all(e["source"] == "copilot" for e in evs if e["type"].startswith("config."))
+
+
+def test_copilot_seeded_partial_knowledge_asks_blocking_question(client: TestClient) -> None:
+    """Activity B declares a PARTIAL knowledge requirement → mapping REQUIRES_KNOWLEDGE → blocking upload question."""
+    seed = _load_example("activity_b_clinic")
+    v = _start(client, activity_id=seed["identity"]["activity_id"], seed=seed, operator_id="op_1")
+    assert v["draft_valid"] and v["status"] == "asking"
+    blocking = [q for q in v["questions"] if q["blocking"]]
+    assert blocking and blocking[0]["target_path"] == "capabilities.knowledge:visit_preparation"
+    assert blocking[0]["answer_type"] == "upload"
+    assert any(c["action"] == "REQUIRES_KNOWLEDGE" for c in v["capability_requirements"])
+    r = client.post(f"/api/copilot/sessions/{v['config_session_id']}/publish")
+    assert r.status_code == 409 and r.json()["detail"]["reason"] == "blocking_questions_open"
 
 
 # ------------------------------------------------------------------------- WS

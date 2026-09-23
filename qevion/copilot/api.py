@@ -67,8 +67,9 @@ def mount(app: FastAPI, ctx: CopilotContext) -> dict[str, ConfigSession]:
     def _view(s: ConfigSession, *, limit: int = 3) -> dict[str, Any]:
         gaps, contradictions = ctx.knowledge(s.state.tenant_id)
         s.set_knowledge(gaps, contradictions)
-        proposal = s.propose()
-        nxt = s.next_questions(limit=limit)
+        proposal = s.propose()  # ranked questions incl. preflight/mapping sources
+        nxt = proposal.questions[:limit]
+        s.mark_asked(nxt)
         return {
             "config_session_id": s.state.config_session_id,
             "tenant_id": s.state.tenant_id,
@@ -155,6 +156,9 @@ def mount(app: FastAPI, ctx: CopilotContext) -> dict[str, ConfigSession]:
             raise HTTPException(
                 409, {"reason": "unapproved_decisions", "paths": [d.item_path for d in proposal.unapproved_decisions]}
             )
+        blocking = [q.target_path for q in proposal.questions if q.blocking]
+        if blocking:
+            raise HTTPException(409, {"reason": "blocking_questions_open", "paths": blocking})
         key = ctx.publish(proposal.draft)
         return {"activity_key": key, "readiness_state": proposal.readiness_state.value, "status": proposal.status.value}
 

@@ -27,11 +27,11 @@ from qevion.contracts.control import PreflightResult
 from qevion.contracts.event import Event
 from qevion.contracts.knowledge import KnowledgeSource, SourceKind
 from qevion.contracts.provider import S2SSessionConfig
-from qevion.contracts.tenant import Tenant
+from qevion.contracts.tenant import LocalePack, Tenant, VoiceProfile
 from qevion.control.capabilities import CapabilityMapper, RequirementMapping, build_registry
 from qevion.control.preflight import Preflight, PreflightContext
 from qevion.control.readiness import IllegalReadinessTransitionError, ReadinessChange, ReadinessMachine
-from qevion.core.platform_tools import declarations_for_blueprint_permissions
+from qevion.core.platform_tools import declarations_for_blueprint_permissions, platform_declarations
 from qevion.core.session import Session, SessionDeps
 from qevion.knowledge.pipeline import IngestionReport, KnowledgePipeline, KnowledgeStore
 
@@ -81,8 +81,16 @@ class RuntimeStore:
         self._s2s = MockS2SAdapter([])
         self._turn = EnergyTurnAdapter()
         self._decision = RulesDecisionAdapter()
+        self.locale_packs: dict[str, LocalePack] = _load_dir(ROOT / "config/locale_packs", LocalePack, "locale_pack_id")
+        self.voice_profiles: dict[str, VoiceProfile] = _load_dir(
+            ROOT / "config/voice_profiles", VoiceProfile, "voice_profile_id"
+        )
+        self.tool_declarations = platform_declarations()
         self.registry = build_registry(
             [self._s2s, self._turn, self._decision],
+            tool_declarations=self.tool_declarations,
+            locale_packs=self.locale_packs,
+            voice_profiles=self.voice_profiles,
             channels=[Channel.TEXT, Channel.BROWSER_VOICE],
         )
         self.tool_store = MemoryStore()
@@ -111,6 +119,8 @@ class RuntimeStore:
             composition=self.composition,
             tenant=tenant,
             tool_declarations=declarations_for_blueprint_permissions(bp.tools.permissions),
+            locale_packs=self.locale_packs,
+            voice_profiles=self.voice_profiles,
             knowledge_conflicts=[
                 c.contradiction_id for c in self.knowledge.unresolved_conflicts(bp.identity.tenant_id)
             ],
@@ -211,6 +221,16 @@ class RuntimeStore:
         live.session = Session(deps)
         self.sessions[session_id] = live
         return live
+
+
+def _load_dir(path: Path, model: type[Any], key: str) -> dict[str, Any]:
+    out: dict[str, Any] = {}
+    if not path.is_dir():
+        return out
+    for f in sorted(path.glob("*.yaml")):
+        obj = model.model_validate(yaml.safe_load(f.read_text()))
+        out[getattr(obj, key)] = obj
+    return out
 
 
 def _default_script(bp: ActivityBlueprint) -> list[MockScriptStep]:
