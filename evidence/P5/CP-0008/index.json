@@ -1,0 +1,62 @@
+{
+ "checkpoint": "CP-0008",
+ "items": [
+  {
+   "path": "evidence/P5/CP-0008/junit.xml",
+   "sha256": "5521201278240d76b8eebb9035ac2bf113f480e9dd529f7cdd460ebd2c18295d",
+   "kind": "pytest-junit",
+   "produced_by": "scripts/ci_local.sh (243 tests, 0 failures)",
+   "produced_at": "2026-09-23T04:33:40.781443+00:00",
+   "criterion_ids": [
+    "QV-ACC-020",
+    "QV-ACC-021",
+    "QV-SIM-004",
+    "QV-OUT-DIR-002"
+   ]
+  },
+  {
+   "path": "evidence/P5/CP-0008/licenses.json",
+   "sha256": "7d6f76d47bdaeec3ace30f91ef3ff536e2d76ed3505b37cb24870ef17ff6d1fe",
+   "kind": "pip-licenses",
+   "produced_by": "scripts/ci_local.sh \u2192 scripts/license_gate.py",
+   "produced_at": "2026-09-23T04:33:40.781567+00:00",
+   "criterion_ids": [
+    "QV-LIC-001"
+   ]
+  },
+  {
+   "path": "evidence/P5/CP-0008/acc020_simulation_gate.json",
+   "sha256": "ad3a95487625a38970cf96c8610fd827b9893821951980c0c9e5a164f8b28b94",
+   "kind": "simulation-gate",
+   "produced_by": "scripts/p5_evidence.py (clean \u2192 ACTIVE; seeded \u2192 SIMULATION_FAILED, activation refused)",
+   "produced_at": "2026-09-23T04:33:40.781638+00:00",
+   "criterion_ids": [
+    "QV-ACC-020",
+    "QV-LIFE-002",
+    "QV-SIM-005"
+   ]
+  },
+  {
+   "path": "evidence/P5/CP-0008/acc021_budget_guard.json",
+   "sha256": "64ca2def137e47afe540e705f5c641dde4b22e5244bb4681f882dcec00c9ddcd",
+   "kind": "budget-guard",
+   "produced_by": "scripts/p5_evidence.py (max_write_calls=1 \u2192 budget.exceeded \u00d76, 1 write executed, CLOSED)",
+   "produced_at": "2026-09-23T04:33:40.781701+00:00",
+   "criterion_ids": [
+    "QV-ACC-021"
+   ]
+  },
+  {
+   "path": "evidence/P5/CP-0008/simulation_report_clean.json",
+   "sha256": "baf79a3b31a236652396eea7c051968a0c718f96db44f0a671bca86854caefa8",
+   "kind": "qevion.simulation_report.v1",
+   "produced_by": "scripts/p5_evidence.py (14 cases, 10 persona kinds, 10 adversarial)",
+   "produced_at": "2026-09-23T04:33:40.781991+00:00",
+   "criterion_ids": [
+    "QV-SIM-002",
+    "QV-SIM-004",
+    "QV-SIM-006"
+   ]
+  }
+ ]
+}

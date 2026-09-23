@@ -89,6 +89,6 @@ acceptance:
   QV-ACC-017: { phase: P4,   status: accepted, evidence: [evidence/P4/CP-0007/latency_table.json, evidence/P4/CP-0007/e2e_voice_preview.json] }
   QV-ACC-018: { phase: P4,   status: accepted, evidence: [evidence/P4/CP-0007/latency_table.json, evidence/P4/CP-0007/junit.xml] }
   QV-ACC-019: { phase: P4,   status: in_progress, evidence: [], note: "replay harness deferred to P6 (CP-0009) with evaluation; mock realtime pacing makes wall-clock nondeterministic, replay must use recorded event seq" }
-  QV-ACC-020: { phase: P5,   status: planned, evidence: [] }
-  QV-ACC-021: { phase: P5,   status: planned, evidence: [] }
+  QV-ACC-020: { phase: P5,   status: accepted, evidence: [evidence/P5/CP-0008/acc020_simulation_gate.json, evidence/P5/CP-0008/simulation_report_clean.json, evidence/P5/CP-0008/junit.xml] }
+  QV-ACC-021: { phase: P5,   status: accepted, evidence: [evidence/P5/CP-0008/acc021_budget_guard.json, evidence/P5/CP-0008/junit.xml] }
   QV-ACC-022: { phase: P6,   status: planned, evidence: [], depends_on: A5 }
