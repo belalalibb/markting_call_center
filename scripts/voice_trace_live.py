@@ -105,6 +105,7 @@ async def main() -> int:
         "starts": 0,
         "ends": 0,
         "voiced_ends": 0,
+        "transcripts": [],
         "stops": 0,
         "last_end_ms": 0,
         "ready": None,
@@ -136,6 +137,8 @@ async def main() -> int:
                     if t == "stop_playout":
                         st["speaking"], st["stops"] = False, st["stops"] + 1
                         await ws.send(json.dumps({"type": "playout_stopped", "response_id": m.get("response_id")}))
+                    if t == "transcript" and (m.get("payload") or {}).get("role") == "user":
+                        st["transcripts"].append((now(), m.get("text") or ""))
                     log.append((now(), t, m.get("response_id") or ""))
             except websockets.exceptions.ConnectionClosed as e:
                 log.append((now(), "ws_closed", e.rcvd.code if e.rcvd else None))
@@ -228,6 +231,9 @@ async def main() -> int:
         "stop_playout": st["stops"],
         "health": health,
         "interruptions": detail.get("interruptions"),
+        "session_facts": {k: detail.get(k) for k in ("composition_id", "turn_detector", "transcription_model")},
+        "user_transcripts": st["transcripts"],
+        "phrases": {n: PHRASES[n] for n in PLAN},
         "client_log": log,
         "core_events": core,
     }
