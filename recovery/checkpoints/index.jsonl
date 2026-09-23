@@ -5,3 +5,4 @@
 {"id":"CP-0005","ts":"2026-09-23T00:09:17Z","phase":"P2","git_sha":"380f63a60487d05d254b1bac30ad42989a7841c1","title":"Knowledge pipeline + Preflight + readiness + capability mapping","status":"VERIFIED"}
 {"id":"CP-0006","ts":"2026-09-23T02:22:54Z","phase":"P3","git_sha":"dcbbd1f3fa951a5dd76e5a9e51d94b79c6b35fe1","title":"Copilot + runtime API + web app","status":"VERIFIED"}
 {"id":"CP-0007","ts":"2026-09-23T03:31:15Z","phase":"P4","git_sha":"b58e391e839dbcbddd70412f174743e98677e09c","title":"Voice runtime: browser voice console, OpenAI Realtime + Silero/SmartTurn adapters, compositions, §31 t0..t4 E2E","status":"VERIFIED"}
+{"id":"CP-0008","ts":"2026-09-23T04:33:50Z","phase":"P5","git_sha":"270c56c33b59b8fb1cec4a4f3ec01400e4d0a15e","title":"Simulation harness + Activation gates + Outbound seam","status":"VERIFIED"}
