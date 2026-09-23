@@ -283,12 +283,17 @@ def test_ws_unknown_composition_closes_4400(client: TestClient) -> None:
     from starlette.websockets import WebSocketDisconnect
 
     key = _key(client, "act_csat_survey")
-    with pytest.raises(WebSocketDisconnect) as ei, client.websocket_connect(f"/ws/sessions/{key}?composition=nope") as ws:
+    with (
+        pytest.raises(WebSocketDisconnect) as ei,
+        client.websocket_connect(f"/ws/sessions/{key}?composition=nope") as ws,
+    ):
         ws.receive_text()
     assert ei.value.code == 4400
 
 
-def test_ws_real_provider_without_credential_reports_error_not_crash(client: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_ws_real_provider_without_credential_reports_error_not_crash(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
     store: RuntimeStore = client.app.state.store  # type: ignore[attr-defined]
     monkeypatch.setattr(store.credentials, "env", {})  # hide any sandbox OPENAI_API_KEY
     store.credentials.admin_store.clear()
@@ -320,7 +325,11 @@ def test_ws_silero_composition_runs_on_mock_provider(client: TestClient) -> None
         {
             "composition_id": "comp_mock_smart_v1",
             "mode": "s2s",
-            "bindings": [{"role": "s2s", "adapter": "mock"}, {"role": "turn", "adapter": "smart_turn"}, {"role": "decision", "adapter": "rules"}],
+            "bindings": [
+                {"role": "s2s", "adapter": "mock"},
+                {"role": "turn", "adapter": "smart_turn"},
+                {"role": "decision", "adapter": "rules"},
+            ],
         }
     )
     key = _key(client, "act_order_intake")
