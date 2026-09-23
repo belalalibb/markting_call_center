@@ -438,7 +438,9 @@ class RuntimeStore:
             channel=channel,
             event_sink=sink,
         )
-        live.session = Session(deps)
+        # Same id on the wire (ServerMessage.session_id), in events, and in the REST registry — otherwise a client
+        # cannot look up its own session (found live 2026-09-23: WS id != /api/sessions id).
+        live.session = Session(deps, session_id=session_id)
         self.sessions[session_id] = live
         return live
 

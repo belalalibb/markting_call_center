@@ -241,6 +241,7 @@ def test_ws_session_text_roundtrip(client: TestClient) -> None:
     assert len(sessions) == 1
     s = sessions[0]
     assert s["running"] is False and s["events"] > 0
+    assert s["session_id"] == first["session_id"]  # wire id == registry id (client can look up its own session)
     detail = client.get(f"/api/sessions/{s['session_id']}").json()
     assert detail["events"] and all(e["schema"] == "qevion.event.v1" for e in detail["events"])
     assert [e["seq"] for e in detail["events"]] == sorted(e["seq"] for e in detail["events"])
