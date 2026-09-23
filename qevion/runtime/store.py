@@ -30,7 +30,7 @@ from qevion.contracts.provider import S2SSessionConfig
 from qevion.contracts.tenant import Tenant
 from qevion.control.capabilities import CapabilityMapper, RequirementMapping, build_registry
 from qevion.control.preflight import Preflight, PreflightContext
-from qevion.control.readiness import ReadinessChange, ReadinessMachine
+from qevion.control.readiness import IllegalReadinessTransitionError, ReadinessChange, ReadinessMachine
 from qevion.core.platform_tools import declarations_for_blueprint_permissions
 from qevion.core.session import Session, SessionDeps
 from qevion.knowledge.pipeline import IngestionReport, KnowledgePipeline, KnowledgeStore
@@ -45,6 +45,7 @@ class ActivityRecord:
     preflight: PreflightResult | None = None
     mapping: list[RequirementMapping] = field(default_factory=list)
     changes: list[ReadinessChange] = field(default_factory=list)
+    notes: list[str] = field(default_factory=list)
 
     @property
     def key(self) -> str:
@@ -110,7 +111,9 @@ class RuntimeStore:
             composition=self.composition,
             tenant=tenant,
             tool_declarations=declarations_for_blueprint_permissions(bp.tools.permissions),
-            knowledge_conflicts=[c.contradiction_id for c in self.knowledge.unresolved_conflicts(bp.identity.tenant_id)],
+            knowledge_conflicts=[
+                c.contradiction_id for c in self.knowledge.unresolved_conflicts(bp.identity.tenant_id)
+            ],
             strict_capabilities=strict,
         )
 
@@ -121,10 +124,12 @@ class RuntimeStore:
         ref = f"preflight:{hashlib.sha256(result.model_dump_json().encode()).hexdigest()[:12]}"
         try:
             change = rec.readiness.apply_preflight(result, ref=ref, actor=actor)
-            if change is not None:
-                rec.changes.append(change)
-        except Exception:  # noqa: BLE001 — illegal from current state (e.g. ACTIVE) is reported, not raised
-            pass
+        except IllegalReadinessTransitionError as e:
+            # e.g. ACTIVE version re-checked: result is stored, lifecycle untouched (immutability)
+            rec.notes.append(f"preflight_not_applied: {e}")
+            change = None
+        if change is not None:
+            rec.changes.append(change)
         return rec
 
     def map_capabilities(self, key: str) -> list[RequirementMapping]:
@@ -140,12 +145,29 @@ class RuntimeStore:
 
     # -------------------------------------------------------------- knowledge
     def ingest(
-        self, *, tenant_id: str, name: str, data: bytes, mime_type: str | None, activity_key: str | None, priority: int = 100
+        self,
+        *,
+        tenant_id: str,
+        name: str,
+        data: bytes,
+        mime_type: str | None,
+        activity_key: str | None,
+        priority: int = 100,
     ) -> IngestionReport:
         sid = f"src_{hashlib.sha256(data).hexdigest()[:10]}"
-        kind = SourceKind.STRUCTURED if (mime_type or "").split("/")[-1] in {"csv", "json", "yaml", "x-yaml"} else SourceKind.FILE
+        kind = (
+            SourceKind.STRUCTURED
+            if (mime_type or "").split("/")[-1] in {"csv", "json", "yaml", "x-yaml"}
+            else SourceKind.FILE
+        )
         src = KnowledgeSource(
-            source_id=sid, tenant_id=tenant_id, kind=kind, name=name, mime_type=mime_type, priority=priority, sha256=hashlib.sha256(data).hexdigest()
+            source_id=sid,
+            tenant_id=tenant_id,
+            kind=kind,
+            name=name,
+            mime_type=mime_type,
+            priority=priority,
+            sha256=hashlib.sha256(data).hexdigest(),
         )
         bp = self.get_activity(activity_key).blueprint if activity_key else None
         report = self.pipeline.ingest(src, data, activity=bp)
@@ -154,11 +176,16 @@ class RuntimeStore:
 
     # ---------------------------------------------------------------- sessions
     def build_session(
-        self, *, activity_key: str, transport: Any, session_id: str, channel: Channel, script: list[MockScriptStep] | None = None
+        self,
+        *,
+        activity_key: str,
+        transport: Any,
+        session_id: str,
+        channel: Channel,
+        script: list[MockScriptStep] | None = None,
     ) -> LiveSession:
         rec = self.get_activity(activity_key)
         bp = rec.blueprint
-        tenant = self.tenants.get(bp.identity.tenant_id)
         live = LiveSession(session_id=session_id, activity_key=activity_key, session=None)  # type: ignore[arg-type]
 
         async def sink(ev: Event) -> None:
@@ -174,11 +201,10 @@ class RuntimeStore:
             turn=self._turn.new_detector(),
             decision=self._decision,
             tool_declarations=declarations_for_blueprint_permissions(bp.tools.permissions),
-            tool_backends=memory_backends(self.tool_store),
+            tool_backends=dict(memory_backends(self.tool_store)),
             outcome_sink=live.outcomes,
             handoff_sink=live.handoffs,
             credential=credential,
-            tenant_allowed_tools=None if tenant is None else None,
             channel=channel,
             event_sink=sink,
         )
