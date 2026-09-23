@@ -376,7 +376,7 @@ def _turn_seq(s: Session, turn_index: int | None) -> int | None:
     """Event seq of the N-th user turn start (0-based), or None."""
     if turn_index is None:
         return None
-    starts = [e.seq for e in s.events if e.type == EventType.TURN_STARTED.value and e.payload.get("role") == "user"]
+    starts = [e.seq for e in s.events if e.type == EventType.TURN_STARTED.value]  # turn.started = user turns
     return starts[turn_index] if turn_index < len(starts) else None
 
 
