@@ -3,3 +3,4 @@
 {"id":"CP-0003","ts":"2026-09-22T20:07:02Z","phase":"P0.2","git_sha":"950e05f8aeb20ce22b1e353c3dc68e5f1ce72e32","title":"mock/default adapter for every port + local CI gate","status":"VERIFIED"}
 {"id":"CP-0004","ts":"2026-09-22T22:08:06Z","phase":"P1","git_sha":"af6e8c346641cc876913ba2560b2624665d853ec","title":"Generic Core: machines, FieldStore, pipeline, outcome, session orchestrator; A/B/C on mocks","status":"VERIFIED"}
 {"id":"CP-0005","ts":"2026-09-23T00:09:17Z","phase":"P2","git_sha":"380f63a60487d05d254b1bac30ad42989a7841c1","title":"Knowledge pipeline + Preflight + readiness + capability mapping","status":"VERIFIED"}
+{"id":"CP-0006","ts":"2026-09-23T02:22:54Z","phase":"P3","git_sha":"dcbbd1f3fa951a5dd76e5a9e51d94b79c6b35fe1","title":"Copilot + runtime API + web app","status":"VERIFIED"}
