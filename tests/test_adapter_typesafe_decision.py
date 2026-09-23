@@ -85,6 +85,9 @@ async def test_classify_intent_uses_closed_options_only() -> None:
     assert set(crit) == {"complaint", "order", "none_of_these"}
     r2 = await TypeSafeDecisionAdapter("k", http=FakeHttp("refund", 0.99)).decide(req)
     assert r2.is_unknown  # an answer outside the closed set is never accepted
+    # intents carry a higher floor than confirmations (live smoke: opt-out misread as order @0.69)
+    r3 = await TypeSafeDecisionAdapter("k", http=FakeHttp("order", 0.69)).decide(req)
+    assert r3.is_unknown and "0.75" in (r3.reason or "")
 
 
 async def test_layered_rules_first_then_fallback_only_on_unknown() -> None:

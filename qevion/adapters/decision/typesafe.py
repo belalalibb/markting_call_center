@@ -60,12 +60,16 @@ class TypeSafeDecisionAdapter:
         base_url: str = DEFAULT_BASE_URL,
         model: str = DEFAULT_MODEL,
         min_confidence: float = 0.6,
+        intent_min_confidence: float = 0.75,
         http: HttpFn | None = None,
     ) -> None:
         self._credential = credential
         self.base_url = base_url.rstrip("/")
         self.model = model
         self.min_confidence = min_confidence
+        # live smoke 2026-09-23: an opt-out phrase was classified `order`@0.69 -> intents need a higher bar;
+        # opt-out / claims stay deterministic regardless (never gated by this adapter).
+        self.intent_min_confidence = intent_min_confidence
         self._http = http or _urllib_http
         self.calls = 0
         self.last_usage: dict[str, int] = {}
@@ -123,12 +127,13 @@ class TypeSafeDecisionAdapter:
         refs = [f"typesafe:{self.last_model}", f"probabilities:{json.dumps(probabilities, sort_keys=True)}"]
         decided_ms = int((time.monotonic() - t0) * 1000)
         value = mapping.get(str(choice)) if choice is not None else None
-        if value is None or confidence < self.min_confidence:
+        floor = self.intent_min_confidence if request.kind is DecisionKind.CLASSIFY_INTENT else self.min_confidence
+        if value is None or confidence < floor:
             return DecisionResult(
                 value=None,
                 confidence=confidence,
                 source=DecisionSource.UNKNOWN,
-                reason=f"typesafe low confidence {confidence:.2f} < {self.min_confidence} (choice={choice})",
+                reason=f"typesafe low confidence {confidence:.2f} < {floor} (choice={choice})",
                 evidence_refs=refs,
                 decided_at_ms=decided_ms,
             )
