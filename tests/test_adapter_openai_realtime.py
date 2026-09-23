@@ -8,7 +8,6 @@ import json
 from typing import Any
 
 import pytest
-
 from qevion.adapters.providers.openai_realtime import OpenAIRealtimeAdapter, render_tools
 from qevion.contracts.provider import AudioFrameRef, S2SEventType, S2SSessionConfig, ToolCallResult
 
@@ -50,16 +49,23 @@ def make() -> tuple[OpenAIRealtimeAdapter, FakeSocket]:
     return OpenAIRealtimeAdapter(factory), sock
 
 
-CFG = S2SSessionConfig(provider="openai_realtime", model="gpt-realtime", voice="marin", tools=[{"tool_id": "record_field", "description": "d", "input_schema": {"type": "object"}}])
+CFG = S2SSessionConfig(
+    provider="openai_realtime",
+    model="gpt-realtime",
+    voice="marin",
+    tools=[{"tool_id": "record_field", "description": "d", "input_schema": {"type": "object"}}],
+)
 
 
 async def _drain(gen: Any, n: int, timeout: float = 1.0) -> list[Any]:
     out: list[Any] = []
+
     async def take() -> None:
         async for x in gen:
             out.append(x)
             if len(out) >= n:
                 return
+
     await asyncio.wait_for(take(), timeout)
     return out
 
@@ -71,8 +77,22 @@ def test_capabilities_declare_unverified_languages_and_barge_in() -> None:
 
 
 def test_render_tools_from_tool_v1() -> None:
-    r = render_tools([{"tool_id": "lookup", "description": "x", "input_schema": {"type": "object", "properties": {"q": {"type": "string"}}}}, {"type": "function", "name": "already"}])
-    assert r[0] == {"type": "function", "name": "lookup", "description": "x", "parameters": {"type": "object", "properties": {"q": {"type": "string"}}}}
+    r = render_tools(
+        [
+            {
+                "tool_id": "lookup",
+                "description": "x",
+                "input_schema": {"type": "object", "properties": {"q": {"type": "string"}}},
+            },
+            {"type": "function", "name": "already"},
+        ]
+    )
+    assert r[0] == {
+        "type": "function",
+        "name": "lookup",
+        "description": "x",
+        "parameters": {"type": "object", "properties": {"q": {"type": "string"}}},
+    }
     assert r[1]["name"] == "already"
 
 
@@ -101,9 +121,12 @@ async def test_outbound_mapping() -> None:
     assert t == [
         "session.update",
         "input_audio_buffer.append",
-        "input_audio_buffer.commit", "response.create",
-        "conversation.item.create", "response.create",
-        "conversation.item.create", "response.create",
+        "input_audio_buffer.commit",
+        "response.create",
+        "conversation.item.create",
+        "response.create",
+        "conversation.item.create",
+        "response.create",
         "response.cancel",
     ]
     su = sock.out[0]["session"]
@@ -141,7 +164,14 @@ async def test_inbound_translation_events_and_audio() -> None:
     sock.feed(type="response.created", response={"id": "r1"})
     sock.feed(type="response.audio.delta", response_id="r1", event_id="a1", delta=base64.b64encode(pcm).decode())
     sock.feed(type="response.audio_transcript.delta", response_id="r1", delta="Hel")
-    sock.feed(type="response.function_call_arguments.done", response_id="r1", call_id="c9", name="record_field", arguments=json.dumps({"field": "name", "value": "x"}), item_id="i2")
+    sock.feed(
+        type="response.function_call_arguments.done",
+        response_id="r1",
+        call_id="c9",
+        name="record_field",
+        arguments=json.dumps({"field": "name", "value": "x"}),
+        item_id="i2",
+    )
     sock.feed(type="response.done", response={"id": "r1", "status": "completed"})
     sock.feed(type="response.created", response={"id": "r2"})
     sock.feed(type="response.done", response={"id": "r2", "status": "cancelled"})
@@ -149,14 +179,26 @@ async def test_inbound_translation_events_and_audio() -> None:
     evs = await _drain(s.events(), 12)
     kinds = [e.type for e in evs]
     assert kinds == [
-        S2SEventType.SESSION_READY, S2SEventType.INPUT_SPEECH_STARTED, S2SEventType.INPUT_SPEECH_STOPPED,
-        S2SEventType.INPUT_TRANSCRIPT, S2SEventType.RESPONSE_STARTED, S2SEventType.RESPONSE_AUDIO_DELTA,
-        S2SEventType.RESPONSE_TEXT_DELTA, S2SEventType.RESPONSE_TOOL_CALL, S2SEventType.RESPONSE_DONE,
-        S2SEventType.RESPONSE_STARTED, S2SEventType.RESPONSE_CANCELLED, S2SEventType.ERROR,
+        S2SEventType.SESSION_READY,
+        S2SEventType.INPUT_SPEECH_STARTED,
+        S2SEventType.INPUT_SPEECH_STOPPED,
+        S2SEventType.INPUT_TRANSCRIPT,
+        S2SEventType.RESPONSE_STARTED,
+        S2SEventType.RESPONSE_AUDIO_DELTA,
+        S2SEventType.RESPONSE_TEXT_DELTA,
+        S2SEventType.RESPONSE_TOOL_CALL,
+        S2SEventType.RESPONSE_DONE,
+        S2SEventType.RESPONSE_STARTED,
+        S2SEventType.RESPONSE_CANCELLED,
+        S2SEventType.ERROR,
     ]
     assert evs[3].text == "مرحبا"
     assert evs[5].audio is not None and evs[5].audio.duration_ms == 100 and evs[5].audio.byte_length == 4800
-    assert evs[7].tool_call is not None and evs[7].tool_call.tool_id == "record_field" and evs[7].tool_call.arguments == {"field": "name", "value": "x"}
+    assert (
+        evs[7].tool_call is not None
+        and evs[7].tool_call.tool_id == "record_field"
+        and evs[7].tool_call.arguments == {"field": "name", "value": "x"}
+    )
     assert evs[11].error is not None and evs[11].error.retryable and evs[11].error.provider_code == "429"
     audio = await _drain(s.audio_out(), 1)
     assert audio[0][1] == pcm and audio[0][0].fmt.sample_rate_hz == 24000
