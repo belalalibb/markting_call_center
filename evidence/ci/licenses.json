@@ -175,6 +175,11 @@
     "Version": "1.2.3"
   },
   {
+    "License": "Apache-2.0",
+    "Name": "python-multipart",
+    "Version": "0.0.32"
+  },
+  {
     "License": "Proprietary",
     "Name": "qevion",
     "Version": "0.1.0"

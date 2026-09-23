@@ -9,7 +9,6 @@ from typing import Any
 import pytest
 import yaml
 from fastapi.testclient import TestClient
-
 from qevion.main import build
 from qevion.runtime.store import RuntimeStore
 
@@ -134,7 +133,7 @@ def test_knowledge_upload_rejects_oversize(client: TestClient) -> None:
 
 
 def test_ephemeral_test_key_never_echoed(client: TestClient) -> None:
-    secret = "sk-test-ABCDEFGHIJKLMNOP"
+    secret = "EPHEMERAL_TEST_VALUE_ABCDEFGHIJKLMNOP"  # deliberately not key-shaped: verify.sh scans tracked files
     r = client.post("/api/admin/test-key", json={"provider": "testprov", "value": secret, "ttl_seconds": 60})
     assert r.status_code == 200
     body = r.text
@@ -159,15 +158,27 @@ def test_copilot_session_loop_over_http(client: TestClient) -> None:
     v = _start(client)
     sid = v["config_session_id"]
     assert v["status"] == "asking" and not v["draft_valid"] and v["questions"] and v["blocking_total"] > 0
-    assert "# Proposal" in v["explanation"] and all(q["question_id"] in v["question_explanations"] for q in v["questions"])
+    assert "# Proposal" in v["explanation"] and all(
+        q["question_id"] in v["question_explanations"] for q in v["questions"]
+    )
     q = v["questions"][0]
-    v2 = client.post(f"/api/copilot/sessions/{sid}/answer", json={"question_id": q["question_id"], "value": ["text"] if q["target_path"] == "channels" else "faq_v1"}).json()
+    v2 = client.post(
+        f"/api/copilot/sessions/{sid}/answer",
+        json={"question_id": q["question_id"], "value": ["text"] if q["target_path"] == "channels" else "faq_v1"},
+    ).json()
     assert q["question_id"] not in {x["question_id"] for x in v2["questions"]}
     assert v2["blocking_total"] == v["blocking_total"] - 1
     # bad ids / illegal defer
-    assert client.post(f"/api/copilot/sessions/{sid}/answer", json={"question_id": "q_x", "value": 1}).status_code == 404
+    assert (
+        client.post(f"/api/copilot/sessions/{sid}/answer", json={"question_id": "q_x", "value": 1}).status_code == 404
+    )
     blocking = next(x for x in v2["questions"] if x["blocking"])
-    assert client.post(f"/api/copilot/sessions/{sid}/answer", json={"question_id": blocking["question_id"], "mode": "defer"}).status_code == 409
+    assert (
+        client.post(
+            f"/api/copilot/sessions/{sid}/answer", json={"question_id": blocking["question_id"], "mode": "defer"}
+        ).status_code
+        == 409
+    )
     assert client.get("/api/copilot/sessions/nope").status_code == 404
     assert client.post(f"/api/copilot/sessions/{sid}/publish").status_code == 409
     assert any(s["config_session_id"] == sid for s in client.get("/api/copilot/sessions").json())
