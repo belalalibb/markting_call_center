@@ -16,13 +16,16 @@ import yaml
 
 from qevion.adapters.decision.rules import RulesDecisionAdapter
 from qevion.adapters.providers.mocks import MockS2SAdapter, MockScriptStep
+from qevion.adapters.providers.openai_realtime import OpenAIRealtimeAdapter
 from qevion.adapters.sinks.memory import MemoryHandoffSink, MemoryOutcomeSink
 from qevion.adapters.tools.memory_backend import MemoryStore, memory_backends
-from qevion.adapters.turn.energy import EnergyTurnAdapter
+from qevion.adapters.turn.energy import EnergyTurnAdapter, MockTurnAdapter
+from qevion.adapters.turn.silero import SileroTurnAdapter
+from qevion.adapters.turn.smart_turn import SmartTurnAdapter
 from qevion.admin.credentials import EnvAdminEphemeralResolver
 from qevion.contracts.activity import ActivityBlueprint, ReadinessState
 from qevion.contracts.common import Channel
-from qevion.contracts.composition import Composition
+from qevion.contracts.composition import Composition, ProviderRole
 from qevion.contracts.control import PreflightResult
 from qevion.contracts.event import Event
 from qevion.contracts.knowledge import KnowledgeSource, SourceKind
@@ -61,6 +64,9 @@ class LiveSession:
     task: asyncio.Task[Any] | None = None
     handoffs: MemoryHandoffSink = field(default_factory=MemoryHandoffSink)
     outcomes: MemoryOutcomeSink = field(default_factory=MemoryOutcomeSink)
+    composition_id: str = ""
+    credential_source: str = "none"
+    error: str | None = None
 
 
 class RuntimeStore:
@@ -75,19 +81,30 @@ class RuntimeStore:
         self.credentials = EnvAdminEphemeralResolver()
         self.sessions: dict[str, LiveSession] = {}
         self.event_log: list[Event] = []
-        self.composition = Composition.model_validate(
-            yaml.safe_load((ROOT / "config/compositions/comp_mock_s2s_v1.yaml").read_text())
+        self.compositions: dict[str, Composition] = _load_dir(
+            ROOT / "config/compositions", Composition, "composition_id"
         )
+        self.default_composition_id = "comp_mock_s2s_v1"
+        self.composition = self.compositions[self.default_composition_id]
         self._s2s = MockS2SAdapter([])
         self._turn = EnergyTurnAdapter()
         self._decision = RulesDecisionAdapter()
+        # adapter registry by (role, name) — compositions bind by these names
+        self.s2s_adapters: dict[str, Any] = {"mock": self._s2s, "openai_realtime": OpenAIRealtimeAdapter()}
+        self.turn_adapters: dict[str, Any] = {
+            "energy": self._turn,
+            "mock": MockTurnAdapter(),
+            "silero": SileroTurnAdapter(),
+            "smart_turn": SmartTurnAdapter(),
+        }
+        self.decision_adapters: dict[str, Any] = {"rules": self._decision}
         self.locale_packs: dict[str, LocalePack] = _load_dir(ROOT / "config/locale_packs", LocalePack, "locale_pack_id")
         self.voice_profiles: dict[str, VoiceProfile] = _load_dir(
             ROOT / "config/voice_profiles", VoiceProfile, "voice_profile_id"
         )
         self.tool_declarations = platform_declarations()
         self.registry = build_registry(
-            [self._s2s, self._turn, self._decision],
+            [*self.s2s_adapters.values(), *self.turn_adapters.values(), *self.decision_adapters.values()],
             tool_declarations=self.tool_declarations,
             locale_packs=self.locale_packs,
             voice_profiles=self.voice_profiles,
@@ -184,6 +201,15 @@ class RuntimeStore:
         self.reports[sid] = report
         return report
 
+    # ------------------------------------------------------------ compositions
+    def composition_for(self, bp: ActivityBlueprint, override: str | None = None) -> Composition:
+        """Resolution order: explicit override → blueprint pin → runtime default."""
+        cid = override or bp.version_metadata.pinned.composition_config or self.default_composition_id
+        comp = self.compositions.get(cid)
+        if comp is None:
+            raise KeyError(f"composition {cid!r} not found")
+        return comp
+
     # ---------------------------------------------------------------- sessions
     def build_session(
         self,
@@ -193,6 +219,7 @@ class RuntimeStore:
         session_id: str,
         channel: Channel,
         script: list[MockScriptStep] | None = None,
+        composition_id: str | None = None,
     ) -> LiveSession:
         rec = self.get_activity(activity_key)
         bp = rec.blueprint
@@ -202,19 +229,45 @@ class RuntimeStore:
             live.events.append(ev)
             self.event_log.append(ev)
 
-        credential, _src = self.credentials.resolve("mock", bp.identity.tenant_id)
+        comp = self.composition_for(bp, composition_id)
+        s2s_b = next(b for b in comp.bindings if b.role is ProviderRole.S2S)
+        turn_b = next((b for b in comp.bindings if b.role is ProviderRole.TURN), None)
+        dec_b = next((b for b in comp.bindings if b.role is ProviderRole.DECISION), None)
+        s2s = self.s2s_adapters.get(s2s_b.adapter)
+        if s2s is None:
+            raise KeyError(f"s2s adapter {s2s_b.adapter!r} not registered")
+        if s2s_b.adapter == "mock":
+            s2s = MockS2SAdapter(script or _default_script(bp))
+        turn_ad = self.turn_adapters.get(turn_b.adapter if turn_b else "energy", self._turn)
+        decision = self.decision_adapters.get(dec_b.adapter if dec_b else "rules", self._decision)
+        credential, cred_src = self.credentials.resolve(s2s_b.adapter, bp.identity.tenant_id)
+        live.composition_id = comp.composition_id
+        live.credential_source = cred_src.value
+        voice = None
+        if bp.locale.voice_profile_ref and bp.locale.voice_profile_ref in self.voice_profiles:
+            voice = self.voice_profiles[bp.locale.voice_profile_ref].provider_voice_map.get(s2s_b.adapter)
+        turn_det = turn_ad.new_detector()
+        turn_det.configure(comp.turn)
         deps = SessionDeps(
             blueprint=bp,
-            s2s=MockS2SAdapter(script or _default_script(bp)),
-            s2s_config=S2SSessionConfig(provider="mock", model="mock-1"),
+            s2s=s2s,
+            s2s_config=S2SSessionConfig(
+                provider=s2s_b.adapter,
+                model=s2s_b.model or "mock-1",
+                voice=voice,
+                language_hint=bp.locale.locale,
+                tools=[d.model_dump(mode="json") for d in declarations_for_blueprint_permissions(bp.tools.permissions).values()],
+            ),
             transport=transport,
-            turn=self._turn.new_detector(),
-            decision=self._decision,
+            turn=turn_det,
+            decision=decision,
             tool_declarations=declarations_for_blueprint_permissions(bp.tools.permissions),
             tool_backends=dict(memory_backends(self.tool_store)),
             outcome_sink=live.outcomes,
             handoff_sink=live.handoffs,
             credential=credential,
+            locale_pack=self.locale_packs.get(bp.locale.locale_pack_ref or ""),
+            voice_profile=self.voice_profiles.get(bp.locale.voice_profile_ref or ""),
             channel=channel,
             event_sink=sink,
         )

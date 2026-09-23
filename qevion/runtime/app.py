@@ -215,6 +215,21 @@ def create_app(store: RuntimeStore | None = None) -> FastAPI:
             raise HTTPException(409, str(e)) from e
         return {**_summary(key), "change": change.payload()}
 
+    @app.get("/api/compositions")
+    async def compositions() -> list[dict[str, Any]]:
+        out = []
+        for c in store.compositions.values():
+            s2s = next((b for b in c.bindings if b.role.value == "s2s"), None)
+            cred = store.credentials.status(s2s.adapter, None) if s2s else None
+            out.append(
+                {
+                    **c.model_dump(mode="json", by_alias=True),
+                    "default": c.composition_id == store.default_composition_id,
+                    "credential_source": cred.source.value if cred else "none",
+                }
+            )
+        return out
+
     @app.get("/api/registry")
     async def registry() -> dict[str, Any]:
         return store.registry.model_dump(mode="json", by_alias=True)
@@ -310,7 +325,9 @@ def create_app(store: RuntimeStore | None = None) -> FastAPI:
         return [e.model_dump(mode="json", by_alias=True) for e in store.event_log[since : since + limit]]
 
     @app.websocket("/ws/sessions/{activity_key}")
-    async def ws_session(ws: WebSocket, activity_key: str, channel: str = "text") -> None:
+    async def ws_session(
+        ws: WebSocket, activity_key: str, channel: str = "text", composition: str | None = None
+    ) -> None:
         await ws.accept()
         try:
             store.get_activity(activity_key)
@@ -320,8 +337,14 @@ def create_app(store: RuntimeStore | None = None) -> FastAPI:
         sid = new_id("ses")
         transport = WsTransport(ws)
         ch = Channel(channel) if channel in {c.value for c in Channel} else Channel.TEXT
-        live = store.build_session(activity_key=activity_key, transport=transport, session_id=sid, channel=ch)
-        live.task = asyncio.create_task(live.session.run())
+        try:
+            live = store.build_session(
+                activity_key=activity_key, transport=transport, session_id=sid, channel=ch, composition_id=composition
+            )
+        except KeyError as e:
+            await ws.close(code=4400, reason=str(e)[:120])
+            return
+        live.task = asyncio.create_task(_run_guarded(live))
         try:
             while not live.task.done():
                 msg = await ws.receive()
@@ -353,6 +376,34 @@ def create_app(store: RuntimeStore | None = None) -> FastAPI:
     return app
 
 
+async def _run_guarded(live: LiveSession) -> None:
+    """Provider open failures (e.g. no credential) become a transport error + clean close, not a crash."""
+    try:
+        await live.session.run()
+    except PermissionError as e:
+        live.error = f"credential: {e}"
+        await _safe_error(live, "provider_credential_missing", str(e))
+    except Exception as e:  # noqa: BLE001 — surfaced to the client and the session list
+        live.error = f"{type(e).__name__}: {e}"
+        await _safe_error(live, "provider_failure", str(e)[:200])
+
+
+async def _safe_error(live: LiveSession, code: str, text: str) -> None:
+    try:
+        await live.session.deps.transport.send(
+            ServerMessage(
+                type=ServerMessageType.ERROR,
+                session_id=live.session_id,
+                server_ts_ms=int(time.time() * 1000),
+                text=text,
+                payload={"code": code},
+            )
+        )
+        await live.session.deps.transport.close(code)
+    except Exception:  # noqa: BLE001, S110 — transport already gone
+        pass
+
+
 def _live(s: LiveSession) -> dict[str, Any]:
     rec = s.session.record
     return {
@@ -364,6 +415,9 @@ def _live(s: LiveSession) -> dict[str, Any]:
         "events": len(s.events),
         "handoffs": len(s.handoffs.requests),
         "outcome": None if rec is None else rec.outcome.model_dump(mode="json", by_alias=True),
+        "composition_id": s.composition_id,
+        "credential_source": s.credential_source,
+        "error": s.error,
     }
 
 
