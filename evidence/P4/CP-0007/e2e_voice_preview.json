@@ -1,0 +1,84 @@
+{
+  "preview_url": "https://8000-iwvtoaa5bc44eo8z5nmoz-2e1b9533.sandbox.novita.ai",
+  "ts": "2026-09-23T03:22:56Z",
+  "activity_key": "act_csat_survey@1.0.0",
+  "compositions": [
+    {
+      "id": "comp_mock_s2s_v1",
+      "credential_source": "none",
+      "default": true
+    },
+    {
+      "id": "comp_s2s_openai_v1",
+      "credential_source": "env",
+      "default": false
+    }
+  ],
+  "greeting_response_id": "resp_1",
+  "ms_to_first_audio_frame": 6,
+  "wall_ms_barge_sent_to_stop_playout": 9,
+  "interruption_sample": {
+    "ts_ms": 17,
+    "segment": "interruption",
+    "response_id": "resp_1",
+    "t0": 14,
+    "t1": 16,
+    "t2": 17,
+    "t3": 17,
+    "t4": 17,
+    "forced": false,
+    "heard_len": 4,
+    "unheard_len": 58
+  },
+  "messages_after_barge": [
+    "event:user.speech_started",
+    "event:user.speech_started",
+    "event:interruption.detected",
+    "state",
+    "stop_playout",
+    "event:assistant.response_cancelled",
+    "event:latency.sample"
+  ],
+  "audio_bytes_received": 4800,
+  "session": {
+    "session_id": "ses_feea07014ea84c20",
+    "composition_id": "comp_mock_s2s_v1",
+    "credential_source": "none",
+    "running": false,
+    "error": null,
+    "interruptions": [
+      {
+        "response_id": "resp_1",
+        "t0": 14,
+        "t1": 16,
+        "t2": 17,
+        "t3": 17,
+        "t4": 17,
+        "forced": false,
+        "heard_len": 4,
+        "unheard_len": 58,
+        "t1_to_t3_ms": 1,
+        "t1_to_t4_ms": 1
+      }
+    ]
+  },
+  "event_types": [
+    "assistant.response_cancelled",
+    "assistant.response_started",
+    "interaction_record.produced",
+    "interruption.detected",
+    "latency.sample",
+    "outcome.produced",
+    "provider.session_closed",
+    "provider.session_created",
+    "session.created",
+    "session.ended",
+    "session.started",
+    "state.changed",
+    "transport.playout_stopped",
+    "turn.started",
+    "user.speech_committed",
+    "user.speech_started"
+  ],
+  "verdict": "PASS"
+}
