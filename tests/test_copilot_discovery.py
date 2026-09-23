@@ -5,6 +5,7 @@ from __future__ import annotations
 import subprocess
 import sys
 from dataclasses import dataclass
+from typing import Any
 
 from qevion.contracts.composition import MappingResult
 from qevion.contracts.control import PreflightFinding, PreflightReason
@@ -31,7 +32,7 @@ class Row:
     note: str | None = None
 
 
-def _full_draft() -> dict:
+def _full_draft() -> dict[str, Any]:
     return {
         "objective": {"primary": {"kind": "run_survey", "description": "gather answers"}},
         "direction": "inbound",
