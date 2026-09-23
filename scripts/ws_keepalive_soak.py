@@ -46,6 +46,22 @@ async def main() -> int:
     )
     base = _arg("--base", "http://localhost:8000")
     composition = _arg("--composition", "comp_mock_s2s_v1")
+    key_env = _arg(
+        "--inject-key-env", ""
+    )  # e.g. OPENAI_API_KEY → POST /api/admin/test-key provider=openai (memory only)
+    if key_env:
+        import os
+        from urllib import request
+
+        val = os.environ.get(key_env, "")
+        if val:
+            provider = key_env.lower().removesuffix("_api_key")
+            body = json.dumps({"provider": provider, "value": val, "ttl_seconds": 900}).encode()
+            req = request.Request(
+                base + "/api/admin/test-key", data=body, headers={"content-type": "application/json"}, method="POST"
+            )
+            with request.urlopen(req, timeout=10):  # noqa: S310 - operator-run against own server
+                pass
     activity = _arg("--activity", "act_order_intake@1.0.0")
     seconds = float(_arg("--seconds", "90"))
     ws_base = base.replace("http://", "ws://").replace("https://", "wss://")
@@ -89,6 +105,8 @@ async def main() -> int:
                 session_id = session_id or m.get("session_id")
                 if t == "ready":
                     ready_ms = now()
+                elif t == "error":
+                    events.append((now(), f"error:{str(m.get('text'))[:80]}"))
                 elif t == "pong":
                     pongs += 1
                 elif t == "state":
@@ -101,6 +119,11 @@ async def main() -> int:
         except websockets.exceptions.ConnectionClosed as e:
             close_code = e.rcvd.code if e.rcvd else (e.sent.code if e.sent else None)
             close_reason = (e.rcvd.reason if e.rcvd else (e.sent.reason if e.sent else "")) or ""
+        finally:
+            # a clean close ends `async for` without raising — read the negotiated code from the connection
+            if close_code is None and getattr(ws, "close_code", None) is not None:
+                close_code = ws.close_code
+                close_reason = getattr(ws, "close_reason", "") or ""
 
     try:
         async with websockets.connect(url, open_timeout=15, max_size=None, ping_interval=20, ping_timeout=20) as ws:
