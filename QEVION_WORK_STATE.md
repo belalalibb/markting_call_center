@@ -5,7 +5,7 @@
 | Field | Value |
 |---|---|
 | Project phase | P5 — Simulation + Activation + Outbound |
-| Current stage | **P6 COMPLETE** (CP-0009, tag → f977930) — Phase B P0→P6 delivered; next = post-P6 backlog / Phase B closure review |
+| Current stage | **P6 COMPLETE** (CP-0009, tag → f977930) + **post-P6: TypeSafe Jev live decision role integrated & verified** (evidence `evidence/live/`) — next = CP-0010 addendum checkpoint / Phase B closure review |
 | Current objective | Phase B closure: all planned checkpoints CP-0001..CP-0009 verified. Open: QV-ACC-022 real-provider smoke (A5 key needed), QV-ACC-001 final inspection, QV-ACC-005. Backlog: bounded-LLM simulated customer, CRM/DNC adapter seam, Silero ONNX model fetch, real-provider latency table, audio-mode eval subset (license-clean fixtures). |
 | Last verified checkpoint | CP-0008 (P5 Simulation + Activation + Outbound) — `recovery/checkpoints/CP-0008.md`, tag `cp/CP-0008` |
 | Last known good Git SHA | see `recovery/checkpoints/index.jsonl` last line (CP-0008 = 2d61b3a) |
@@ -35,9 +35,10 @@
 - **CP-0005 (P2):** `qevion/control/preflight.py` (13 deterministic checks, all 20 §11 reason codes, path + fix_hint, approved-Decision waiver, strict/lenient UNVERIFIED), `readiness.py` (table-driven lifecycle, `ActivationGates`, BFS legal path, edit invalidation, immutability), `capabilities.py` (registry aggregated from adapter self-declarations + platform facts; `RequirementMapping`); `qevion/knowledge/parsers.py` (csv/json/yaml/txt/md, locators, size cap, injection flags) + `pipeline.py` (normative 10-step pipeline: entities, facts w/ provenance, relationships, cross-source contradictions with priority resolution or pending+DATA_CONFLICT, ambiguity, 6 gap classes vs Activity needs, customer questions, operational requirements; `StructuredRetriever` approved-only). Tests: 150 total (+57) — **CI_LOCAL PASS**; evidence `evidence/P2/CP-0005/`; QV-ACC-011..013 accepted.
 
 ## In progress
-- none (CP-0009 closed: record + tag cp/CP-0009 → f977930 + snapshot manifest)
+- **Post-P6 TypeSafe integration (operator-supplied key, A5 partially lifted for the decision role):** `qevion/adapters/decision/typesafe.py` (`TypeSafeDecisionAdapter` — Jev `systemone` choice questions for `interpret_confirmation` / `classify_intent` only; https-only; floors 0.6 / 0.75; UNKNOWN on no-credential/network/low-confidence; `LayeredDecisionAdapter` rules-first, LLM only when rules UNKNOWN — ADR-0004 kept), composition `comp_mock_s2s_typesafe_v1` (decision `rules+typesafe`), store/app wiring (`decision_credential_source` per session, `?script=callback` named mock script, decision/tool events mirrored to client), `credentials._ENV_KEYS["typesafe"]=TYPESAFE_API_KEY`, 8 offline tests. **CI_LOCAL PASS 268 tests.** Live evidence (key fingerprint only): `evidence/live/typesafe_live_smoke.json` (18 cases, 16 match / 2 abstain / **0 contradictions**, core session `callback_requested` via LLM_VALIDATED confirmation, p50 202 ms, p95 292 ms) and `evidence/live/typesafe_live_ws_e2e.json` (running server + Admin ephemeral key → 3/3: ar-EG yes → LLM_VALIDATED 1.0 → granted → `schedule_callback` executed; no → RULE 0.8 → denied, no provider call; ambiguous → UNKNOWN → neither). Scripts: `scripts/typesafe_live_smoke.py`, `scripts/typesafe_live_ws.py`. Remaining: checkpoint record (CP-0010 addendum), optional console display of decision credential source. S2S real provider still A5-blocked (no OpenAI/Gemini key).
 
 ## Incidents
+- 2026-09-23 #16: sandbox resets #22–#29 during TypeSafe integration (venv/node_modules wiped each time; `/tmp/ws_live.py` scratch probe lost → promoted to tracked `scripts/typesafe_live_ws.py`; one full `ci_local.sh` run interrupted → re-run PASS 268). Zero pushed work lost. Probe fixes on first live run: skip binary mock-audio frames; tolerate clean close on `bye`. Both classified: test harness, not Core.
 - 2026-09-23 #15: sandbox resets #22–#24 during P6 (replay files wiped once before commit; three *locally committed but unpushed* eval fixes lost once — rule tightened: **push immediately after every commit**, not only after checkpoints). Every resume verified actual file state; zero pushed work lost.
 - 2026-09-23 #14: sandbox resets #16–#21 during P5 (six resets; runner.py, cases.py format, outbound store/event edits, p5_evidence.py, snapshot manifest + work-state update each re-created once). Zero committed work lost; every resume verified actual file state before redoing. Countermeasure held; ≈3–5 min per reset.
 - 2026-09-23 #12: sandbox resets #12–#15 during P4 (venv/node_modules wiped 4×; one interrupted checkpoint step). Zero committed work lost; index.json + CP-0007.md redone after verifying actual state (not blindly re-run). Rule held: commit before first test/build.
@@ -58,7 +59,8 @@
 
 ## Known risks
 - Sandbox: 2 vCPU / ~1 GB RAM / no GPU → local ASR/TTS candidates are stubs (A9).
-- Real-provider evidence (QV-ACC-022) requires operator-supplied test key (A5); Admin ephemeral UI exists. ACC-017/018 currently measured on the mock provider only.
+- Real-provider evidence (QV-ACC-022): **decision role verified live with TypeSafe Jev** (`evidence/live/`); S2S role still requires an operator-supplied OpenAI/Gemini key (A5). ACC-017/018 currently measured on the mock provider only.
+- TypeSafe Jev abstains on Arabizi negatives ("la2 msh 3ayez" 0.21–0.25) and on some ar-EG intents (0.42) → safe UNKNOWN, but the rules lexicon should grow for those (backlog).
 - Browser mic path not exercised headless (no mic in Playwright); WS/binary contract covered by `scripts/e2e_voice_probe.py`.
 
 ## Pending (ordered)
@@ -66,4 +68,6 @@
 2. Post-P6 backlog: bounded-LLM simulated customer, CRM/DNC adapter seam, Silero ONNX model fetch, real-provider latency table.
 
 ## Exact next action
-(P6 closed.) Next session: Phase B closure review — run `scripts/recovery/verify.sh`, confirm tag cp/CP-0009, then pick from backlog (priority: QV-ACC-022 if an A5 key is supplied via Admin ephemeral test-key; else bounded-LLM simulated customer). Previous P6 step-3 note: web — Config Center panel (POST `/api/activities/{key}/simulate`, GET `/gates`, POST `/activate` with 409 unmet display) + Operator Console outbound dial (`PUT /api/contacts/{ref}`, `GET /contact-check/{ref}`, WS `/ws/outbound/{key}/{ref}`); `cd web && npm install && npm run build`; commit `web/dist`. Then `make eval` → copy reports into `evidence/P6/CP-0009/`.
+Write `recovery/checkpoints/CP-0010.md` (addendum: TypeSafe live decision role) + append `index.jsonl` + tag `cp/CP-0010` + snapshot manifest via `scripts/recovery/*.sh`; then optional: web console shows `decision_credential_source` per composition; then backlog (Arabizi negatives into rules lexicon; bounded-LLM simulated customer). Server: `uvicorn qevion.main:app --port 8000`; re-inject key via `POST /api/admin/test-key {provider:"typesafe"}` after any restart (memory-only).
+
+Previous: (P6 closed.) Next session: Phase B closure review — run `scripts/recovery/verify.sh`, confirm tag cp/CP-0009, then pick from backlog (priority: QV-ACC-022 if an A5 key is supplied via Admin ephemeral test-key; else bounded-LLM simulated customer). Previous P6 step-3 note: web — Config Center panel (POST `/api/activities/{key}/simulate`, GET `/gates`, POST `/activate` with 409 unmet display) + Operator Console outbound dial (`PUT /api/contacts/{ref}`, `GET /contact-check/{ref}`, WS `/ws/outbound/{key}/{ref}`); `cd web && npm install && npm run build`; commit `web/dist`. Then `make eval` → copy reports into `evidence/P6/CP-0009/`.
