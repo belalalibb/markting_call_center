@@ -1,0 +1,9 @@
+# Composition: OpenAI Realtime s2s with legacy whisper-1 input transcription (comparison baseline, OPS 5.5 P2).
+schema: qevion.composition.v1
+composition_id: comp_s2s_openai_whisper_v1
+mode: s2s
+bindings:
+  - { role: s2s, adapter: openai_realtime, model: gpt-realtime, config: { transcription_model: whisper-1 } }
+  - { role: turn, adapter: silero }
+  - { role: decision, adapter: rules }
+turn: { detector: silero, threshold: 0.5, min_speech_ms: 120, min_silence_ms: 500, barge_in_min_speech_ms: 200 }
