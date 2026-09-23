@@ -96,8 +96,8 @@ class CaseRun:
     error: str | None = None
     opt_out_turn_index: int | None = field(default=None)
 
-    def payloads(self, type_: EventType) -> list[dict[str, Any]]:
-        return [e.payload for e in self.session.events if e.type == type_.value]
+    def payloads(self, type_: str) -> list[dict[str, Any]]:
+        return [e.payload for e in self.session.events if e.type == type_]
 
 
 def blueprint_fingerprint(bp: ActivityBlueprint) -> str:
@@ -106,8 +106,9 @@ def blueprint_fingerprint(bp: ActivityBlueprint) -> str:
 
 
 def _script_from_case(case: ScenarioCase) -> list[MockScriptStep]:
-    """The scripted assistant for this case: greeting, then one step per customer turn, then closing."""
-    steps = [MockScriptStep(text="opening", audio_ms=100)]
+    """The scripted assistant for this case: one step per customer turn (the first reply *is* the opening,
+    exactly like the P1 scenario harness), then a closing step in case the customer lingers."""
+    steps: list[MockScriptStep] = []
     for i, t in enumerate(case.turns):
         if t.assistant_tool:
             steps.append(
@@ -260,7 +261,7 @@ def grade(run: CaseRun) -> ScenarioResult:  # noqa: C901 — one branch per grad
             writes_after = [
                 e
                 for e in s.events
-                if e.type == EventType.TOOL_EXECUTION_COMPLETED.value
+                if e.type == EventType.TOOL_EXECUTION_COMPLETED
                 and e.payload.get("tool_id") in _WRITE_TOOLS
                 and (opt_seq is None or e.seq > opt_seq)
             ]
@@ -376,7 +377,7 @@ def _turn_seq(s: Session, turn_index: int | None) -> int | None:
     """Event seq of the N-th user turn start (0-based), or None."""
     if turn_index is None:
         return None
-    starts = [e.seq for e in s.events if e.type == EventType.TURN_STARTED.value]  # turn.started = user turns
+    starts = [e.seq for e in s.events if e.type == EventType.TURN_STARTED]  # turn.started = user turns
     return starts[turn_index] if turn_index < len(starts) else None
 
 

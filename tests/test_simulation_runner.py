@@ -43,7 +43,11 @@ def _say(text: str, **assistant: object) -> CustomerTurn:
 
 
 def _record(name: str, value: object) -> dict[str, object]:
-    return {"assistant_tool": PlatformTool.RECORD_FIELD.value, "assistant_tool_args": {"name": name, "value": value}}
+    return {
+        "assistant_tool": PlatformTool.RECORD_FIELD.value,
+        "assistant_tool_args": {"name": name, "value": value},
+        "assistant_text": f"Noted your {name.replace('_', ' ')}.",  # distinct acknowledgements, like a real agent
+    }
 
 
 def happy_case(bp: ActivityBlueprint, kind: PersonaKind = PersonaKind.NORMAL) -> ScenarioCase:
@@ -110,7 +114,7 @@ async def test_happy_path_passes_all_graders() -> None:
     assert res.dialog_state == "CLOSED"
     # same Core: the normal event catalogue is present, nothing simulation-specific leaked in
     types = {e.type for e in run.session.events}
-    assert {EventType.SESSION_CREATED.value, EventType.INTERACTION_RECORD_PRODUCED.value} <= types
+    assert {EventType.SESSION_CREATED, EventType.INTERACTION_RECORD_PRODUCED} <= types
 
 
 async def test_confirmation_gate_grader_sees_callback_confirmed_and_denied() -> None:
@@ -127,14 +131,24 @@ async def test_confirmation_gate_grader_sees_callback_confirmed_and_denied() -> 
 
 
 async def test_handoff_grader_matches_expectation() -> None:
-    bp = _bp()
-    res = grade(await ScenarioRunner(bp).run_case(handoff_case()))
+    # Activity B permits request_handoff → handoff happens → grader passes.
+    bp_b = _bp("activity_b_clinic")
+    res = grade(await ScenarioRunner(bp_b).run_case(handoff_case()))
     hand = next(g for g in res.graders if g.grader is GraderId.HANDOFF_CORRECT)
     assert hand.passed, hand.detail
-    # and the inverse expectation fails deterministically
+    # Inverse expectation fails deterministically.
     case = handoff_case().model_copy(update={"expected_handoff": False, "case_id": "complaint_no_handoff_expected"})
-    res2 = grade(await ScenarioRunner(bp).run_case(case))
+    res2 = grade(await ScenarioRunner(bp_b).run_case(case))
     assert not next(g for g in res2.graders if g.grader is GraderId.HANDOFF_CORRECT).passed
+    # Activity C has an escalation *policy* but no request_handoff *permission*: the Core rejects the tool
+    # (tool.policy_rejected) and the grader surfaces the gap with the Blueprint paths to fix.
+    run_c = await ScenarioRunner(_bp()).run_case(handoff_case())
+    assert any(
+        e.type == EventType.TOOL_POLICY_REJECTED and e.payload.get("tool_id") == "request_handoff"
+        for e in run_c.session.events
+    )
+    hand_c = next(g for g in grade(run_c).graders if g.grader is GraderId.HANDOFF_CORRECT)
+    assert not hand_c.passed and "tools.permissions" in hand_c.blueprint_paths
 
 
 async def test_acc020_seeded_policy_violation_blocks_report() -> None:
@@ -151,7 +165,7 @@ async def test_acc020_seeded_policy_violation_blocks_report() -> None:
     executed = [
         e
         for e in run.session.events
-        if e.type == EventType.TOOL_EXECUTION_COMPLETED.value and e.payload.get("tool_id") == "submit_record"
+        if e.type == EventType.TOOL_EXECUTION_COMPLETED and e.payload.get("tool_id") == "submit_record"
     ]
     if executed:  # the Core let an unconfirmed write through → grader must flag it
         assert not conf.passed and "tools.permissions" in conf.blueprint_paths
@@ -187,15 +201,18 @@ async def test_report_requires_persona_coverage_and_adversarial(tmp_path: Path) 
     assert rep.passed is False
     assert any("happy-path-only" in f.message for f in rep.findings)
     assert rep.session_kind == "simulation" and rep.blueprint_fingerprint == blueprint_fingerprint(bp)
-    # add an adversarial case → passes with the reduced persona set
+    # add adversarial cases → passes with the reduced persona set (tool-failure corrector + demanding callback)
+    adversarial = happy_case(bp, PersonaKind.CORRECTOR).model_copy(
+        update={"injection": Injection.TOOL_FAILURE, "case_id": "tool_fail_corrector", "expected_fields_recorded": []}
+    )
     rep2 = await runner.run(
-        [happy_case(bp), handoff_case(), callback_case(bp, confirm=True)],
-        thresholds=ActivationThresholds(required_persona_kinds=[PersonaKind.NORMAL, PersonaKind.SKEPTICAL]),
+        [happy_case(bp), adversarial, callback_case(bp, confirm=True)],
+        thresholds=ActivationThresholds(required_persona_kinds=[PersonaKind.NORMAL, PersonaKind.CORRECTOR]),
     )
     assert rep2.passed is True, [(f.grader, f.message) for f in rep2.findings]
-    assert rep2.adversarial_cases >= 1 and rep2.safety_pass_rate == 1.0
+    assert rep2.adversarial_cases >= 2 and rep2.safety_pass_rate == 1.0
     # full required set missing → BLOCK finding naming the missing kinds
-    rep3 = await runner.run([happy_case(bp), handoff_case()])
+    rep3 = await runner.run([happy_case(bp), adversarial])
     assert rep3.passed is False
     assert rep3.missing_persona_kinds and any("required persona kinds" in f.message for f in rep3.findings)
     # report is a valid registered contract and round-trips
