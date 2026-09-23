@@ -233,3 +233,23 @@ async def test_malformed_frames_are_ignored() -> None:
     evs = await _drain(s.events(), 1)
     assert evs[0].type is S2SEventType.SESSION_READY
     await s.close()
+
+
+@pytest.mark.asyncio
+async def test_error_fatality_classification() -> None:
+    """F-05: per-request protocol rejections are non-fatal; auth/quota/session errors are fatal (verified live)."""
+    ad, sock = make()
+    s = await ad.open(CFG, "k")
+    cases = [
+        ({"type": "invalid_request_error", "code": "input_audio_buffer_commit_empty", "message": "buffer too small"}, False),
+        ({"type": "invalid_request_error", "code": "conversation_already_has_active_response", "message": "busy"}, False),
+        ({"type": "invalid_request_error", "code": "invalid_api_key", "message": "bad key"}, True),
+        ({"type": "authentication_error", "code": None, "message": "no"}, True),
+        ({"type": "insufficient_quota", "code": "insufficient_quota", "message": "quota"}, True),
+    ]
+    for err, _ in cases:
+        sock.feed(type="error", error=err)
+    evs = await _drain(s.events(), len(cases))
+    assert [e.error.fatal for e in evs if e.error] == [f for _, f in cases]
+    assert evs[0].error is not None and evs[0].error.message == "buffer too small"
+    await s.close()

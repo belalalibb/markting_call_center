@@ -105,6 +105,10 @@ class ProviderError(QevionModel):
     message: str
     retryable: bool = False
     provider_code: str | None = None
+    # F-05: the adapter (which knows the provider protocol) decides whether the error ends the conversation.
+    # Protocol races / rejected single requests are non-fatal: the session keeps going. Only fatal errors
+    # (auth, quota, session unusable) may block the Activity. Default True keeps unknown errors conservative.
+    fatal: bool = True
 
 
 # ---- llm.v1 ---------------------------------------------------------------

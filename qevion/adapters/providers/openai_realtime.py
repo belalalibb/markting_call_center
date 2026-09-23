@@ -95,6 +95,23 @@ def _ga_format(fmt: AudioFormat) -> dict[str, Any]:
     return {"type": "audio/pcmu"}
 
 
+# F-05: OpenAI Realtime reports many *per-request* rejections as `invalid_request_error` while the session stays
+# perfectly usable (verified live 2026-09-23). Only these classes end the conversation.
+_FATAL_ERROR_TYPES = {"authentication_error", "permission_error", "insufficient_quota"}
+_FATAL_ERROR_CODES = {
+    "invalid_api_key",
+    "insufficient_quota",
+    "session_expired",
+    "model_not_found",
+    "session_not_found",
+    "invalid_model",
+}
+
+
+def _is_fatal(error_type: str, code: object) -> bool:
+    return error_type in _FATAL_ERROR_TYPES or (isinstance(code, str) and code in _FATAL_ERROR_CODES)
+
+
 def render_tools(tools: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """tool.v1 declarations → Realtime function tools. Accepts either already-rendered functions or tool.v1."""
     out: list[dict[str, Any]] = []
@@ -308,14 +325,17 @@ class OpenAIRealtimeSession:
                 self._current_response = None
         elif t == "error":
             e = msg.get("error") or {}
+            etype = str(e.get("type") or "provider_error")
+            pcode = e.get("code")
             ev = S2SEvent(
                 type=S2SEventType.ERROR,
                 raw_type=t,
                 error=ProviderError(
-                    code=str(e.get("type") or "provider_error"),
+                    code=etype,
                     message=str(e.get("message") or "")[:500],
-                    retryable=str(e.get("type") or "") in {"rate_limit_error", "server_error"},
-                    provider_code=e.get("code"),
+                    retryable=etype in {"rate_limit_error", "server_error"},
+                    provider_code=pcode,
+                    fatal=_is_fatal(etype, pcode),
                 ),
             )
         if ev is not None:

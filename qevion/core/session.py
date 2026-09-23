@@ -865,16 +865,29 @@ class Session(SessionInterruption):
                     EventType.USER_SPEECH_COMMITTED, {"transcript": True, **_digest(ev.text or "")}, source=src
                 )
             case S2SEventType.ERROR:
+                err = ev.error
+                fatal = err.fatal if err else True
                 await self.emit(
                     EventType.PROVIDER_ERROR,
                     {
-                        "code": ev.error.code if ev.error else "unknown",
-                        "retryable": bool(ev.error and ev.error.retryable),
+                        "code": err.code if err else "unknown",
+                        "provider_code": err.provider_code if err else None,
+                        "retryable": bool(err and err.retryable),
+                        "fatal": fatal,
+                        # provider protocol text only (never user content / secrets); bounded
+                        "message": (err.message if err else "")[:200],
                     },
                     source=src,
                 )
-                if not (ev.error and ev.error.retryable):
+                # F-05: a rejected single request (protocol race) must not block the Activity or turn the outcome
+                # into technical_failure; only errors the adapter marks fatal do.
+                if fatal and not (err and err.retryable):
                     await self.activity_fire(ActivityTrigger.BLOCKED, "provider error", authority="core")
+                else:
+                    await self.emit(
+                        EventType.FAILURE_CLASSIFIED,
+                        {"class": "provider_request_rejected", "provider_code": err.provider_code if err else None},
+                    )
             case S2SEventType.CLOSED:
                 if not self._closed:
                     await self.close("provider_closed")
