@@ -84,6 +84,46 @@ async def _case(ad: TypeSafeDecisionAdapter, req: DecisionRequest, text: str, ex
     }
 
 
+async def _core_session(key: str) -> dict[str, Any]:
+    import yaml
+
+    from qevion.contracts.activity import ActivityBlueprint
+    from qevion.contracts.event import EventType
+    from qevion.contracts.simulation import CustomerTurn
+    from qevion.simulation.cases import default_cases
+    from qevion.simulation.runner import ScenarioRunner, SimulationDeps, grade
+
+    root = Path(__file__).resolve().parents[1]
+    bp = ActivityBlueprint.model_validate(yaml.safe_load((root / "config/examples/activity_c_survey.yaml").read_text()))
+    base = next(c for c in default_cases(bp) if c.case_id == "callback_confirmed")
+    # replace the structured `confirm` turn with a spoken Egyptian confirmation the rules lexicon cannot parse.
+    # (text while WAITING_CONFIRMATION resolves the confirmation and consumes no mock script step)
+    turns = [t if t.kind != "confirm" else CustomerTurn(kind="say", text="خلاص يا عم اتفقنا كده") for t in base.turns]
+    case = base.model_copy(update={"case_id": "callback_confirmed_spoken_ar", "turns": turns})
+    layered = LayeredDecisionAdapter(RulesDecisionAdapter(), TypeSafeDecisionAdapter(key))
+    deps = SimulationDeps(decision_factory=lambda: layered, composition_id="comp_mock_s2s_typesafe_v1")
+    run = await ScenarioRunner(bp, deps).run_case(case)
+    res = grade(run)
+    decisions = [
+        e.payload
+        for e in run.session.events
+        if e.type == EventType.DECISION_MADE and e.payload.get("kind") == "interpret_confirmation"
+    ]
+    return {
+        "case_id": case.case_id,
+        "passed": res.passed,
+        "primary_outcome": res.primary_outcome,
+        "failed_graders": [g.grader.value for g in res.graders if not g.passed],
+        "confirmation_decisions": decisions,
+        "fallback_hits": layered.fallback_hits,
+        "confirmation_granted": bool(run.payloads(EventType.TOOL_CONFIRMATION_GRANTED)),
+        "callback_executed": any(
+            p.get("tool_id") == "schedule_callback" for p in run.payloads(EventType.TOOL_EXECUTION_COMPLETED)
+        ),
+        "error": run.error,
+    }
+
+
 async def main(argv: list[str]) -> int:
     key = os.environ.get("TYPESAFE_API_KEY", "").strip()
     out_path = Path(argv[0]) if argv else Path("evidence/live/typesafe_smoke.json")
@@ -116,6 +156,9 @@ async def main(argv: list[str]) -> int:
                 "confidence": r.confidence,
             }
         )
+    # (4) full Core session on Activity C: the customer answers the schedule_callback confirmation with a spoken
+    # phrase the rules lexicon does not know, so the layered port must consult Jev *inside* the real pipeline.
+    core = await _core_session(key)
     lat = sorted(x["latency_ms"] for x in rows)
     mismatches = sum(1 for x in rows if not x["ok"])
     report: dict[str, Any] = {
@@ -132,6 +175,7 @@ async def main(argv: list[str]) -> int:
             "unknown_after_fallback": sum(1 for x in layered_rows if x["source"] == "UNKNOWN"),
             "contradictions": sum(1 for x in layered_rows if x["got"] is not None and x["got"] != x["expected"]),
         },
+        "core_session": core,
         "summary": {
             "cases": len(rows),
             "matches": len(rows) - mismatches,
