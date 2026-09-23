@@ -7,8 +7,8 @@
 | Project phase | P5 — Simulation + Activation + Outbound |
 | Current stage | **P6 COMPLETE** (CP-0009, tag → f977930) + **post-P6: TypeSafe Jev live decision role integrated & verified** (evidence `evidence/live/`) — next = CP-0010 addendum checkpoint / Phase B closure review |
 | Current objective | Phase B closure: all planned checkpoints CP-0001..CP-0009 verified. Open: QV-ACC-022 real-provider smoke (A5 key needed), QV-ACC-001 final inspection, QV-ACC-005. Backlog: bounded-LLM simulated customer, CRM/DNC adapter seam, Silero ONNX model fetch, real-provider latency table, audio-mode eval subset (license-clean fixtures). |
-| Last verified checkpoint | CP-0008 (P5 Simulation + Activation + Outbound) — `recovery/checkpoints/CP-0008.md`, tag `cp/CP-0008` |
-| Last known good Git SHA | see `recovery/checkpoints/index.jsonl` last line (CP-0008 = 2d61b3a) |
+| Last verified checkpoint | CP-0010 (TypeSafe live decision role) — `recovery/checkpoints/CP-0010.md`, tag `cp/CP-0010` → 7639084 |
+| Last known good Git SHA | see `recovery/checkpoints/index.jsonl` last line (CP-0010 = 29cf556 described, tag 7639084) |
 | Approval | Operator approved full plan + decisions D1–D15 on 2026-09-22 (see `recovery/analysis/pre_approval_inspection_2026-09-22.md`) |
 
 ## Completed (with evidence)
