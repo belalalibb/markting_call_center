@@ -22,6 +22,7 @@ from qevion.contracts.provider import ProviderRole
 
 SILERO_RATE = 16000
 SILERO_WINDOW = 512  # samples @16k = 32 ms
+SILERO_CONTEXT = 64  # v5 context samples prepended to each window @16k
 DEFAULT_MODEL = Path(__file__).resolve().parents[3] / "models" / "silero_vad.onnx"
 
 ModelFn = Callable[[list[float]], float]  # 16 kHz float32 window → speech probability
@@ -81,11 +82,16 @@ class _OnnxModel:
         self._sess = ort.InferenceSession(str(path), sess_options=opts, providers=["CPUExecutionProvider"])
         self._state = np.zeros((2, 1, 128), dtype=np.float32)
         self._sr = np.array(SILERO_RATE, dtype=np.int64)
+        # v5 expects each 512-sample window prefixed with the previous window's last 64 samples (official
+        # OnnxWrapper). Without it the model scores clear speech ≤0.1 (found live in OPS 5.5 P2).
+        self._context = np.zeros((1, SILERO_CONTEXT), dtype=np.float32)
 
     def __call__(self, window: list[float]) -> float:
         np = self._np
         x = np.asarray(window, dtype=np.float32).reshape(1, -1)
-        out, self._state = self._sess.run(None, {"input": x, "state": self._state, "sr": self._sr})
+        xc = np.concatenate([self._context, x], axis=1)
+        out, self._state = self._sess.run(None, {"input": xc, "state": self._state, "sr": self._sr})
+        self._context = xc[:, -SILERO_CONTEXT:]
         return float(out[0][0])
 
 
