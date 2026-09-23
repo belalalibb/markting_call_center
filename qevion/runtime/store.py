@@ -203,8 +203,12 @@ class RuntimeStore:
 
     # ------------------------------------------------------------ compositions
     def composition_for(self, bp: ActivityBlueprint, override: str | None = None) -> Composition:
-        """Resolution order: explicit override → blueprint pin → runtime default."""
-        cid = override or bp.version_metadata.pinned.composition_config or self.default_composition_id
+        """Resolution: explicit id → `"pinned"` (blueprint's `version_metadata.pinned.composition_config`) →
+        runtime default. The pin is *not* applied implicitly: a pinned real provider must be an explicit
+        operator choice per session (and needs a resolved credential), never a side effect of a test run."""
+        cid = override or self.default_composition_id
+        if cid == "pinned":
+            cid = bp.version_metadata.pinned.composition_config or self.default_composition_id
         comp = self.compositions.get(cid)
         if comp is None:
             raise KeyError(f"composition {cid!r} not found")
