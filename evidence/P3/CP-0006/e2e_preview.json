@@ -1,0 +1,164 @@
+{
+ "base": "https://8000-izv1zeqxqlc0j6f76blya-d0b9e1e2.sandbox.novita.ai",
+ "ts": "2026-09-23T02:13:34Z",
+ "steps": [
+  {
+   "step": "health",
+   "status": 200,
+   "body_head": "{\"status\":\"ok\",\"uptime_s\":188.1,\"composition\":\"comp_mock_s2s_v1\",\"tenants\":1,\"activities\":3,\"sessions_live\":0}"
+  },
+  {
+   "step": "activities",
+   "status": 200,
+   "body_head": "[{\"key\":\"act_order_intake@1.0.0\",\"activity_id\":\"act_order_intake\",\"version\":\"1.0.0\",\"tenant_id\":\"t_demo\",\"name\":\"Phone order intake\",\"direction\":\"inbound\",\"channels\":[\"browser_voice\",\"text\"],\"readiness\":\"DRAFT\",\"preflight\":null,\"decisions_unapproved\":0,\"notes\":[]},{\"key\":\"act_appointment_booking@1.0"
+  },
+  {
+   "step": "preflight",
+   "status": 200,
+   "body_head": "{\"key\":\"act_csat_survey@1.0.0\",\"activity_id\":\"act_csat_survey\",\"version\":\"1.0.0\",\"tenant_id\":\"t_demo\",\"name\":\"Post-visit satisfaction survey\",\"direction\":\"outbound\",\"channels\":[\"browser_voice\"],\"readiness\":\"READY_FOR_SIMULATION\",\"preflight\":{\"status\":\"READY\",\"blocking\":0,\"total\":1},\"decisions_unappr"
+  },
+  {
+   "step": "capabilities",
+   "status": 200,
+   "body_head": "{\"key\":\"act_csat_survey@1.0.0\",\"rows\":[{\"requirement\":\"channel browser_voice\",\"required_capability\":\"channel:browser_voice\",\"current_state\":\"SUPPORTED\",\"action\":\"SUPPORTED\",\"provider\":null,\"note\":null},{\"requirement\":\"s2s: understand/speak ar-EG (egyptian)\",\"required_capability\":\"language:ar-EG\",\"cu"
+  },
+  {
+   "step": "copilot_start",
+   "status": 201,
+   "body_head": "{\"config_session_id\":\"cfg_6806867d600845d1\",\"tenant_id\":\"t_demo\",\"activity_id\":\"act_e2e\",\"status\":\"asking\",\"readiness_state\":\"DRAFT\",\"draft_valid\":false,\"validation_errors\":[\"direction: Field required\",\"channels: Field required\",\"locale: Field required\",\"objective: Field required\",\"policies.unknown_"
+  },
+  {
+   "step": "copilot_publish",
+   "status": 200,
+   "body_head": "{\"activity_key\":\"act_e2e@0.1.0\",\"readiness_state\":\"NEEDS_CONFIGURATION\",\"status\":\"review\"}"
+  },
+  {
+   "step": "knowledge_upload",
+   "status": 201,
+   "body_head": "{\"source\":{\"schema\":\"qevion.knowledge_source.v1\",\"source_id\":\"src_387108c19f\",\"tenant_id\":\"t_demo\",\"kind\":\"structured\",\"name\":\"faq.csv\",\"version\":\"1\",\"sha256\":\"387108c19f9457be21b59330b0028e19ca6046b7a3f5dcf9568a3f30f677167e\",\"mime_type\":\"text/csv\",\"priority\":100,\"status\":\"UPLOADED\",\"uploaded_at\":\"2"
+  },
+  {
+   "step": "sessions",
+   "status": 200,
+   "body_head": "[{\"session_id\":\"ses_2ae0632666b44f5f\",\"activity_key\":\"act_csat_survey@1.0.0\",\"running\":false,\"dialog_state\":\"CLOSED\",\"activity_state\":\"ABANDONED\",\"events\":20,\"handoffs\":0,\"outcome\":{\"schema\":\"qevion.outcome.v1\",\"outcome_id\":\"out_be39a34badaf4b2e\",\"session_id\":\"ses_cc2f893253c34cb6\",\"tenant_id\":\"t_de"
+  }
+ ],
+ "copilot": {
+  "asked": [
+   [
+    "blocking_gap",
+    "channels",
+    "answer"
+   ],
+   [
+    "blocking_gap",
+    "knowledge.sources",
+    "answer"
+   ],
+   [
+    "policy_risk",
+    "policies.unknown_question_policy.default",
+    "answer"
+   ],
+   [
+    "business_decision",
+    "objective.primary",
+    "answer"
+   ],
+   [
+    "business_decision",
+    "direction",
+    "answer"
+   ],
+   [
+    "policy_risk",
+    "policies.opt_out",
+    "answer"
+   ],
+   [
+    "business_decision",
+    "data.required",
+    "answer"
+   ],
+   [
+    "business_decision",
+    "outcome_schema.primary",
+    "answer"
+   ],
+   [
+    "business_decision",
+    "completion.success_rules",
+    "answer"
+   ],
+   [
+    "business_decision",
+    "coverage.objections",
+    "defer"
+   ],
+   [
+    "quality",
+    "locale",
+    "answer"
+   ],
+   [
+    "capability_gap",
+    "locale.locale_pack_ref",
+    "defer"
+   ],
+   [
+    "quality",
+    "data.required[0]",
+    "defer"
+   ]
+  ],
+  "final_status": "review",
+  "readiness": "NEEDS_CONFIGURATION",
+  "draft_valid": true,
+  "blocking_total": 0,
+  "decisions": 6,
+  "unapproved": []
+ },
+ "published": {
+  "activity_key": "act_e2e@0.1.0",
+  "readiness_state": "NEEDS_CONFIGURATION",
+  "status": "review"
+ },
+ "knowledge_summary": {
+  "entities": 1,
+  "facts": 2,
+  "relationships": 0,
+  "contradictions": 0,
+  "gaps": 1,
+  "ambiguous": 0,
+  "customer_questions": 3,
+  "operational_requirements": 2
+ },
+ "ws_message_types": [
+  "state",
+  "ready",
+  "state",
+  "state",
+  "state",
+  "state",
+  "audio_start",
+  "<audio 4800b>",
+  "<audio 4800b>",
+  "<audio 4800b>",
+  "<audio 4800b>",
+  "<audio 4800b>",
+  "<audio 4800b>",
+  "<audio 4800b>",
+  "<audio 4800b>",
+  "audio_end",
+  "state"
+ ],
+ "sessions": [
+  {
+   "running": false,
+   "dialog_state": "CLOSED",
+   "activity_state": "ABANDONED",
+   "events": 20
+  }
+ ],
+ "events_total": 47
+}
