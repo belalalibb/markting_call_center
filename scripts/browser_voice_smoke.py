@@ -127,11 +127,8 @@ async def main() -> int:
             if ws_rec.get("close"):
                 soak_close = ws_rec["close"]
                 break
-            if (
-                not second_turn_sent
-                and (ws_rec.get("text_types") or {}).get("audio_end", 0) >= 1
-                and now() > seconds * 450
-            ):
+            audio_ends = int(dict(ws_rec.get("text_types") or {}).get("audio_end", 0))
+            if not second_turn_sent and audio_ends >= 1 and now() > seconds * 450:
                 await page.locator("input[placeholder]").fill("عايز أطلب بيتزا مارجريتا كبيرة")
                 await page.get_by_role("button", name="Send").click()
                 second_turn_sent = True
@@ -152,26 +149,29 @@ async def main() -> int:
             pass
         await browser.close()
 
-    tt = ws_rec.get("text_types") or {}
-    speaking_cycles = min(tt.get("audio_start", 0), tt.get("audio_end", 0))
+    tt: dict[str, int] = dict(ws_rec.get("text_types") or {})
+    speaking_cycles = min(int(tt.get("audio_start", 0)), int(tt.get("audio_end", 0)))
     connected = any("connected →" in ln for _, ln in chat_lines)
     ready_line = next((ln for _, ln in chat_lines if ln.startswith("session ready")), None)
     header_live = any(composition in hdr and hdr.startswith("live") for _, hdr in header_samples)
     second_turn_ok = second_turn_sent and any("عايز أطلب" in ln for _, ln in chat_lines)
-    final_close = ws_rec.get("close")
-    final_ok = bool(final_close) and final_close.get("code") == 1000
-    checks = {
+    final_close: dict[str, Any] = dict(ws_rec.get("close") or {})
+    final_ok = final_close.get("code") == 1000
+    pings = int(ws_rec.get("pings") or 0)
+    pongs = int(ws_rec.get("pongs_sent") or 0)
+    checks: dict[str, bool] = {
         "mic_on": mic_on,
         "connected": connected,
         "session_ready": ready_line is not None and composition in ready_line,
         "header_shows_actual_composition": header_live,
         "speaking_then_listening": speaking_cycles >= 1,
         "second_user_turn": second_turn_ok,
-        "heartbeat_answered": ws_rec.get("pongs_sent", 0) >= 1 and ws_rec.get("pongs_sent", 0) == ws_rec.get("pings", 0),
+        "heartbeat_answered": pongs >= 1 and pongs == pings,
         "no_close_during_soak": soak_close is None,
         "final_close_1000": final_ok,
-        "no_1011": (soak_close or {}).get("code") != 1011 and (final_close or {}).get("code") != 1011,
+        "no_1011": (soak_close or {}).get("code") != 1011 and final_close.get("code") != 1011,
     }
+    passed = all(checks.values())
     report = {
         "kind": "browser-voice-smoke",
         "produced_at": datetime.now(UTC).isoformat(),
@@ -197,14 +197,14 @@ async def main() -> int:
             for s in sessions
         ][-3:],
         "checks": checks,
-        "passed": all(checks.values()),
+        "passed": passed,
     }
     text = json.dumps(report, ensure_ascii=False, indent=1)
     if out_path:
         with open(out_path, "w", encoding="utf-8") as fh:
             fh.write(text + "\n")
     print(text)
-    return 0 if report["passed"] else 1
+    return 0 if passed else 1
 
 
 if __name__ == "__main__":
