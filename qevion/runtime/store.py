@@ -25,11 +25,11 @@ from qevion.adapters.turn.smart_turn import SmartTurnAdapter
 from qevion.admin.credentials import EnvAdminEphemeralResolver
 from qevion.contracts.activity import ActivityBlueprint, ReadinessState
 from qevion.contracts.common import Channel
-from qevion.contracts.composition import Composition, ProviderRole
+from qevion.contracts.composition import Composition
 from qevion.contracts.control import PreflightResult
 from qevion.contracts.event import Event
 from qevion.contracts.knowledge import KnowledgeSource, SourceKind
-from qevion.contracts.provider import S2SSessionConfig
+from qevion.contracts.provider import ProviderRole, S2SSessionConfig
 from qevion.contracts.tenant import LocalePack, Tenant, VoiceProfile
 from qevion.control.capabilities import CapabilityMapper, RequirementMapping, build_registry
 from qevion.control.preflight import Preflight, PreflightContext
@@ -256,7 +256,10 @@ class RuntimeStore:
                 model=s2s_b.model or "mock-1",
                 voice=voice,
                 language_hint=bp.locale.locale,
-                tools=[d.model_dump(mode="json") for d in declarations_for_blueprint_permissions(bp.tools.permissions).values()],
+                tools=[
+                    d.model_dump(mode="json")
+                    for d in declarations_for_blueprint_permissions(bp.tools.permissions).values()
+                ],
             ),
             transport=transport,
             turn=turn_det,
