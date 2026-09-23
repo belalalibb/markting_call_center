@@ -68,12 +68,12 @@ def _post(base: str, path: str, body: dict[str, Any]) -> dict[str, Any]:
         base + path, data=json.dumps(body).encode(), headers={"content-type": "application/json"}, method="POST"
     )
     with request.urlopen(req, timeout=10) as resp:  # noqa: S310 - local server, operator-run script
-        return json.loads(resp.read().decode())
+        return dict(json.loads(resp.read().decode()))
 
 
 def _get(base: str, path: str) -> dict[str, Any]:
     with request.urlopen(base + path, timeout=10) as resp:  # noqa: S310 - local server
-        return json.loads(resp.read().decode())
+        return dict(json.loads(resp.read().decode()))
 
 
 async def _run_phrase(ws_base: str, phrase: dict[str, Any]) -> dict[str, Any]:
@@ -132,8 +132,10 @@ async def _run_phrase(ws_base: str, phrase: dict[str, Any]) -> dict[str, Any]:
     last = conf[-1] if conf else None
     ok_source = last is not None and last["source"] in phrase["expect_source"]
     ok_value = last is not None and last["value"] == phrase["expect_value"]
-    ok_tool = (phrase["expect_tool"] in tool_events) if phrase["expect_tool"] else (
-        "tool.confirmation_granted" not in tool_events and "tool.confirmation_denied" not in tool_events
+    ok_tool = (
+        (phrase["expect_tool"] in tool_events)
+        if phrase["expect_tool"]
+        else ("tool.confirmation_granted" not in tool_events and "tool.confirmation_denied" not in tool_events)
     )
     executed = "tool.execution_completed" in tool_events
     ok_exec = executed == phrase["expect_executed"]
@@ -166,7 +168,8 @@ async def main() -> int:
         return 2
     ws_base = base.replace("http://", "ws://").replace("https://", "wss://")
     results = [await _run_phrase(ws_base, p) for p in PHRASES]
-    report = {
+    all_passed = all(r["passed"] for r in results)
+    report: dict[str, Any] = {
         "kind": "typesafe-live-ws-e2e",
         "produced_at": datetime.now(UTC).isoformat(),
         "base": base,
@@ -177,7 +180,7 @@ async def main() -> int:
         "credential_source": cred.get("source"),
         "phrases": results,
         "summary": {
-            "passed": all(r["passed"] for r in results),
+            "passed": all_passed,
             "n": len(results),
             "n_passed": sum(1 for r in results if r["passed"]),
         },
@@ -187,7 +190,7 @@ async def main() -> int:
         with open(args[0], "w", encoding="utf-8") as fh:
             fh.write(out + "\n")
     print(out)
-    return 0 if report["summary"]["passed"] else 1
+    return 0 if all_passed else 1
 
 
 if __name__ == "__main__":
