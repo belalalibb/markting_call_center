@@ -1,0 +1,241 @@
+"""P3 — runtime REST + WS + copilot HTTP surface (composition root `qevion.main`)."""
+
+from __future__ import annotations
+
+import json
+from pathlib import Path
+from typing import Any
+
+import pytest
+import yaml
+from fastapi.testclient import TestClient
+
+from qevion.main import build
+from qevion.runtime.store import RuntimeStore
+
+ROOT = Path(__file__).resolve().parents[1]
+
+
+@pytest.fixture
+def client() -> TestClient:
+    return TestClient(build(RuntimeStore(), seed_examples=True, web_dist=ROOT / "nonexistent"))
+
+
+def _key(client: TestClient, activity_id: str) -> str:
+    return next(a["key"] for a in client.get("/api/activities").json() if a["activity_id"] == activity_id)
+
+
+# --------------------------------------------------------------------- basics
+
+
+def test_health_and_seed(client: TestClient) -> None:
+    h = client.get("/api/health").json()
+    assert h["status"] == "ok" and h["activities"] == 3 and h["composition"] == "comp_mock_s2s_v1"
+    assert {a["readiness"] for a in client.get("/api/activities").json()} == {"DRAFT"}
+    assert client.get("/api/registry").json()["schema"] == "qevion.capability_registry.v1"
+
+
+def test_tenant_crud_and_validation(client: TestClient) -> None:
+    r = client.post("/api/tenants", json={"tenant_id": "t2", "name": "Two"})
+    assert r.status_code == 201 and r.json()["schema"] == "qevion.tenant.v1"
+    assert client.post("/api/tenants", json={"name": "no id"}).status_code == 422
+    assert any(t["tenant_id"] == "t2" for t in client.get("/api/tenants").json())
+
+
+def test_activity_upload_yaml_and_json(client: TestClient) -> None:
+    raw = (ROOT / "config/examples/activity_a_restaurant.yaml").read_text()
+    body = yaml.safe_load(raw)
+    body["identity"]["version"] = "1.1.0"
+    r = client.post("/api/activities", json=body)
+    assert r.status_code == 201 and r.json()["key"].endswith("@1.1.0")
+    body["identity"]["version"] = "1.2.0"
+    r = client.post("/api/activities/yaml", files={"file": ("a.yaml", yaml.safe_dump(body), "application/x-yaml")})
+    assert r.status_code == 201 and r.json()["version"] == "1.2.0"
+    bad = client.post("/api/activities", json={"identity": {"tenant_id": "t"}})
+    assert bad.status_code == 422 and any("objective" in e for e in bad.json()["detail"])
+    assert client.get("/api/activities/nope@0.0.0").status_code == 404
+    detail = client.get(f"/api/activities/{r.json()['key']}").json()
+    assert detail["blueprint"]["schema"] == "qevion.activity.v1" and detail["history"] == []
+
+
+# --------------------------------------------------------------- control plane
+
+
+def test_preflight_capabilities_and_readiness_flow(client: TestClient) -> None:
+    key = _key(client, "act_csat_survey")
+    r = client.post(f"/api/activities/{key}/preflight").json()
+    assert r["result"]["schema"] == "qevion.preflight.v1"
+    assert r["readiness"] in {"READY_FOR_SIMULATION", "NEEDS_INFORMATION", "BLOCKED", "NEEDS_CONFIGURATION"}
+    if r["result"]["status"] == "READY":
+        assert r["readiness"] == "READY_FOR_SIMULATION"
+    else:
+        assert all("fix_hint" in f and f["path"] for f in r["result"]["findings"])
+    caps = client.post(f"/api/activities/{key}/capabilities").json()
+    assert caps["rows"] and all({"requirement", "required_capability", "action"} <= set(row) for row in caps["rows"])
+    # illegal transition is rejected with 409 and legal history is recorded
+    assert client.post(f"/api/activities/{key}/transition", json={"to": "ACTIVE"}).status_code == 409
+    hist = client.get(f"/api/activities/{key}").json()["history"]
+    assert hist and hist[-1]["to_state"] == r["readiness"]
+
+
+def test_transition_endpoint_legal_path(client: TestClient) -> None:
+    key = _key(client, "act_order_intake")
+    r = client.post(f"/api/activities/{key}/transition", json={"to": "DISCOVERY_IN_PROGRESS", "reason": "start"})
+    assert r.status_code == 200 and r.json()["readiness"] == "DISCOVERY_IN_PROGRESS"
+    assert r.json()["change"]["from_state"] == "DRAFT"
+
+
+# ------------------------------------------------------------------ knowledge
+
+
+def test_knowledge_upload_report_and_conflict_resolution(client: TestClient) -> None:
+    key = _key(client, "act_order_intake")
+    csv1 = "item_id,name,price\nm1,Koshari,45\nm2,Molokhia,60\n"
+    csv2 = "item_id,name,price\nm1,Koshari,50\n"
+    r1 = client.post(
+        "/api/knowledge/upload",
+        data={"tenant_id": "t_demo", "activity_key": key, "priority": "10"},
+        files={"file": ("menu_v1.csv", csv1, "text/csv")},
+    )
+    assert r1.status_code == 201, r1.text
+    rep = r1.json()
+    assert rep["summary"]["entities"] == 2 and rep["summary"]["facts"] >= 4
+    assert rep["source"]["kind"] == "structured"
+    r2 = client.post(
+        "/api/knowledge/upload",
+        data={"tenant_id": "t_demo", "activity_key": key, "priority": "10"},
+        files={"file": ("menu_v2.csv", csv2, "text/csv")},
+    )
+    assert r2.status_code == 201
+    conflicts = client.get("/api/knowledge/t_demo/conflicts").json()
+    assert len(conflicts) >= 1 and conflicts[0]["resolution"] == "pending"
+    cid, winner = conflicts[0]["contradiction_id"], conflicts[0]["fact_ids"][0]
+    res = client.post(f"/api/knowledge/contradictions/{cid}/resolve", params={"winner": winner, "by": "op"}).json()
+    assert res["resolution"] == "operator_decided" and res["winning_fact_id"] == winner
+    assert client.get("/api/knowledge/t_demo/conflicts").json() == []
+    assert client.get(f"/api/knowledge/reports/{rep['source']['source_id']}").json()["summary"] == rep["summary"]
+    assert client.get("/api/knowledge/reports/nope").status_code == 404
+    approved = client.get("/api/knowledge/t_demo/facts").json()
+    assert approved and all(f["status"] == "APPROVED" for f in approved)
+
+
+def test_knowledge_upload_rejects_oversize(client: TestClient) -> None:
+    big = b"a" * (5 * 1024 * 1024 + 1)
+    r = client.post("/api/knowledge/upload", data={"tenant_id": "t"}, files={"file": ("x.txt", big, "text/plain")})
+    assert r.status_code == 422
+
+
+# ---------------------------------------------------------------------- admin
+
+
+def test_ephemeral_test_key_never_echoed(client: TestClient) -> None:
+    secret = "sk-test-ABCDEFGHIJKLMNOP"
+    r = client.post("/api/admin/test-key", json={"provider": "openai", "value": secret, "ttl_seconds": 60})
+    assert r.status_code == 200
+    body = r.text
+    assert secret not in body and r.json()["source"] == "EPHEMERAL_UI"
+    st = client.get("/api/admin/credentials/openai").json()
+    assert st["source"] == "EPHEMERAL_UI" and secret not in json.dumps(st)
+    assert client.delete("/api/admin/test-key", params={"provider": "openai"}).json()["cleared"] == 1
+    assert client.get("/api/admin/credentials/openai").json()["source"] != "EPHEMERAL_UI"
+
+
+# ---------------------------------------------------------------------- copilot
+
+
+def _start(client: TestClient, **kw: Any) -> dict[str, Any]:
+    body = {"tenant_id": "t_demo", "activity_id": "act_new", "name": "New", **kw}
+    r = client.post("/api/copilot/sessions", json=body)
+    assert r.status_code == 201, r.text
+    return r.json()
+
+
+def test_copilot_session_loop_over_http(client: TestClient) -> None:
+    v = _start(client)
+    sid = v["config_session_id"]
+    assert v["status"] == "asking" and not v["draft_valid"] and v["questions"] and v["blocking_total"] > 0
+    assert "# Proposal" in v["explanation"] and all(q["question_id"] in v["question_explanations"] for q in v["questions"])
+    q = v["questions"][0]
+    v2 = client.post(f"/api/copilot/sessions/{sid}/answer", json={"question_id": q["question_id"], "value": ["text"] if q["target_path"] == "channels" else "faq_v1"}).json()
+    assert q["question_id"] not in {x["question_id"] for x in v2["questions"]}
+    assert v2["blocking_total"] == v["blocking_total"] - 1
+    # bad ids / illegal defer
+    assert client.post(f"/api/copilot/sessions/{sid}/answer", json={"question_id": "q_x", "value": 1}).status_code == 404
+    blocking = next(x for x in v2["questions"] if x["blocking"])
+    assert client.post(f"/api/copilot/sessions/{sid}/answer", json={"question_id": blocking["question_id"], "mode": "defer"}).status_code == 409
+    assert client.get("/api/copilot/sessions/nope").status_code == 404
+    assert client.post(f"/api/copilot/sessions/{sid}/publish").status_code == 409
+    assert any(s["config_session_id"] == sid for s in client.get("/api/copilot/sessions").json())
+
+
+def test_copilot_seeded_from_example_publishes_activity(client: TestClient) -> None:
+    seed = yaml.safe_load((ROOT / "config/examples/activity_b_clinic.yaml").read_text())
+    seed["identity"]["version"] = "2.0.0"
+    v = _start(client, activity_id=seed["identity"]["activity_id"], seed=seed, operator_id="op_1")
+    assert v["draft_valid"], v["validation_errors"]
+    assert v["blocking_total"] == 0 and v["status"] in {"review", "blocked"}
+    assert v["unapproved"] == []
+    sid = v["config_session_id"]
+    pub = client.post(f"/api/copilot/sessions/{sid}/publish")
+    assert pub.status_code == 200, pub.text
+    key = pub.json()["activity_key"]
+    assert key.endswith("@2.0.0")
+    detail = client.get(f"/api/activities/{key}").json()
+    assert detail["blueprint"]["version_metadata"]["decisions"]  # decisions travelled with the blueprint
+    # config events landed in the shared event log without business text
+    evs = client.get("/api/events", params={"limit": 500}).json()
+    kinds = {e["type"] for e in evs}
+    assert "config.session_started" in kinds
+    assert all(e["source"] == "copilot" for e in evs if e["type"].startswith("config."))
+
+
+# ------------------------------------------------------------------------- WS
+
+
+def test_ws_session_text_roundtrip(client: TestClient) -> None:
+    key = _key(client, "act_csat_survey")
+    with client.websocket_connect(f"/ws/sessions/{key}?channel=text") as ws:
+        first = json.loads(ws.receive_text())
+        assert first["schema"] == "qevion.transport.v1" and first["type"] in {"ready", "state", "event"}
+        ws.send_text(json.dumps({"type": "text", "text": "hello"}))
+        got_types: set[str] = set()
+        for _ in range(30):
+            m = ws.receive()
+            if "text" in m and m["text"]:
+                got_types.add(json.loads(m["text"])["type"])
+            elif "bytes" in m and m["bytes"]:
+                got_types.add("<audio>")
+            if "audio_end" in got_types or "transcript" in got_types:
+                break
+        assert got_types & {"audio_start", "transcript", "state", "event", "<audio>"}, got_types
+        ws.send_text(json.dumps({"type": "bye"}))
+    sessions = client.get("/api/sessions").json()
+    assert len(sessions) == 1
+    s = sessions[0]
+    assert s["running"] is False and s["events"] > 0
+    detail = client.get(f"/api/sessions/{s['session_id']}").json()
+    assert detail["events"] and all(e["schema"] == "qevion.event.v1" for e in detail["events"])
+    assert [e["seq"] for e in detail["events"]] == sorted(e["seq"] for e in detail["events"])
+    assert client.get("/api/health").json()["sessions_live"] == 0
+
+
+def test_ws_unknown_activity_closes(client: TestClient) -> None:
+    from starlette.websockets import WebSocketDisconnect
+
+    with pytest.raises(WebSocketDisconnect) as ei, client.websocket_connect("/ws/sessions/nope@0") as ws:
+        ws.receive_text()
+    assert ei.value.code == 4404
+
+
+def test_ws_invalid_client_message_reports_error(client: TestClient) -> None:
+    key = _key(client, "act_csat_survey")
+    with client.websocket_connect(f"/ws/sessions/{key}") as ws:
+        ws.receive_text()
+        ws.send_text("{not json")
+        for _ in range(20):
+            m = ws.receive()
+            if m.get("text") and json.loads(m["text"])["type"] == "error":
+                break
+        else:
+            raise AssertionError("no error message")
+        ws.send_text(json.dumps({"type": "bye"}))
