@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import asyncio
 import hashlib
+import time
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -31,6 +32,7 @@ from qevion.contracts.event import Event
 from qevion.contracts.knowledge import KnowledgeSource, SourceKind
 from qevion.contracts.provider import ProviderRole, S2SSessionConfig
 from qevion.contracts.tenant import LocalePack, Tenant, VoiceProfile
+from qevion.contracts.transport import ServerMessage, ServerMessageType
 from qevion.control.capabilities import CapabilityMapper, RequirementMapping, build_registry
 from qevion.control.preflight import Preflight, PreflightContext
 from qevion.control.readiness import IllegalReadinessTransitionError, ReadinessChange, ReadinessMachine
@@ -232,6 +234,20 @@ class RuntimeStore:
         async def sink(ev: Event) -> None:
             live.events.append(ev)
             self.event_log.append(ev)
+            if ev.type in FORWARDED_EVENT_TYPES:
+                # Filtered mirror to the client (ServerMessageType.EVENT): operator-facing telemetry only,
+                # never transcripts/audio/secrets (QV-EVT-003). Transport failures must not break the session.
+                try:
+                    await transport.send(
+                        ServerMessage(
+                            type=ServerMessageType.EVENT,
+                            session_id=session_id,
+                            server_ts_ms=int(time.time() * 1000),
+                            payload={"seq": ev.seq, "type": ev.type, "source": ev.source, "payload": ev.payload},
+                        )
+                    )
+                except (ConnectionError, RuntimeError):
+                    pass
 
         comp = self.composition_for(bp, composition_id)
         s2s_b = next(b for b in comp.bindings if b.role is ProviderRole.S2S)
@@ -292,6 +308,24 @@ def _load_dir(path: Path, model: type[Any], key: str) -> dict[str, Any]:
         obj = model.model_validate(yaml.safe_load(f.read_text()))
         out[getattr(obj, key)] = obj
     return out
+
+
+# Event types mirrored to the client as ServerMessageType.EVENT (§37.2 subset; interruption + turn telemetry).
+FORWARDED_EVENT_TYPES: frozenset[str] = frozenset(
+    {
+        "user.speech_started",
+        "user.speech_discarded",
+        "turn.ended",
+        "interruption.detected",
+        "assistant.response_cancelled",
+        "transport.playout_started",
+        "transport.playout_stopped",
+        "latency.sample",
+        "failure.classified",
+        "handoff.requested",
+        "handoff.acknowledged",
+    }
+)
 
 
 def _default_script(bp: ActivityBlueprint) -> list[MockScriptStep]:
