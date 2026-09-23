@@ -100,7 +100,7 @@ class MockS2SSession:
         self.log.append(f"tool_result:{result.call_id}")
         if self._pending_tool and self._pending_tool.call_id == result.call_id:
             self._pending_tool = None
-            await self._speak(self._current_step_text, self._current_step_audio_ms)
+            await self._start_speaking(self._current_step_text, self._current_step_audio_ms)
 
     async def cancel_response(self, response_id: str | None = None) -> None:
         rid = response_id or self._current_response
@@ -130,6 +130,8 @@ class MockS2SSession:
 
     async def close(self) -> None:
         self.closed = True
+        if self._speak_task and not self._speak_task.done():
+            self._speak_task.cancel()
         await self._events.put(S2SEvent(type=S2SEventType.CLOSED))
         await self._events.put(None)
         await self._audio.put(None)
@@ -138,6 +140,7 @@ class MockS2SSession:
     _current_step_text: str = ""
     _current_step_audio_ms: int = 0
     realtime: bool = False
+    _speak_task: asyncio.Task[None] | None = None
 
     async def _play_next(self) -> None:
         if not self.script:
@@ -157,7 +160,15 @@ class MockS2SSession:
                 S2SEvent(type=S2SEventType.RESPONSE_TOOL_CALL, response_id=rid, tool_call=step.tool_call)
             )
             return
-        await self._speak(step.text, step.audio_ms)
+        await self._start_speaking(step.text, step.audio_ms)
+
+    async def _start_speaking(self, text: str, audio_ms: int) -> None:
+        """Realtime mode streams in the background (like a live provider) so the caller's pump keeps
+        consuming client frames — barge-in must be able to land mid-response. Non-realtime stays inline."""
+        if self.realtime:
+            self._speak_task = asyncio.create_task(self._speak(text, audio_ms))
+        else:
+            await self._speak(text, audio_ms)
 
     async def _speak(self, text: str, audio_ms: int) -> None:
         self._response_counter += 1
