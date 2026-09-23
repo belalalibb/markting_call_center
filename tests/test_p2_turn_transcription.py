@@ -15,16 +15,17 @@ from qevion.contracts.provider import S2SSessionConfig
 class _Sock:
     def __init__(self) -> None:
         self.sent: list[dict[str, Any]] = []
+        self.closed = asyncio.Event()
 
     async def send(self, raw: str) -> None:
         self.sent.append(json.loads(raw))
 
-    async def recv(self) -> str:
-        await asyncio.sleep(3600)
-        return ""
+    async def recv(self) -> str | None:
+        await self.closed.wait()
+        return None
 
     async def close(self) -> None:
-        return None
+        self.closed.set()
 
 
 def _session_update(extra: dict[str, Any]) -> dict[str, Any]:
@@ -56,7 +57,7 @@ def test_silero_fallback_is_named_honestly() -> None:
     assert ad.model_available is False
     assert ad.new_detector().detector_name == "silero_fallback_energy"
     cap = {c.name: c.state.value for c in ad.capabilities().capabilities}
-    assert cap["feature:vad:silero"] == "unverified"
+    assert cap["feature:vad:silero"] == "UNVERIFIED"
 
 
 def test_silero_with_model_reports_silero() -> None:
