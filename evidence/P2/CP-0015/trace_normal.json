@@ -1,0 +1,218 @@
+{
+ "plan": [
+  "u1_order",
+  "u2_address",
+  "u3_yes"
+ ],
+ "mode": [],
+ "session_id": "ses_c6110f43adff41b6",
+ "ready": {
+  "composition_id": "comp_s2s_openai_v1",
+  "channel": "browser_voice",
+  "s2s_provider": "openai_realtime",
+  "s2s_model": "gpt-realtime",
+  "credential_source": "ephemeral_ui",
+  "decision_credential_source": "none",
+  "turn_detector": "silero",
+  "transcription_model": "gpt-4o-transcribe",
+  "heartbeat_interval_s": 10.0,
+  "activity_id": "act_order_intake"
+ },
+ "audio_frames": 0,
+ "audio_start": 0,
+ "audio_end": 0,
+ "stop_playout": 0,
+ "health": {
+  "checks": {
+   "no_provider_error": true,
+   "no_illegal_dialog_transition": true,
+   "activity_never_blocked": true,
+   "outcome_not_technical_failure": true,
+   "session_started": true
+  },
+  "passed": true,
+  "outcome": "abandoned",
+  "provider_errors": [],
+  "illegal_transitions": [],
+  "event_count": 11
+ },
+ "interruptions": [],
+ "session_facts": {
+  "composition_id": "comp_s2s_openai_v1",
+  "turn_detector": "silero",
+  "transcription_model": "gpt-4o-transcribe"
+ },
+ "user_transcripts": [],
+ "phrases": {
+  "u1_order": "السلام عليكم، عايز أطلب اتنين بيتزا مارجريتا كبيرة وواحد بيبسي.",
+  "u2_address": "العنوان تلاتة وعشرين شارع التحرير، الدقي، الدور الخامس.",
+  "u3_yes": "أيوه تمام كده، اتفقنا."
+ },
+ "client_log": [
+  [
+   1024,
+   "state",
+   ""
+  ],
+  [
+   1024,
+   "ready",
+   ""
+  ],
+  [
+   1024,
+   "state",
+   ""
+  ],
+  [
+   2057,
+   "cli:utterance_start",
+   "u1_order"
+  ],
+  [
+   7718,
+   "cli:utterance_end",
+   "u1_order"
+  ],
+  [
+   22744,
+   "cli:utterance_start",
+   "u2_address"
+  ],
+  [
+   28706,
+   "cli:utterance_end",
+   "u2_address"
+  ],
+  [
+   43729,
+   "cli:utterance_start",
+   "u3_yes"
+  ],
+  [
+   46390,
+   "cli:utterance_end",
+   "u3_yes"
+  ],
+  [
+   65963,
+   "event",
+   ""
+  ],
+  [
+   65963,
+   "event",
+   ""
+  ]
+ ],
+ "core_events": [
+  [
+   0,
+   "session.created",
+   null,
+   {
+    "channel": "browser_voice"
+   }
+  ],
+  [
+   966,
+   "provider.session_created",
+   null,
+   {
+    "provider": "openai_realtime",
+    "model": "gpt-realtime",
+    "instructions_fp": "0334f6cb5cdd2beb"
+   }
+  ],
+  [
+   966,
+   "state.changed",
+   null,
+   {
+    "machine": "dialog",
+    "from": "IDLE",
+    "to": "LISTENING",
+    "trigger": "session_started",
+    "reason": null,
+    "authority": "core"
+   }
+  ],
+  [
+   966,
+   "session.started",
+   null,
+   {}
+  ],
+  [
+   967,
+   "state.changed",
+   null,
+   {
+    "machine": "activity",
+    "from": "OPENING",
+    "to": "ENGAGED",
+    "trigger": "opened",
+    "reason": "session started",
+    "authority": "core"
+   }
+  ],
+  [
+   63866,
+   "state.changed",
+   null,
+   {
+    "machine": "dialog",
+    "from": "LISTENING",
+    "to": "CLOSED",
+    "trigger": "close",
+    "reason": "user_bye",
+    "authority": "core"
+   }
+  ],
+  [
+   63867,
+   "state.changed",
+   null,
+   {
+    "machine": "activity",
+    "from": "ENGAGED",
+    "to": "ABANDONED",
+    "trigger": "user_left",
+    "reason": "user_bye",
+    "authority": "core:completion_rules"
+   }
+  ],
+  [
+   65905,
+   "provider.session_closed",
+   null,
+   {}
+  ],
+  [
+   65906,
+   "outcome.produced",
+   null,
+   {
+    "primary": "abandoned",
+    "secondary": []
+   }
+  ],
+  [
+   65906,
+   "interaction_record.produced",
+   null,
+   {
+    "ref": "memory://record/rec_225961c00a6e430c"
+   }
+  ],
+  [
+   65906,
+   "session.ended",
+   null,
+   {
+    "reason": "user_bye",
+    "turns": 0
+   }
+  ]
+ ]
+}
