@@ -64,7 +64,6 @@ CONTRACTS: dict[str, type[QevionModel]] = {
     "qevion.credential_scope.v1": control.CredentialScope,
     "qevion.metrics.v1": telemetry.LatencySample,
     "qevion.usage.v1": telemetry.UsageRecord,
-    "qevion.simulation_report.v1": telemetry.SimulationReport,
 }
 
 # §37.3 "design-only" contracts: reserved ids, no model in POC (integration, campaign, router, customer_context, retrieval).

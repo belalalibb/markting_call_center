@@ -26,6 +26,7 @@
   "qevion.preflight.v1": "preflight_v1.schema.json",
   "qevion.s2s.v1": "s2s_v1.schema.json",
   "qevion.s2s_event.v1": "s2s_event_v1.schema.json",
+  "qevion.simulation_case.v1": "simulation_case_v1.schema.json",
   "qevion.simulation_report.v1": "simulation_report_v1.schema.json",
   "qevion.sink.v1": "sink_v1.schema.json",
   "qevion.tenant.v1": "tenant_v1.schema.json",

@@ -1,0 +1,274 @@
+{
+  "$defs": {
+    "CustomerTurn": {
+      "additionalProperties": false,
+      "description": "One scripted customer step. `text` is what the simulated customer says; `kind` drives the transport.",
+      "properties": {
+        "assistant_claim_type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "claim the assistant attempts to make",
+          "title": "Assistant Claim Type"
+        },
+        "assistant_text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Assistant Text"
+        },
+        "assistant_tool": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Assistant Tool"
+        },
+        "assistant_tool_args": {
+          "additionalProperties": true,
+          "title": "Assistant Tool Args",
+          "type": "object"
+        },
+        "delay_ms": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Delay Ms",
+          "type": "integer"
+        },
+        "kind": {
+          "default": "say",
+          "enum": [
+            "say",
+            "interrupt",
+            "silence",
+            "confirm",
+            "deny",
+            "hangup"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Text"
+        }
+      },
+      "title": "CustomerTurn",
+      "type": "object"
+    },
+    "GraderId": {
+      "description": "Deterministic graders (QV-SIM-004). `safety` graders must be 100 %; `completion` graders ≥ threshold.",
+      "enum": [
+        "no_invented_claims",
+        "confirmation_before_writes",
+        "unknown_question_policy_applied",
+        "opt_out_respected",
+        "handoff_correct",
+        "required_fields_with_provenance",
+        "outcome_produced",
+        "expected_outcome_matched",
+        "repetition_below_threshold",
+        "budget_respected"
+      ],
+      "title": "GraderId",
+      "type": "string"
+    },
+    "Injection": {
+      "description": "Injected conditions (QV-SIM-002/003) applied on top of a persona.",
+      "enum": [
+        "none",
+        "tool_failure",
+        "missing_knowledge",
+        "human_request",
+        "objection_sequence",
+        "opt_out",
+        "provider_interruption",
+        "unsupported_claim_request",
+        "incomplete_customer_info"
+      ],
+      "title": "Injection",
+      "type": "string"
+    },
+    "Persona": {
+      "additionalProperties": false,
+      "properties": {
+        "description": {
+          "default": "",
+          "title": "Description",
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/PersonaKind"
+        },
+        "persona_id": {
+          "title": "Persona Id",
+          "type": "string"
+        },
+        "traits": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Traits",
+          "type": "array"
+        }
+      },
+      "required": [
+        "persona_id",
+        "kind"
+      ],
+      "title": "Persona",
+      "type": "object"
+    },
+    "PersonaKind": {
+      "description": "Required persona set (QV-SIM-002). Activities may add their own strings via `persona_id`.",
+      "enum": [
+        "normal",
+        "confused",
+        "skeptical",
+        "demanding",
+        "follow_up_asker",
+        "comparison_asker",
+        "corrector",
+        "topic_switcher",
+        "interrupter",
+        "unsupported_question_asker"
+      ],
+      "title": "PersonaKind",
+      "type": "string"
+    }
+  },
+  "$id": "https://qevion.dev/schemas/simulation_case_v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "A single simulation case: persona × injection × scripted turns × expectations.",
+  "properties": {
+    "case_id": {
+      "title": "Case Id",
+      "type": "string"
+    },
+    "channel": {
+      "default": "text",
+      "enum": [
+        "text",
+        "browser_voice"
+      ],
+      "title": "Channel",
+      "type": "string"
+    },
+    "coverage_item_ids": {
+      "description": "QV-COV-005 traceability",
+      "items": {
+        "type": "string"
+      },
+      "title": "Coverage Item Ids",
+      "type": "array"
+    },
+    "expected_fields_recorded": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Expected Fields Recorded",
+      "type": "array"
+    },
+    "expected_handoff": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Expected Handoff"
+    },
+    "expected_primary_outcome": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Expected Primary Outcome"
+    },
+    "forbidden_claim_types": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Forbidden Claim Types",
+      "type": "array"
+    },
+    "graders": {
+      "description": "empty = all applicable graders",
+      "items": {
+        "$ref": "#/$defs/GraderId"
+      },
+      "title": "Graders",
+      "type": "array"
+    },
+    "injection": {
+      "$ref": "#/$defs/Injection",
+      "default": "none"
+    },
+    "persona": {
+      "$ref": "#/$defs/Persona"
+    },
+    "schema": {
+      "const": "qevion.simulation_case.v1",
+      "default": "qevion.simulation_case.v1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "tags": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Tags",
+      "type": "array"
+    },
+    "turns": {
+      "items": {
+        "$ref": "#/$defs/CustomerTurn"
+      },
+      "minItems": 1,
+      "title": "Turns",
+      "type": "array"
+    }
+  },
+  "required": [
+    "case_id",
+    "persona",
+    "turns"
+  ],
+  "title": "ScenarioCase",
+  "type": "object",
+  "x-qevion-schema-id": "qevion.simulation_case.v1"
+}

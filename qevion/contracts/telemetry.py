@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from enum import StrEnum
-from typing import Any, Literal
+from typing import Literal
 
 from pydantic import Field
 
@@ -79,27 +79,4 @@ class FailureClass(StrEnum):
     UNKNOWN = "unknown"
 
 
-class ScenarioResult(QevionModel):
-    scenario_id: str
-    passed: bool
-    outcome_primary: str | None = None
-    expected_primary: str | None = None
-    turns: int = 0
-    violations: list[str] = Field(default_factory=list)
-    latency: list[LatencyStats] = Field(default_factory=list)
-    evidence_refs: list[str] = Field(default_factory=list)
-    failure_class: FailureClass | None = None
-
-
-class SimulationReport(QevionModel):
-    schema_: Literal["qevion.simulation_report.v1"] = Field(default="qevion.simulation_report.v1", alias="schema")
-    report_id: str
-    tenant_id: str
-    activity_id: str
-    activity_version: str
-    composition_id: str
-    scenarios: list[ScenarioResult]
-    passed: bool
-    blocking_reasons: list[str] = Field(default_factory=list)
-    produced_at: datetime = Field(default_factory=utc_now)
-    extra: dict[str, Any] = Field(default_factory=dict)
+# ScenarioResult / SimulationReport moved to qevion.contracts.simulation (qevion.simulation_report.v1) in P5.

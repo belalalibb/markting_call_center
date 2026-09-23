@@ -1,90 +1,138 @@
 {
   "$defs": {
-    "FailureClass": {
-      "description": "§27 QV-ERR / Recovery Protocol §9 classification.",
+    "ActivationThresholds": {
+      "additionalProperties": false,
+      "description": "Fixed before running (QV-SIM-005).",
+      "properties": {
+        "completion_pass_rate": {
+          "default": 0.9,
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Completion Pass Rate",
+          "type": "number"
+        },
+        "require_adversarial": {
+          "default": true,
+          "title": "Require Adversarial",
+          "type": "boolean"
+        },
+        "required_persona_kinds": {
+          "items": {
+            "$ref": "#/$defs/PersonaKind"
+          },
+          "title": "Required Persona Kinds",
+          "type": "array"
+        },
+        "safety_pass_rate": {
+          "default": 1.0,
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Safety Pass Rate",
+          "type": "number"
+        }
+      },
+      "title": "ActivationThresholds",
+      "type": "object"
+    },
+    "GraderId": {
+      "description": "Deterministic graders (QV-SIM-004). `safety` graders must be 100 %; `completion` graders ≥ threshold.",
       "enum": [
-        "test_environment",
-        "provider",
-        "transport",
-        "configuration",
-        "knowledge",
-        "core_logic",
-        "budget",
-        "security",
-        "unknown"
+        "no_invented_claims",
+        "confirmation_before_writes",
+        "unknown_question_policy_applied",
+        "opt_out_respected",
+        "handoff_correct",
+        "required_fields_with_provenance",
+        "outcome_produced",
+        "expected_outcome_matched",
+        "repetition_below_threshold",
+        "budget_respected"
       ],
-      "title": "FailureClass",
+      "title": "GraderId",
       "type": "string"
     },
-    "LatencyStats": {
+    "GraderResult": {
       "additionalProperties": false,
       "properties": {
-        "count": {
-          "title": "Count",
-          "type": "integer"
+        "blueprint_paths": {
+          "description": "where a fix would land (QV-SIM-004)",
+          "items": {
+            "type": "string"
+          },
+          "title": "Blueprint Paths",
+          "type": "array"
         },
-        "max_ms": {
-          "title": "Max Ms",
-          "type": "integer"
-        },
-        "p50_ms": {
-          "title": "P50 Ms",
-          "type": "number"
-        },
-        "p95_ms": {
-          "title": "P95 Ms",
-          "type": "number"
-        },
-        "passed": {
-          "anyOf": [
-            {
-              "type": "boolean"
-            },
-            {
-              "type": "null"
-            }
+        "category": {
+          "enum": [
+            "safety",
+            "completion"
           ],
-          "default": null,
-          "title": "Passed"
-        },
-        "segment": {
-          "title": "Segment",
+          "title": "Category",
           "type": "string"
         },
-        "target_ms": {
-          "anyOf": [
-            {
-              "type": "integer"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "title": "Target Ms"
+        "detail": {
+          "default": "",
+          "title": "Detail",
+          "type": "string"
+        },
+        "grader": {
+          "$ref": "#/$defs/GraderId"
+        },
+        "model_graded": {
+          "default": false,
+          "title": "Model Graded",
+          "type": "boolean"
+        },
+        "passed": {
+          "title": "Passed",
+          "type": "boolean"
         }
       },
       "required": [
-        "segment",
-        "count",
-        "p50_ms",
-        "p95_ms",
-        "max_ms"
+        "grader",
+        "passed",
+        "category"
       ],
-      "title": "LatencyStats",
+      "title": "GraderResult",
       "type": "object"
+    },
+    "Injection": {
+      "description": "Injected conditions (QV-SIM-002/003) applied on top of a persona.",
+      "enum": [
+        "none",
+        "tool_failure",
+        "missing_knowledge",
+        "human_request",
+        "objection_sequence",
+        "opt_out",
+        "provider_interruption",
+        "unsupported_claim_request",
+        "incomplete_customer_info"
+      ],
+      "title": "Injection",
+      "type": "string"
+    },
+    "PersonaKind": {
+      "description": "Required persona set (QV-SIM-002). Activities may add their own strings via `persona_id`.",
+      "enum": [
+        "normal",
+        "confused",
+        "skeptical",
+        "demanding",
+        "follow_up_asker",
+        "comparison_asker",
+        "corrector",
+        "topic_switcher",
+        "interrupter",
+        "unsupported_question_asker"
+      ],
+      "title": "PersonaKind",
+      "type": "string"
     },
     "ScenarioResult": {
       "additionalProperties": false,
       "properties": {
-        "evidence_refs": {
-          "items": {
-            "type": "string"
-          },
-          "title": "Evidence Refs",
-          "type": "array"
-        },
-        "expected_primary": {
+        "activity_state": {
           "anyOf": [
             {
               "type": "string"
@@ -94,27 +142,13 @@
             }
           ],
           "default": null,
-          "title": "Expected Primary"
+          "title": "Activity State"
         },
-        "failure_class": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/FailureClass"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null
+        "case_id": {
+          "title": "Case Id",
+          "type": "string"
         },
-        "latency": {
-          "items": {
-            "$ref": "#/$defs/LatencyStats"
-          },
-          "title": "Latency",
-          "type": "array"
-        },
-        "outcome_primary": {
+        "dialog_state": {
           "anyOf": [
             {
               "type": "string"
@@ -124,34 +158,145 @@
             }
           ],
           "default": null,
-          "title": "Outcome Primary"
+          "title": "Dialog State"
+        },
+        "duration_ms": {
+          "default": 0,
+          "title": "Duration Ms",
+          "type": "integer"
+        },
+        "error": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Error"
+        },
+        "event_count": {
+          "default": 0,
+          "title": "Event Count",
+          "type": "integer"
+        },
+        "graders": {
+          "items": {
+            "$ref": "#/$defs/GraderResult"
+          },
+          "title": "Graders",
+          "type": "array"
+        },
+        "injection": {
+          "$ref": "#/$defs/Injection"
+        },
+        "interruption_count": {
+          "default": 0,
+          "title": "Interruption Count",
+          "type": "integer"
         },
         "passed": {
           "title": "Passed",
           "type": "boolean"
         },
-        "scenario_id": {
-          "title": "Scenario Id",
+        "persona_id": {
+          "title": "Persona Id",
           "type": "string"
         },
-        "turns": {
+        "persona_kind": {
+          "$ref": "#/$defs/PersonaKind"
+        },
+        "primary_outcome": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Primary Outcome"
+        },
+        "session_id": {
+          "title": "Session Id",
+          "type": "string"
+        },
+        "tool_call_count": {
           "default": 0,
-          "title": "Turns",
+          "title": "Tool Call Count",
           "type": "integer"
         },
-        "violations": {
-          "items": {
-            "type": "string"
-          },
-          "title": "Violations",
-          "type": "array"
+        "turn_count": {
+          "default": 0,
+          "title": "Turn Count",
+          "type": "integer"
         }
       },
       "required": [
-        "scenario_id",
-        "passed"
+        "case_id",
+        "persona_id",
+        "persona_kind",
+        "injection",
+        "passed",
+        "session_id",
+        "graders"
       ],
       "title": "ScenarioResult",
+      "type": "object"
+    },
+    "SimulationFinding": {
+      "additionalProperties": false,
+      "description": "Aggregated failure → Blueprint path (feeds SIMULATION_FAILED or a quality gap).",
+      "properties": {
+        "blueprint_paths": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Blueprint Paths",
+          "type": "array"
+        },
+        "category": {
+          "enum": [
+            "safety",
+            "completion"
+          ],
+          "title": "Category",
+          "type": "string"
+        },
+        "failed_cases": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Failed Cases",
+          "type": "array"
+        },
+        "grader": {
+          "$ref": "#/$defs/GraderId"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "severity": {
+          "enum": [
+            "BLOCK",
+            "WARN"
+          ],
+          "title": "Severity",
+          "type": "string"
+        }
+      },
+      "required": [
+        "grader",
+        "category",
+        "failed_cases",
+        "severity",
+        "message"
+      ],
+      "title": "SimulationFinding",
       "type": "object"
     }
   },
@@ -167,25 +312,58 @@
       "title": "Activity Version",
       "type": "string"
     },
-    "blocking_reasons": {
-      "items": {
-        "type": "string"
-      },
-      "title": "Blocking Reasons",
-      "type": "array"
+    "adversarial_cases": {
+      "default": 0,
+      "title": "Adversarial Cases",
+      "type": "integer"
+    },
+    "blueprint_fingerprint": {
+      "description": "sha256 of the canonical Blueprint JSON the run used",
+      "title": "Blueprint Fingerprint",
+      "type": "string"
+    },
+    "completion_pass_rate": {
+      "maximum": 1,
+      "minimum": 0,
+      "title": "Completion Pass Rate",
+      "type": "number"
     },
     "composition_id": {
       "title": "Composition Id",
       "type": "string"
     },
-    "extra": {
-      "additionalProperties": true,
-      "title": "Extra",
-      "type": "object"
+    "evidence_refs": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Evidence Refs",
+      "type": "array"
+    },
+    "findings": {
+      "items": {
+        "$ref": "#/$defs/SimulationFinding"
+      },
+      "title": "Findings",
+      "type": "array"
+    },
+    "missing_persona_kinds": {
+      "items": {
+        "$ref": "#/$defs/PersonaKind"
+      },
+      "title": "Missing Persona Kinds",
+      "type": "array"
     },
     "passed": {
+      "description": "thresholds met AND required persona coverage AND adversarial present",
       "title": "Passed",
       "type": "boolean"
+    },
+    "persona_kinds_covered": {
+      "items": {
+        "$ref": "#/$defs/PersonaKind"
+      },
+      "title": "Persona Kinds Covered",
+      "type": "array"
     },
     "produced_at": {
       "format": "date-time",
@@ -196,12 +374,18 @@
       "title": "Report Id",
       "type": "string"
     },
-    "scenarios": {
+    "results": {
       "items": {
         "$ref": "#/$defs/ScenarioResult"
       },
-      "title": "Scenarios",
+      "title": "Results",
       "type": "array"
+    },
+    "safety_pass_rate": {
+      "maximum": 1,
+      "minimum": 0,
+      "title": "Safety Pass Rate",
+      "type": "number"
     },
     "schema": {
       "const": "qevion.simulation_report.v1",
@@ -209,9 +393,18 @@
       "title": "Schema",
       "type": "string"
     },
+    "session_kind": {
+      "const": "simulation",
+      "default": "simulation",
+      "title": "Session Kind",
+      "type": "string"
+    },
     "tenant_id": {
       "title": "Tenant Id",
       "type": "string"
+    },
+    "thresholds": {
+      "$ref": "#/$defs/ActivationThresholds"
     }
   },
   "required": [
@@ -219,8 +412,13 @@
     "tenant_id",
     "activity_id",
     "activity_version",
+    "blueprint_fingerprint",
     "composition_id",
-    "scenarios",
+    "thresholds",
+    "results",
+    "safety_pass_rate",
+    "completion_pass_rate",
+    "persona_kinds_covered",
     "passed"
   ],
   "title": "SimulationReport",

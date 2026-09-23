@@ -147,9 +147,19 @@ _MINIMAL: dict[str, dict[str, Any]] = {
         "tenant_id": "t",
         "activity_id": "a",
         "activity_version": "1.0.0",
+        "blueprint_fingerprint": "f" * 64,
         "composition_id": "c",
-        "scenarios": [],
-        "passed": True,
+        "thresholds": {},
+        "results": [],
+        "safety_pass_rate": 1.0,
+        "completion_pass_rate": 1.0,
+        "persona_kinds_covered": [],
+        "passed": False,
+    },
+    "qevion.simulation_case.v1": {
+        "case_id": "k",
+        "persona": {"persona_id": "p", "kind": "normal"},
+        "turns": [{"kind": "say", "text": "hi"}],
     },
 }
 _MINIMAL["qevion.interaction_record.v1"] = {"record_id": "r", "outcome": _MINIMAL["qevion.outcome.v1"]}
