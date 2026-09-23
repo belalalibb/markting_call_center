@@ -210,6 +210,11 @@ async def main() -> int:
             pass
     evs = fetch_events(BASE, st["sid"], HDR) if st["sid"] else []
     health = verdict(evs)
+    # A session where nobody was heard is not healthy (P2: a broken VAD produced 0 turns yet passed all checks).
+    n_commits = sum(1 for e in evs if e["type"] == "user.speech_committed")
+    health["checks"]["every_clip_heard"] = n_commits >= len(PLAN)
+    health["checks"]["agent_spoke"] = st["voiced_ends"] > 0 or st["stops"] > 0
+    health["passed"] = all(health["checks"].values())
     core = [
         (
             e["payload"].get("ts_ms"),
