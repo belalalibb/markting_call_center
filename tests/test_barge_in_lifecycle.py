@@ -169,3 +169,28 @@ async def test_operator_transcripts_can_be_disabled() -> None:
     assert not [m for m in tr.sent if m.type.value == "transcript"]
     assert all(m.text is None for m in tr.sent if m.type.value == "audio_end")
     await _bye(tr, task)
+
+
+@pytest.mark.asyncio
+async def test_prompt_client_ack_is_not_forced_during_audio_barge_in() -> None:
+    """The client's playout_stopped arrives on the same inbound stream the barge-in audio came from; it must
+    release interrupt()'s wait immediately (live P2 finding: every audio barge-in was `playout_stop_timeout`)."""
+    s, tr, prov, task = await _session([MockScriptStep(text="a long answer " * 10, audio_ms=6000)])
+    tr.client_sends(ClientMessage.model_validate({"type": "text", "text": "hello"}))
+    await asyncio.sleep(0.1)
+    rid = next(m.response_id for m in tr.sent if m.type.value == "audio_start")
+    tr.client_sends(ClientMessage.model_validate({"type": "playout_started", "response_id": rid}))
+    await asyncio.sleep(0.05)
+    for _ in range(20):  # speech frames immediately followed by the client's prompt ack
+        tr.client_sends(_tone())
+    tr.client_sends(ClientMessage.model_validate({"type": "playout_stopped", "response_id": rid}))
+    for _ in range(100):
+        if s.interruptions:
+            break
+        await asyncio.sleep(0.01)
+    assert len(s.interruptions) == 1
+    rec = s.interruptions[0]
+    assert rec.forced is False
+    assert not any(e.type == "failure.classified" and e.payload.get("class") == "playout_stop_timeout" for e in s.events)
+    assert rec.t3_playout_stopped is not None and rec.t3_playout_stopped - rec.t1_barge_in_detected < 150
+    await _bye(tr, task)
