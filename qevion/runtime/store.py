@@ -467,6 +467,15 @@ FORWARDED_EVENT_TYPES: frozenset[str] = frozenset(
         "failure.classified",
         "handoff.requested",
         "handoff.acknowledged",
+        # decision + tool lifecycle: source/confidence/tool_id only (no text) — lets the console show which
+        # decision port answered (RULE vs LLM_VALIDATED) and the confirmation gate in real time
+        "decision.made",
+        "tool.confirmation_requested",
+        "tool.confirmation_granted",
+        "tool.confirmation_denied",
+        "tool.execution_completed",
+        "tool.execution_failed",
+        "tool.policy_rejected",
     }
 )
 
