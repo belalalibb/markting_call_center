@@ -250,7 +250,7 @@ function activationCard(): HTMLElement {
       } }, "Activate"),
     ));
     // gates
-    const allGates = ["schema_valid", "preflight", "simulation_passed", "all_decisions_approved", "version_frozen"];
+    const allGates = ["schema_valid", "preflight_ready", "simulation_passed", "all_decisions_approved", "version_frozen"];
     box.append(h("h3", {}, "Activation gates"), h("div", {}, ...allGates.map((g) => pill(g.replace(/_/g, " "), gates!.unmet.includes(g) ? "bad" : "ok"))));
     if (lastActivate) box.append(h("details", { open: true }, h("summary", {}, "Last activation response"), pre(lastActivate)));
     // report
