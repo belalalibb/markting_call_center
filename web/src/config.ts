@@ -1,5 +1,5 @@
 // Config Center: Copilot session (questions → answers → proposal → publish), activities, knowledge.
-import { api, type ActivitySummary, type CopilotView, type Question } from "./api";
+import { api, ApiError, type ActivitySummary, type CopilotView, type Gates, type Question, type SimulationReport } from "./api";
 import { clear, errMsg, h, pill, pre, section, table, toast, toneFor } from "./ui";
 
 interface State {
@@ -17,7 +17,7 @@ export async function renderConfig(root: HTMLElement): Promise<void> {
   root.className = "";
   clear(root);
   st.activities = await api.activities().catch(() => []);
-  root.append(copilotCard(), activitiesCard(), knowledgeCard(), proposalCard());
+  root.append(copilotCard(), activitiesCard(), activationCard(), knowledgeCard(), proposalCard());
 }
 
 // ------------------------------------------------------------------ copilot
@@ -188,7 +188,7 @@ function activitiesCard(): HTMLElement {
       try { await api.uploadActivityYaml(f); st.activities = await api.activities(); toast("Blueprint uploaded", "ok"); await draw(); } catch (e) { toast(errMsg(e), "bad"); }
     } }, "Upload Blueprint YAML")));
     const rows = st.activities.map((a) => {
-      const tr = h("tr", { "data-key": a.key, onClick: async () => { st.selected = a.key; st.detail = await api.activity(a.key); await draw(); } },
+      const tr = h("tr", { "data-key": a.key, onClick: async () => { st.selected = a.key; st.detail = await api.activity(a.key); await draw(); await activationRedraw(); } },
         h("td", {}, h("code", {}, a.key)), h("td", {}, a.name), h("td", {}, a.direction), h("td", {}, pill(a.readiness, toneFor(a.readiness))),
         h("td", {}, a.preflight ? pill(`${a.preflight.status} (${a.preflight.blocking} block)`, a.preflight.status === "READY" ? "ok" : "bad") : pill("not run", "muted")),
         h("td", {}, a.decisions_unapproved ? pill(`${a.decisions_unapproved} unapproved`, "warn") : pill("approved", "ok")));
@@ -214,6 +214,73 @@ function activitiesCard(): HTMLElement {
   void draw();
   return card;
 }
+
+// ------------------------------------------------- simulate → gates → activate (QV-SIM / QV-LIFE-002)
+let activationRedraw: () => Promise<void> = async () => {};
+
+function activationCard(): HTMLElement {
+  const box = h("div");
+  const card = section("Simulate → Gates → Activate", box);
+  card.classList.add("span2");
+  let report: SimulationReport | null = null;
+  let gates: Gates | null = null;
+  let lastActivate: unknown = null;
+  let busy = false;
+  const draw = async () => {
+    clear(box);
+    const key = st.selected;
+    if (!key) { box.append(h("p", { class: "muted" }, "Select an activity above. Activation is refused (409) until every gate is proven: schema · preflight · simulation · approved decisions · frozen version.")); return; }
+    try { gates = await api.gates(key); } catch (e) { box.append(h("p", { class: "muted" }, errMsg(e))); return; }
+    if (!report) report = (await api.simulation(key).catch(() => ({ report: null }))).report;
+    box.append(h("div", { class: "row" },
+      h("code", {}, key), pill(`readiness: ${gates.readiness}`, toneFor(gates.readiness)),
+      h("button", { class: "primary", disabled: busy, onClick: async () => {
+        busy = true; await draw();
+        try { report = (await api.simulate(key)).report; toast(report.passed ? "simulation PASSED" : "simulation FAILED — see findings", report.passed ? "ok" : "bad"); }
+        catch (e) { toast(errMsg(e), "bad"); }
+        busy = false; st.activities = await api.activities(); await draw();
+      } }, busy ? "Running personas…" : "Run simulation (all personas + adversarial)"),
+      h("button", { class: gates.unmet.length ? "" : "primary", onClick: async () => {
+        try { lastActivate = await api.activate(key); toast("ACTIVATED", "ok"); }
+        catch (e) {
+          lastActivate = e instanceof ApiError ? { status: e.status, detail: safeJson(e.message) } : { error: errMsg(e) };
+          toast(e instanceof ApiError && e.status === 409 ? "activation refused — gates unmet" : errMsg(e), "bad");
+        }
+        st.activities = await api.activities(); await draw();
+      } }, "Activate"),
+    ));
+    // gates
+    const allGates = ["schema_valid", "preflight", "simulation_passed", "all_decisions_approved", "version_frozen"];
+    box.append(h("h3", {}, "Activation gates"), h("div", {}, ...allGates.map((g) => pill(g.replace(/_/g, " "), gates!.unmet.includes(g) ? "bad" : "ok"))));
+    if (lastActivate) box.append(h("details", { open: true }, h("summary", {}, "Last activation response"), pre(lastActivate)));
+    // report
+    if (report) {
+      const r = report;
+      box.append(h("h3", {}, "Simulation report"), h("div", { class: "row" },
+        pill(r.passed ? "PASSED" : "FAILED", r.passed ? "ok" : "bad"),
+        pill(`safety ${pct(r.safety_pass_rate)} (need ${pct(r.thresholds.safety_pass_rate)})`, r.safety_pass_rate >= r.thresholds.safety_pass_rate ? "ok" : "bad"),
+        pill(`completion ${pct(r.completion_pass_rate)} (need ${pct(r.thresholds.completion_pass_rate)})`, r.completion_pass_rate >= r.thresholds.completion_pass_rate ? "ok" : "bad"),
+        pill(`${r.results.length} cases · ${r.results.filter((x) => x.injection !== "none").length} adversarial`, "muted"),
+        h("code", { class: "muted" }, `fp ${r.blueprint_fingerprint.slice(0, 12)} · ${r.composition_id}`),
+      ));
+      if (r.findings.length) box.append(table(["sev", "finding", "blueprint paths"], r.findings.map((f) => [pill(f.severity, toneFor(f.severity)), f.message, h("code", {}, f.blueprint_paths.join(", "))])));
+      box.append(table(["case", "persona", "injection", "result", "outcome", "turns", "tools", "failed graders"], r.results.map((x) => [
+        h("code", {}, x.case_id), x.persona_kind, x.injection === "none" ? "—" : pill(x.injection, "warn"), pill(x.passed ? "pass" : "fail", x.passed ? "ok" : "bad"),
+        x.primary_outcome ?? "—", String(x.turn_count), String(x.tool_call_count),
+        x.graders.filter((g) => !g.passed).map((g) => `${g.grader}${g.blueprint_paths.length ? ` → ${g.blueprint_paths.join(",")}` : ""}`).join("; ") || "—",
+      ])));
+      box.append(h("details", {}, h("summary", {}, "full report (qevion.simulation_report.v1)"), pre(r)));
+    } else {
+      box.append(h("p", { class: "muted" }, "No simulation report yet for this version."));
+    }
+  };
+  activationRedraw = draw;
+  void draw();
+  return card;
+}
+
+function pct(x: number): string { return `${Math.round(x * 100)}%`; }
+function safeJson(s: string): unknown { try { return JSON.parse(s); } catch { return s; } }
 
 // ---------------------------------------------------------------- knowledge
 function knowledgeCard(): HTMLElement {

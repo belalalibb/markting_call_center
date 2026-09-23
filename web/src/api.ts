@@ -102,8 +102,41 @@ export interface InterruptionRecord {
   t1_to_t3_ms: number | null; t1_to_t4_ms: number | null;
 }
 
+export interface GraderResult { grader: string; passed: boolean; category: string; detail: string; blueprint_paths: string[] }
+export interface ScenarioResult {
+  case_id: string; persona_kind: string; injection: string; passed: boolean; session_id: string;
+  graders: GraderResult[]; primary_outcome: string | null; turn_count: number; tool_call_count: number; error: string | null;
+}
+export interface SimulationReport {
+  report_id: string; passed: boolean; blueprint_fingerprint: string; composition_id: string;
+  safety_pass_rate: number; completion_pass_rate: number; results: ScenarioResult[];
+  findings: { severity: string; message: string; blueprint_paths: string[]; case_ids?: string[] }[];
+  thresholds: { safety_pass_rate: number; completion_pass_rate: number; require_adversarial: boolean };
+  [k: string]: unknown;
+}
+export interface Gates { key: string; unmet: string[]; readiness: string }
+export interface ContactState { contact_ref: string; consent: boolean | null; opted_out: boolean; suppressed: boolean; attempts: number; tags: string[] }
+export interface ContactDecision { key: string; contact_ref: string; allowed: boolean; refusals: string[]; checked_at: string }
+export interface OutboundAttempt {
+  attempt_id: string; activity_key: string; contact_ref: string; allowed: boolean; refusals: string[];
+  call_id: string | null; call_state: string | null; session_id: string | null; [k: string]: unknown;
+}
+
 export const api = {
   health: () => req("GET", "/api/health"),
+  // P5/P6: simulation gate → activation
+  simulate: (key: string, actor = "operator:web") =>
+    req<{ report: SimulationReport } & Json>("POST", `/api/activities/${encodeURIComponent(key)}/simulate`, { actor }),
+  simulation: (key: string) => req<{ key: string; report: SimulationReport | null }>("GET", `/api/activities/${encodeURIComponent(key)}/simulation`),
+  gates: (key: string) => req<Gates>("GET", `/api/activities/${encodeURIComponent(key)}/gates`),
+  activate: (key: string, actor = "operator:web") => req("POST", `/api/activities/${encodeURIComponent(key)}/activate`, { actor }),
+  // outbound seam
+  contact: (ref: string) => req<ContactState>("GET", `/api/contacts/${encodeURIComponent(ref)}`),
+  setContact: (ref: string, body: Partial<Pick<ContactState, "consent" | "opted_out" | "suppressed" | "tags">>) =>
+    req<ContactState>("PUT", `/api/contacts/${encodeURIComponent(ref)}`, body),
+  contactCheck: (key: string, ref: string) =>
+    req<ContactDecision>("GET", `/api/activities/${encodeURIComponent(key)}/contact-check/${encodeURIComponent(ref)}`),
+  outboundAttempts: () => req<OutboundAttempt[]>("GET", "/api/outbound/attempts"),
   compositions: () => req<CompositionSummary[]>("GET", "/api/compositions"),
   tenants: () => req<Json[]>("GET", "/api/tenants"),
   createTenant: (body: Json) => req("POST", "/api/tenants", body),
@@ -156,4 +189,9 @@ export function wsUrl(activityKey: string, channel = "text", composition?: strin
   const proto = location.protocol === "https:" ? "wss:" : "ws:";
   const comp = composition ? `&composition=${encodeURIComponent(composition)}` : "";
   return `${proto}//${location.host}/ws/sessions/${encodeURIComponent(activityKey)}?channel=${channel}${comp}`;
+}
+
+export function outboundWsUrl(activityKey: string, contactRef: string): string {
+  const proto = location.protocol === "https:" ? "wss:" : "ws:";
+  return `${proto}//${location.host}/ws/outbound/${encodeURIComponent(activityKey)}/${encodeURIComponent(contactRef)}`;
 }

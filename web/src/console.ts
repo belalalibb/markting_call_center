@@ -1,6 +1,6 @@
 // Operator Console: live text/voice session over WS (selectable composition), state, events, handoffs,
 // and the §31 interruption watermarks (t0..t4) per session.
-import { api, wsUrl, type ActivitySummary, type CompositionSummary, type InterruptionRecord } from "./api";
+import { api, outboundWsUrl, wsUrl, type ActivitySummary, type CompositionSummary, type ContactState, type InterruptionRecord } from "./api";
 import { VoiceClient } from "./audio/client";
 import { clear, errMsg, h, pill, pre, section, table, toast, toneFor } from "./ui";
 
@@ -28,7 +28,116 @@ export async function renderConsole(root: HTMLElement): Promise<void> {
     api.activities().catch(() => [] as ActivitySummary[]),
     api.compositions().catch(() => [] as CompositionSummary[]),
   ]);
-  root.append(chatCard(activities, compositions), stateCard(), interruptionsCard(), sessionsCard(), eventsCard());
+  root.append(chatCard(activities, compositions), stateCard(), outboundCard(activities), interruptionsCard(), sessionsCard(), eventsCard());
+}
+
+// ------------------------------------------------------- outbound dial (QV-OUT-DIR / QV-TEL seam)
+let outboundWs: WebSocket | null = null;
+
+function outboundCard(activities: ActivitySummary[]): HTMLElement {
+  const box = h("div");
+  const card = section("Outbound dial (contact policy → simulated telephony → same Core)", box);
+  const outbound = activities.filter((a) => a.direction === "outbound");
+  const sel = h("select", {}, ...(outbound.length ? outbound : activities).map((a) => h("option", { value: a.key }, `${a.key} — ${a.name} [${a.direction}]`)));
+  const ref = h("input", { value: "contact_demo_1", placeholder: "contact_ref" });
+  const consent = h("select", {}, h("option", { value: "unknown" }, "consent: unknown"), h("option", { value: "true" }, "consent: given"), h("option", { value: "false" }, "consent: refused"));
+  const optOut = h("input", { type: "checkbox" });
+  const suppressed = h("input", { type: "checkbox" });
+  const decisionHost = h("div");
+  const chat = h("div", { class: "chat" });
+  const input = h("input", { placeholder: "type as the called party…" });
+  const statusHost = h("span");
+  const setStatus = (t: string, tone: "ok" | "muted" | "bad" | "warn") => { clear(statusHost); statusHost.append(pill(t, tone)); };
+  setStatus("idle", "muted");
+  const add = (cls: string, text: string) => { chat.append(h("div", { class: `msg ${cls}` }, text)); chat.scrollTop = chat.scrollHeight; };
+  const send = (obj: Record<string, unknown>) => {
+    if (outboundWs && outboundWs.readyState === WebSocket.OPEN) outboundWs.send(JSON.stringify({ schema: "qevion.transport.v1", client_ts_ms: Date.now(), ...obj }));
+  };
+  const showContact = (c: ContactState) => {
+    consent.value = c.consent === null ? "unknown" : String(c.consent);
+    optOut.checked = c.opted_out; suppressed.checked = c.suppressed;
+    return pill(`attempts: ${c.attempts}`, c.attempts ? "warn" : "muted");
+  };
+  const saveContact = async (): Promise<ContactState> => api.setContact(ref.value, {
+    consent: consent.value === "unknown" ? null : consent.value === "true",
+    opted_out: optOut.checked, suppressed: suppressed.checked,
+  });
+  const check = async () => {
+    clear(decisionHost);
+    try {
+      const c = await saveContact();
+      const d = await api.contactCheck(sel.value, ref.value);
+      decisionHost.append(h("div", { class: "row" }, pill(d.allowed ? "contact ALLOWED" : "contact REFUSED", d.allowed ? "ok" : "bad"),
+        ...d.refusals.map((r) => pill(r, "bad")), showContact(c), h("span", { class: "muted" }, `checked ${d.checked_at}`)));
+    } catch (e) { toast(errMsg(e), "bad"); }
+  };
+  const dial = async () => {
+    outboundWs?.close();
+    clear(chat);
+    try { await saveContact(); } catch (e) { toast(errMsg(e), "bad"); return; }
+    outboundWs = new WebSocket(outboundWsUrl(sel.value, ref.value));
+    outboundWs.binaryType = "arraybuffer";
+    outboundWs.onopen = () => { setStatus("dialing…", "warn"); add("sys", `dial → ${sel.value} / ${ref.value}`); };
+    outboundWs.onclose = (e) => {
+      const why = e.code === 4403 ? "refused by contact policy" : e.code === 4480 ? "not answered" : e.code === 4400 ? "inbound-only activity" : e.code === 4404 ? "activity not found" : "closed";
+      setStatus(`${why} (${e.code})`, e.code >= 4400 ? "bad" : "muted");
+      add("sys", `${why}${e.reason ? ": " + e.reason : ""}`);
+      void refreshAttempts(); void sessionsRedraw();
+    };
+    outboundWs.onerror = () => { setStatus("error", "bad"); };
+    outboundWs.onmessage = (ev) => {
+      if (typeof ev.data !== "string") return;
+      const m = JSON.parse(ev.data) as ServerMsg;
+      currentSid = m.session_id;
+      eventsPush(m);
+      switch (m.type) {
+        case "ready": setStatus("answered · live", "ok"); add("sys", "call answered — session ready"); break;
+        case "transcript": add(m.payload["role"] === "user" ? "user" : "agent", m.text ?? ""); break;
+        case "audio_start": add("agent", m.text ? m.text : "(speaking…)"); send({ type: "playout_started", response_id: m.response_id }); break;
+        case "audio_end": send({ type: "playout_stopped", response_id: m.response_id }); break;
+        case "stop_playout": add("sys", "⏹ interrupted"); send({ type: "playout_stopped", response_id: m.response_id }); break;
+        case "confirmation_request": {
+          const row = h("div", { class: "msg sys" }, `Confirm: ${m.text ?? JSON.stringify(m.payload)} `,
+            h("button", { onClick: () => { send({ type: "confirm", call_id: m.payload["call_id"], granted: true }); row.remove(); } }, "Yes"),
+            h("button", { onClick: () => { send({ type: "confirm", call_id: m.payload["call_id"], granted: false }); row.remove(); } }, "No"));
+          chat.append(row); break;
+        }
+        case "state": stateRedraw(m); break;
+        case "error": add("sys", `error: ${m.text}`); break;
+        case "bye": add("sys", "agent closed the call"); break;
+        default: break;
+      }
+    };
+  };
+  const attempts = h("div");
+  const refreshAttempts = async () => {
+    clear(attempts);
+    try {
+      const rows = await api.outboundAttempts();
+      if (!rows.length) { attempts.append(h("p", { class: "muted" }, "No outbound attempts yet. Every attempt is recorded, including refusals.")); return; }
+      attempts.append(table(["attempt", "activity", "contact", "decision", "call", "session"], rows.slice().reverse().map((a) => [
+        h("code", {}, String(a.attempt_id).slice(0, 12)), String(a.activity_key), String(a.contact_ref),
+        a.allowed ? pill("allowed", "ok") : pill(`refused: ${a.refusals.join(",")}`, "bad"),
+        a.call_state ? pill(String(a.call_state), a.call_state === "answered" ? "ok" : "warn") : "—",
+        a.session_id ? h("code", {}, String(a.session_id).slice(0, 14)) : "—",
+      ])));
+    } catch (e) { attempts.append(h("p", { class: "muted" }, errMsg(e))); }
+  };
+  const doSend = () => { const t = input.value.trim(); if (!t) return; add("user", t); send({ type: "text", text: t }); input.value = ""; };
+  input.addEventListener("keydown", (e) => { if ((e as KeyboardEvent).key === "Enter") doSend(); });
+  box.append(
+    h("p", { class: "muted" }, "Contact-policy hooks (consent · opt-out · suppression · attempt limit · contact window) are evaluated before any dial. A refusal is recorded and closes with 4403; no-answer with 4480."),
+    h("div", { class: "row" }, sel, ref),
+    h("div", { class: "row" }, consent, h("label", {}, optOut, " opted out"), h("label", {}, suppressed, " suppressed"),
+      h("button", { onClick: () => void check() }, "Check contact policy"),
+      h("button", { class: "primary", onClick: () => void dial() }, "📞 Dial"),
+      h("button", { class: "danger", onClick: () => send({ type: "bye" }) }, "Hang up"), statusHost),
+    decisionHost, chat,
+    h("div", { class: "row" }, input, h("button", { onClick: doSend }, "Send")),
+    h("h3", {}, "Outbound attempts (audit)"), attempts,
+  );
+  void refreshAttempts();
+  return card;
 }
 
 function compLabel(c: CompositionSummary): string {
