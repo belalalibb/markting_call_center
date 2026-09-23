@@ -407,4 +407,4 @@ def test_ws_voice_binary_roundtrip_barge_in_records_t0_t4(client: TestClient) ->
     rec = detail["interruptions"][0]
     assert rec["t1_to_t3_ms"] is not None and rec["t1_to_t4_ms"] is not None and rec["t1_to_t4_ms"] >= rec["t1_to_t3_ms"]
     types = {e["type"] for e in detail["events"]}
-    assert {"interruption.detected", "transport.playout_stopped", "user_speech.started"} <= types, types
+    assert {"interruption.detected", "transport.playout_stopped", "user.speech_started"} <= types, types
