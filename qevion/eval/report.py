@@ -88,7 +88,11 @@ class EvalReport:
 
     def to_json(self) -> str:
         return json.dumps(
-            {"schema": "qevion.eval_report.v1", "aggregate": self.aggregate(), "cases": [asdict(c) for c in self.cases]},
+            {
+                "schema": "qevion.eval_report.v1",
+                "aggregate": self.aggregate(),
+                "cases": [asdict(c) for c in self.cases],
+            },
             indent=2,
             sort_keys=True,
             default=str,

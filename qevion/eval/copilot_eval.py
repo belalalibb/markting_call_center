@@ -233,7 +233,9 @@ def drive(case: CopilotEvalCase, *, max_rounds: int = 25) -> CopilotRun:
         raw = _fixture(p.fixture)
         if p.missing_tool_id:
             tools = raw.setdefault("tools", {})
-            tools.setdefault("required", []).append({"tool_id": p.missing_tool_id, "purpose": "push lead to external CRM"})
+            tools.setdefault("required", []).append(
+                {"tool_id": p.missing_tool_id, "purpose": "push lead to external CRM"}
+            )
             tools.setdefault("permissions", {})[p.missing_tool_id] = {
                 "impact": "write",
                 "confirmation": "confirm_before_execute",
@@ -265,7 +267,9 @@ def drive(case: CopilotEvalCase, *, max_rounds: int = 25) -> CopilotRun:
                     unnecessary.append(q.target_path)
                 if q.target_path.startswith("knowledge.contradictions."):
                     cid = q.target_path.rsplit(".", 1)[1]
-                    winner = next((c.fact_ids[0] for c in session.state.contradictions if c.contradiction_id == cid), "")
+                    winner = next(
+                        (c.fact_ids[0] for c in session.state.contradictions if c.contradiction_id == cid), ""
+                    )
                     session.answer(q.question_id, winner, operator_id=OPERATOR)
                     _knowledge_plane_applies(session, contradiction_id=cid, winner=winner)
                     progressed = True
