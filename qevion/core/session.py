@@ -111,6 +111,9 @@ class SessionDeps:
     event_sink: EventSink | None = None
     budget: BudgetGuard = field(default_factory=BudgetGuard)
     confirmation_timeout_ms: int = 30_000
+    # F-13: send live user/assistant transcripts to the *connected operator client only* (ServerMessage TRANSCRIPT).
+    # Never written to the event log (events keep digests only, QV-PRIV). Off → the console shows no text.
+    operator_transcripts: bool = False
 
 
 @dataclass
@@ -927,7 +930,14 @@ class Session(SessionInterruption):
                         {"response_id": tr.response_id, "audio_ms": tr.audio_ms_sent, **_digest(tr.text)},
                         source=src,
                     )
-                    await self._send(ServerMessageType.AUDIO_END, response_id=tr.response_id)
+                    await self._send(
+                        ServerMessageType.AUDIO_END,
+                        response_id=tr.response_id,
+                        # F-13: lets the console drop "(speaking…)" bubbles for silent tool-only responses and
+                        # show what the agent said (operator transcript opt-in only; never in the event log)
+                        text=tr.text[:2000] if (self.deps.operator_transcripts and tr.text) else None,
+                        payload={"audio_ms": tr.audio_ms_sent},
+                    )
                 if self._current_response == rid:
                     self._current_response = None
                 if self.dialog.state is DialogState.SPEAKING:
@@ -941,9 +951,12 @@ class Session(SessionInterruption):
                     tr.cancelled = True
                 self._playout_stopped.set()
             case S2SEventType.INPUT_TRANSCRIPT:
-                await self.emit(
-                    EventType.USER_SPEECH_COMMITTED, {"transcript": True, **_digest(ev.text or "")}, source=src
-                )
+                # F-10: the provider's transcript is its own event, not a second USER_SPEECH_COMMITTED
+                await self.emit(EventType.USER_TRANSCRIPT, {**_digest(ev.text or "")}, source=src)
+                if self.deps.operator_transcripts and ev.text:
+                    await self._send(
+                        ServerMessageType.TRANSCRIPT, text=ev.text[:2000], payload={"role": "user", "item_id": ev.item_id}
+                    )
             case S2SEventType.ERROR:
                 err = ev.error
                 fatal = err.fatal if err else True

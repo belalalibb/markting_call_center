@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import asyncio
 import hashlib
+import os
 import time
 from collections.abc import Callable
 from dataclasses import dataclass, field
@@ -119,6 +120,9 @@ class RuntimeStore:
     """Composition root state. Single process, in-memory."""
 
     def __init__(self) -> None:
+        # F-13: live transcripts to the operator console (connected client only, never persisted). Default ON in
+        # development; set QEVION_OPERATOR_TRANSCRIPTS=0 for deployments where operators must not see caller text.
+        self.operator_transcripts = os.environ.get("QEVION_OPERATOR_TRANSCRIPTS", "1") != "0"
         self.tenants: dict[str, Tenant] = {}
         self.activities: dict[str, ActivityRecord] = {}
         self.knowledge = KnowledgeStore()
@@ -440,6 +444,7 @@ class RuntimeStore:
             voice_profile=self.voice_profiles.get(bp.locale.voice_profile_ref or ""),
             channel=channel,
             event_sink=sink,
+            operator_transcripts=self.operator_transcripts,
         )
         # Same id on the wire (ServerMessage.session_id), in events, and in the REST registry — otherwise a client
         # cannot look up its own session (found live 2026-09-23: WS id != /api/sessions id).
@@ -481,6 +486,11 @@ FORWARDED_EVENT_TYPES: frozenset[str] = frozenset(
         "tool.execution_completed",
         "tool.execution_failed",
         "tool.policy_rejected",
+        # P1: interruption lifecycle + provider errors (codes/messages only)
+        "assistant.response_cancelled",
+        "assistant.response_truncated",
+        "assistant.playout_ended",
+        "provider.error",
         # session close: primary/secondary outcome codes only (no record fields)
         "outcome.produced",
         "session.ended",
