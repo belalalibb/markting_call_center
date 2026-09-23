@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from zoneinfo import ZoneInfo
 
 from qevion.contracts.policy import ContactPolicyHooks
 from qevion.control.contact_policy import ContactRefusal, ContactState, evaluate_contact
@@ -10,8 +11,9 @@ from qevion.control.contact_policy import ContactRefusal, ContactState, evaluate
 HOOKS = ContactPolicyHooks(
     consent_required=True, attempt_limit=2, contact_window="10:00-20:00 Africa/Cairo", suppression_ref="sup_default"
 )
-NOON_CAIRO = datetime(2026, 9, 23, 10, 0, tzinfo=UTC)  # 12:00 Africa/Cairo (UTC+2 in Sept 2026, no DST)
-MIDNIGHT_CAIRO = datetime(2026, 9, 23, 22, 0, tzinfo=UTC)  # 00:00 Africa/Cairo
+CAIRO = ZoneInfo("Africa/Cairo")
+NOON_CAIRO = datetime(2026, 9, 23, 12, 0, tzinfo=CAIRO)
+MIDNIGHT_CAIRO = datetime(2026, 9, 24, 0, 0, tzinfo=CAIRO)
 
 
 def test_allowed_when_every_hook_satisfied() -> None:
@@ -48,8 +50,8 @@ def test_attempt_limit_boundary() -> None:
 
 
 def test_contact_window_edges_and_overnight_and_unparseable() -> None:
-    at_open = datetime(2026, 9, 23, 8, 0, tzinfo=UTC)  # 10:00 Cairo
-    at_close = datetime(2026, 9, 23, 18, 0, tzinfo=UTC)  # 20:00 Cairo
+    at_open = datetime(2026, 9, 23, 10, 0, tzinfo=CAIRO)
+    at_close = datetime(2026, 9, 23, 20, 0, tzinfo=CAIRO)
     assert evaluate_contact(HOOKS, ContactState("c", consent=True), now=at_open).allowed
     assert evaluate_contact(HOOKS, ContactState("c", consent=True), now=at_close).allowed
     overnight = HOOKS.model_copy(update={"contact_window": "22:00-06:00 Africa/Cairo"})
@@ -61,7 +63,7 @@ def test_contact_window_edges_and_overnight_and_unparseable() -> None:
 
 
 def test_missing_hooks_refuse_outbound() -> None:
-    d = evaluate_contact(None, ContactState("c", consent=True))
+    d = evaluate_contact(None, ContactState("c", consent=True), now=datetime.now(UTC))
     assert not d.allowed and d.refusals == (ContactRefusal.HOOKS_MISSING,)
 
 

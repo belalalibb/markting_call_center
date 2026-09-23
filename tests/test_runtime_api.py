@@ -591,8 +591,8 @@ def test_outbound_answered_runs_same_core_session_and_counts_attempt(client: Tes
 
 
 def test_outbound_no_answer_closes_4480_and_records_attempt(client: TestClient) -> None:
-    from starlette.websockets import WebSocketDisconnect
     from qevion.adapters.telephony.simulated import SimCallState
+    from starlette.websockets import WebSocketDisconnect
 
     key = _key(client, "act_csat_survey")
     _no_window(client, key)

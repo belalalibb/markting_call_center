@@ -265,9 +265,7 @@ class RuntimeStore:
         if self.telephony.state(call_id) is not SimCallState.ANSWERED:
             return attempt
         sid = session_id or new_id("ses")
-        live = self.build_session(
-            activity_key=key, transport=transport, session_id=sid, channel=Channel.BROWSER_VOICE
-        )
+        live = self.build_session(activity_key=key, transport=transport, session_id=sid, channel=Channel.BROWSER_VOICE)
         live.outbound_attempt_id = attempt.attempt_id
         attempt.session_id = sid
         return attempt
