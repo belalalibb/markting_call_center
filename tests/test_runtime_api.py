@@ -386,7 +386,9 @@ def test_ws_voice_binary_roundtrip_barge_in_records_t0_t4(client: TestClient) ->
             j = json.loads(m["text"])
             if j["type"] == "stop_playout":
                 got_stop = True
-                ws.send_text(json.dumps({"type": "playout_stopped", "response_id": j["response_id"], "client_ts_ms": 1}))
+                ws.send_text(
+                    json.dumps({"type": "playout_stopped", "response_id": j["response_id"], "client_ts_ms": 1})
+                )
             elif j["type"] == "event":
                 ev = j["payload"]
                 if ev.get("type") == "latency.sample" and ev["payload"].get("segment") == "interruption":
@@ -395,7 +397,9 @@ def test_ws_voice_binary_roundtrip_barge_in_records_t0_t4(client: TestClient) ->
         assert got_stop, "stop_playout never sent"
         assert interruption is not None, "interruption latency.sample never emitted"
         assert interruption["response_id"] == response_id
-        assert interruption["t0"] <= interruption["t1"] <= interruption["t2"] <= interruption["t3"] <= interruption["t4"]
+        assert (
+            interruption["t0"] <= interruption["t1"] <= interruption["t2"] <= interruption["t3"] <= interruption["t4"]
+        )
         assert interruption["forced"] is False
         # Then silence → END_OF_TURN → provider commit (next response).
         for _ in range(30):
@@ -405,6 +409,8 @@ def test_ws_voice_binary_roundtrip_barge_in_records_t0_t4(client: TestClient) ->
     detail = client.get(f"/api/sessions/{s['session_id']}").json()
     assert detail["interruptions"] and detail["interruptions"][0]["response_id"] == response_id
     rec = detail["interruptions"][0]
-    assert rec["t1_to_t3_ms"] is not None and rec["t1_to_t4_ms"] is not None and rec["t1_to_t4_ms"] >= rec["t1_to_t3_ms"]
+    assert (
+        rec["t1_to_t3_ms"] is not None and rec["t1_to_t4_ms"] is not None and rec["t1_to_t4_ms"] >= rec["t1_to_t3_ms"]
+    )
     types = {e["type"] for e in detail["events"]}
     assert {"interruption.detected", "transport.playout_stopped", "user.speech_started"} <= types, types
