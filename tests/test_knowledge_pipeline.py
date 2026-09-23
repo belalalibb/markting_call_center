@@ -113,7 +113,9 @@ def test_approved_structured_source_yields_approved_facts_directly() -> None:
 
 
 def test_relationships_link_entities_by_name() -> None:
-    rep = KnowledgePipeline().ingest(_src("p", "plans.json"), b'[{"name":"Alpha"},{"name":"Bundle","includes":"Alpha"}]')
+    rep = KnowledgePipeline().ingest(
+        _src("p", "plans.json"), b'[{"name":"Alpha"},{"name":"Bundle","includes":"Alpha"}]'
+    )
     rel = rep.relationships
     assert len(rel) == 1 and rel[0].kind is FactKind.RELATIONSHIP
     assert (rel[0].subject, rel[0].predicate, rel[0].value) == ("item:bundle", "includes", "item:alpha")
