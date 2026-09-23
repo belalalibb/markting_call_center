@@ -1,0 +1,145 @@
+{
+ "kind": "openai-realtime-live-ws-e2e",
+ "produced_at": "2026-09-23T14:24:41.608433+00:00",
+ "base": "http://localhost:8000",
+ "activity": "act_csat_survey@1.0.0",
+ "composition": "comp_s2s_openai_v1",
+ "key_fingerprint": "…FToA",
+ "admin_credential_source": "ephemeral_ui",
+ "session_id": "ses_b9d1d1ffcf2e4df8",
+ "session_detail": {
+  "composition_id": "comp_s2s_openai_v1",
+  "credential_source": "ephemeral_ui",
+  "decision_credential_source": "none",
+  "running": true,
+  "dialog_state": "LISTENING",
+  "activity_state": "COLLECTING",
+  "error": null,
+  "interruptions": []
+ },
+ "outcome": "abandoned",
+ "session_events_seen": 57,
+ "tool_calls": [
+  "record_field",
+  "record_field"
+ ],
+ "turns": [
+  {
+   "text_len": 4,
+   "sent_ms": 8045,
+   "first_audio_ms": 8498,
+   "ttfa_ms": 453
+  },
+  {
+   "text_len": 38,
+   "sent_ms": 17053,
+   "first_audio_ms": 18021,
+   "ttfa_ms": 968
+  },
+  {
+   "text_len": 19,
+   "sent_ms": 26055,
+   "first_audio_ms": 27020,
+   "ttfa_ms": 965
+  }
+ ],
+ "audio": {
+  "frames": 88,
+  "bytes": 1077600,
+  "ms_pcm16_24k": 22450
+ },
+ "server_message_counts": {
+  "state": 26,
+  "ready": 1,
+  "event": 8,
+  "audio_start": 5,
+  "audio_end": 5
+ },
+ "event_types": [
+  "decision.made",
+  "outcome.produced",
+  "tool.execution_completed",
+  "turn.ended"
+ ],
+ "events": [
+  {
+   "t_ms": 8051,
+   "type": "turn.ended",
+   "keys": [
+    "ts_ms",
+    "turn_id"
+   ]
+  },
+  {
+   "t_ms": 17057,
+   "type": "turn.ended",
+   "keys": [
+    "ts_ms",
+    "turn_id"
+   ]
+  },
+  {
+   "t_ms": 17599,
+   "type": "tool.execution_completed",
+   "keys": [
+    "call_id",
+    "latency_ms",
+    "provenance",
+    "tool_id",
+    "ts_ms"
+   ]
+  },
+  {
+   "t_ms": 17599,
+   "type": "decision.made",
+   "keys": [
+    "field",
+    "kind",
+    "ok",
+    "source",
+    "ts_ms"
+   ]
+  },
+  {
+   "t_ms": 26059,
+   "type": "turn.ended",
+   "keys": [
+    "ts_ms",
+    "turn_id"
+   ]
+  },
+  {
+   "t_ms": 26598,
+   "type": "tool.execution_completed",
+   "keys": [
+    "call_id",
+    "latency_ms",
+    "provenance",
+    "tool_id",
+    "ts_ms"
+   ]
+  },
+  {
+   "t_ms": 26598,
+   "type": "decision.made",
+   "keys": [
+    "field",
+    "kind",
+    "ok",
+    "source",
+    "ts_ms"
+   ]
+  },
+  {
+   "t_ms": 37114,
+   "type": "outcome.produced",
+   "keys": [
+    "primary",
+    "secondary",
+    "ts_ms"
+   ]
+  }
+ ],
+ "errors": [],
+ "passed": true
+}
