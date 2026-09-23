@@ -35,3 +35,4 @@ data/runtime/
 !evidence/**/index.json
 !evidence/**/junit.xml
 !evidence/**/licenses.json
+models/
