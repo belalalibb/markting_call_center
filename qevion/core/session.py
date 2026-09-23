@@ -17,7 +17,7 @@ from __future__ import annotations
 import asyncio
 import hashlib
 import time
-from collections.abc import Awaitable, Callable
+from collections.abc import AsyncIterator, Awaitable, Callable
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -1011,9 +1011,27 @@ class Session(SessionInterruption):
                     except ConnectionError:
                         return
 
+        inbox: asyncio.Queue[ClientMessage | bytes | None] = asyncio.Queue()
+
+        async def read_client() -> None:
+            # The processor below may be parked inside interrupt() waiting for the client's playout ack; that ack
+            # arrives on this same stream, so the reader must signal it directly (otherwise every audio barge-in
+            # waited the full force timeout — found live in OPS 5.5 P2). Order of processing is unchanged.
+            try:
+                async for item in self.deps.transport.incoming():
+                    if not isinstance(item, bytes) and item.type is ClientMessageType.PLAYOUT_STOPPED:
+                        self._playout_stopped.set()
+                    inbox.put_nowait(item)
+            finally:
+                inbox.put_nowait(None)
+
+        async def client_items() -> AsyncIterator[ClientMessage | bytes]:
+            while (item := await inbox.get()) is not None:
+                yield item
+
         async def pump_client() -> None:
             fmt = self.deps.s2s_config.input_format
-            async for item in self.deps.transport.incoming():
+            async for item in client_items():
                 if isinstance(item, bytes):
                     dur = int(len(item) / 2 / fmt.sample_rate_hz * 1000)
                     ref = AudioFrameRef(frame_id=new_id("frm"), byte_length=len(item), duration_ms=dur, fmt=fmt)
@@ -1030,6 +1048,7 @@ class Session(SessionInterruption):
             asyncio.create_task(pump_provider()),
             asyncio.create_task(pump_audio_out()),
             asyncio.create_task(pump_client()),
+            asyncio.create_task(read_client()),
         ]
         try:
             await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
