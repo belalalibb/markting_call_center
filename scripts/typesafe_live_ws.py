@@ -92,6 +92,8 @@ async def _run_phrase(ws_base: str, phrase: dict[str, Any]) -> dict[str, Any]:
                 raw = await asyncio.wait_for(ws.recv(), timeout=max(0.05, deadline - time.monotonic()))
             except TimeoutError:
                 return
+            if isinstance(raw, bytes):  # mock audio frames — not part of this probe
+                continue
             msg = json.loads(raw)
             mtype = msg.get("type")
             session_id = session_id or msg.get("session_id")
