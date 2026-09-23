@@ -956,7 +956,9 @@ class Session(SessionInterruption):
                 await self.emit(EventType.USER_TRANSCRIPT, {**_digest(ev.text or "")}, source=src)
                 if self.deps.operator_transcripts and ev.text:
                     await self._send(
-                        ServerMessageType.TRANSCRIPT, text=ev.text[:2000], payload={"role": "user", "item_id": ev.item_id}
+                        ServerMessageType.TRANSCRIPT,
+                        text=ev.text[:2000],
+                        payload={"role": "user", "item_id": ev.item_id},
                     )
             case S2SEventType.ERROR:
                 err = ev.error

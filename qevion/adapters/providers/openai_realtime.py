@@ -229,7 +229,12 @@ class OpenAIRealtimeSession:
         if not item:
             return
         await self._send(
-            {"type": "conversation.item.truncate", "item_id": item, "content_index": 0, "audio_end_ms": max(0, audio_end_ms)}
+            {
+                "type": "conversation.item.truncate",
+                "item_id": item,
+                "content_index": 0,
+                "audio_end_ms": max(0, audio_end_ms),
+            }
         )
 
     async def cancel_response(self, response_id: str | None = None) -> None:

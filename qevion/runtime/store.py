@@ -493,7 +493,6 @@ FORWARDED_EVENT_TYPES: frozenset[str] = frozenset(
         "tool.execution_failed",
         "tool.policy_rejected",
         # P1: interruption lifecycle + provider errors (codes/messages only)
-        "assistant.response_cancelled",
         "assistant.response_truncated",
         "assistant.playout_ended",
         "provider.error",
