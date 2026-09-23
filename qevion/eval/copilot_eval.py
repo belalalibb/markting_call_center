@@ -150,6 +150,24 @@ def _plant_knowledge(s: ConfigSession, gaps: int, conflicts: int) -> None:
     )
 
 
+def _knowledge_plane_applies(
+    session: ConfigSession, *, contradiction_id: str | None = None, winner: str = "", gap_id: str | None = None
+) -> None:
+    """Emulate the knowledge plane applying the operator decision (runtime: KnowledgePipeline.resolve_contradiction /
+    gap fill) and re-feeding the Copilot, exactly as `copilot.api._view` does via `set_knowledge`."""
+    gaps = [
+        g.model_copy(update={"resolved": True, "resolution_fact_id": "fact_operator"}) if g.gap_id == gap_id else g
+        for g in session.state.gaps
+    ]
+    cons = [
+        c.model_copy(update={"resolution": "operator_decided", "winning_fact_id": winner})
+        if c.contradiction_id == contradiction_id
+        else c
+        for c in session.state.contradictions
+    ]
+    session.set_knowledge(gaps, cons)
+
+
 def _load_dir(path: Path, model: type[Any], key: str) -> dict[str, Any]:
     out: dict[str, Any] = {}
     if path.is_dir():
@@ -246,10 +264,15 @@ def drive(case: CopilotEvalCase, *, max_rounds: int = 25) -> CopilotRun:
                 if q.blocking and q.target_path in answered:
                     unnecessary.append(q.target_path)
                 if q.target_path.startswith("knowledge.contradictions."):
-                    session.answer(q.question_id, "keep_first", operator_id=OPERATOR)
+                    cid = q.target_path.rsplit(".", 1)[1]
+                    winner = next((c.fact_ids[0] for c in session.state.contradictions if c.contradiction_id == cid), "")
+                    session.answer(q.question_id, winner, operator_id=OPERATOR)
+                    _knowledge_plane_applies(session, contradiction_id=cid, winner=winner)
                     progressed = True
                 elif q.target_path.startswith("knowledge.gaps."):
+                    gid = q.target_path.rsplit(".", 1)[1]
                     session.answer(q.question_id, "operator supplied value", operator_id=OPERATOR)
+                    _knowledge_plane_applies(session, gap_id=gid)
                     progressed = True
                 elif q.target_path.startswith("capabilities.knowledge:"):
                     # REQUIRES_KNOWLEDGE → operator uploads/points to a source (AnswerType.UPLOAD)
