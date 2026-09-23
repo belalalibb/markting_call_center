@@ -88,6 +88,13 @@ class ActorBody(BaseModel):
     actor: str = "operator"
 
 
+class ContactBody(BaseModel):
+    consent: bool | None = None
+    opted_out: bool | None = None
+    suppressed: bool | None = None
+    tags: list[str] | None = None
+
+
 class SimulateBody(BaseModel):
     actor: str = "operator"
     thresholds: ActivationThresholds | None = None
@@ -408,36 +415,105 @@ def create_app(store: RuntimeStore | None = None) -> FastAPI:
         except KeyError as e:
             await ws.close(code=4400, reason=str(e)[:120])
             return
-        live.task = asyncio.create_task(_run_guarded(live))
+        await _pump(ws, transport, live)
+
+    # ------------------------------------------------------------- outbound (P5, QV-OUT-DIR)
+
+    @app.get("/api/contacts/{contact_ref}")
+    async def contact_get(contact_ref: str) -> dict[str, Any]:
+        st = store.contact_state(contact_ref)
+        return {
+            "contact_ref": st.contact_ref,
+            "consent": st.consent,
+            "opted_out": st.opted_out,
+            "suppressed": st.suppressed,
+            "attempts": st.attempts,
+            "tags": sorted(st.tags),
+        }
+
+    @app.put("/api/contacts/{contact_ref}")
+    async def contact_put(contact_ref: str, body: ContactBody) -> dict[str, Any]:
+        st = store.contact_state(contact_ref)
+        if body.consent is not None:
+            st.consent = body.consent
+        if body.opted_out is not None:
+            st.opted_out = body.opted_out
+        if body.suppressed is not None:
+            st.suppressed = body.suppressed
+        if body.tags is not None:
+            st.tags = set(body.tags)
+        return await contact_get(contact_ref)
+
+    @app.get("/api/activities/{key}/contact-check/{contact_ref}")
+    async def contact_check(key: str, contact_ref: str) -> dict[str, Any]:
         try:
-            while not live.task.done():
-                msg = await ws.receive()
-                if msg.get("type") == "websocket.disconnect":
-                    break
-                if msg.get("bytes") is not None:
-                    transport.push(msg["bytes"])
-                elif msg.get("text") is not None:
-                    try:
-                        transport.push(ClientMessage.model_validate_json(msg["text"]))
-                    except ValidationError:
-                        err = ServerMessage(
-                            type=ServerMessageType.ERROR,
-                            session_id=sid,
-                            server_ts_ms=int(time.time() * 1000),
-                            text="invalid client message",
-                        )
-                        await ws.send_text(err.model_dump_json(by_alias=True))
-        except WebSocketDisconnect:
-            pass
-        finally:
-            transport.push(None)
-            try:
-                await asyncio.wait_for(live.task, timeout=5)
-            except (TimeoutError, asyncio.CancelledError):
-                live.task.cancel()
-            await transport.close("session_ended")
+            d = store.check_contact(key, contact_ref)
+        except KeyError as e:
+            raise HTTPException(404, str(e)) from e
+        return {"key": key, "contact_ref": contact_ref, **d.payload()}
+
+    @app.get("/api/outbound/attempts")
+    async def outbound_attempts() -> list[dict[str, Any]]:
+        return [a.payload() for a in store.outbound_attempts]
+
+    @app.websocket("/ws/outbound/{activity_key}/{contact_ref}")
+    async def ws_outbound(ws: WebSocket, activity_key: str, contact_ref: str) -> None:
+        """Outbound dial as a WS: hooks → dial → session. Refusal / no-answer close with 4403 / 4480 and the
+        attempt is still recorded (auditable)."""
+        await ws.accept()
+        try:
+            store.get_activity(activity_key)
+        except KeyError:
+            await ws.close(code=4404, reason="activity not found")
+            return
+        transport = WsTransport(ws)
+        try:
+            attempt = await store.outbound_attempt(activity_key, contact_ref, transport=transport)
+        except ValueError as e:
+            await ws.close(code=4400, reason=str(e)[:120])
+            return
+        if not attempt.decision.allowed:
+            await ws.close(code=4403, reason="contact refused: " + ",".join(r.value for r in attempt.decision.refusals))
+            return
+        if attempt.session_id is None:
+            await ws.close(code=4480, reason=f"not answered: {attempt.call_state}")
+            return
+        live = store.sessions[attempt.session_id]
+        await _pump(ws, transport, live)
 
     return app
+
+
+async def _pump(ws: WebSocket, transport: WsTransport, live: LiveSession) -> None:
+    """Client→transport pump shared by inbound and outbound WS sessions."""
+    live.task = asyncio.create_task(_run_guarded(live))
+    try:
+        while not live.task.done():
+            msg = await ws.receive()
+            if msg.get("type") == "websocket.disconnect":
+                break
+            if msg.get("bytes") is not None:
+                transport.push(msg["bytes"])
+            elif msg.get("text") is not None:
+                try:
+                    transport.push(ClientMessage.model_validate_json(msg["text"]))
+                except ValidationError:
+                    err = ServerMessage(
+                        type=ServerMessageType.ERROR,
+                        session_id=live.session_id,
+                        server_ts_ms=int(time.time() * 1000),
+                        text="invalid client message",
+                    )
+                    await ws.send_text(err.model_dump_json(by_alias=True))
+    except WebSocketDisconnect:
+        pass
+    finally:
+        transport.push(None)
+        try:
+            await asyncio.wait_for(live.task, timeout=5)
+        except (TimeoutError, asyncio.CancelledError):
+            live.task.cancel()
+        await transport.close("session_ended")
 
 
 async def _run_guarded(live: LiveSession) -> None:
@@ -483,6 +559,7 @@ def _live(s: LiveSession) -> dict[str, Any]:
         "credential_source": s.credential_source,
         "error": s.error,
         "interruptions": [_interruption(i) for i in s.session.interruptions],
+        "outbound_attempt_id": s.outbound_attempt_id,
     }
 
 
