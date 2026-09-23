@@ -21,6 +21,12 @@ def client() -> TestClient:
     return TestClient(build(RuntimeStore(), seed_examples=True, web_dist=ROOT / "nonexistent"))
 
 
+def _load_example(name: str) -> dict[str, Any]:
+    """YAML → JSON-safe dict (yaml parses timestamps into datetime, which `json=` cannot send)."""
+    raw = yaml.safe_load((ROOT / "config/examples" / f"{name}.yaml").read_text())
+    return json.loads(json.dumps(raw, default=str))
+
+
 def _key(client: TestClient, activity_id: str) -> str:
     return next(a["key"] for a in client.get("/api/activities").json() if a["activity_id"] == activity_id)
 
@@ -43,8 +49,7 @@ def test_tenant_crud_and_validation(client: TestClient) -> None:
 
 
 def test_activity_upload_yaml_and_json(client: TestClient) -> None:
-    raw = (ROOT / "config/examples/activity_a_restaurant.yaml").read_text()
-    body = yaml.safe_load(raw)
+    body = _load_example("activity_a_restaurant")
     body["identity"]["version"] = "1.1.0"
     r = client.post("/api/activities", json=body)
     assert r.status_code == 201 and r.json()["key"].endswith("@1.1.0")
@@ -75,14 +80,14 @@ def test_preflight_capabilities_and_readiness_flow(client: TestClient) -> None:
     # illegal transition is rejected with 409 and legal history is recorded
     assert client.post(f"/api/activities/{key}/transition", json={"to": "ACTIVE"}).status_code == 409
     hist = client.get(f"/api/activities/{key}").json()["history"]
-    assert hist and hist[-1]["to_state"] == r["readiness"]
+    assert hist and hist[-1]["to"] == r["readiness"]
 
 
 def test_transition_endpoint_legal_path(client: TestClient) -> None:
     key = _key(client, "act_order_intake")
     r = client.post(f"/api/activities/{key}/transition", json={"to": "DISCOVERY_IN_PROGRESS", "reason": "start"})
     assert r.status_code == 200 and r.json()["readiness"] == "DISCOVERY_IN_PROGRESS"
-    assert r.json()["change"]["from_state"] == "DRAFT"
+    assert r.json()["change"]["from"] == "DRAFT"
 
 
 # ------------------------------------------------------------------ knowledge
@@ -130,14 +135,14 @@ def test_knowledge_upload_rejects_oversize(client: TestClient) -> None:
 
 def test_ephemeral_test_key_never_echoed(client: TestClient) -> None:
     secret = "sk-test-ABCDEFGHIJKLMNOP"
-    r = client.post("/api/admin/test-key", json={"provider": "openai", "value": secret, "ttl_seconds": 60})
+    r = client.post("/api/admin/test-key", json={"provider": "testprov", "value": secret, "ttl_seconds": 60})
     assert r.status_code == 200
     body = r.text
-    assert secret not in body and r.json()["source"] == "EPHEMERAL_UI"
-    st = client.get("/api/admin/credentials/openai").json()
-    assert st["source"] == "EPHEMERAL_UI" and secret not in json.dumps(st)
-    assert client.delete("/api/admin/test-key", params={"provider": "openai"}).json()["cleared"] == 1
-    assert client.get("/api/admin/credentials/openai").json()["source"] != "EPHEMERAL_UI"
+    assert secret not in body and r.json()["source"] == "ephemeral_ui"
+    st = client.get("/api/admin/credentials/testprov").json()
+    assert st["source"] == "ephemeral_ui" and secret not in json.dumps(st)
+    assert client.delete("/api/admin/test-key", params={"provider": "testprov"}).json()["cleared"] == 1
+    assert client.get("/api/admin/credentials/testprov").json()["source"] != "ephemeral_ui"
 
 
 # ---------------------------------------------------------------------- copilot
@@ -169,7 +174,7 @@ def test_copilot_session_loop_over_http(client: TestClient) -> None:
 
 
 def test_copilot_seeded_from_example_publishes_activity(client: TestClient) -> None:
-    seed = yaml.safe_load((ROOT / "config/examples/activity_b_clinic.yaml").read_text())
+    seed = _load_example("activity_b_clinic")
     seed["identity"]["version"] = "2.0.0"
     v = _start(client, activity_id=seed["identity"]["activity_id"], seed=seed, operator_id="op_1")
     assert v["draft_valid"], v["validation_errors"]

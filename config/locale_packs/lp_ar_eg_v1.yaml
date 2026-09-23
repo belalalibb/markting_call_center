@@ -1,0 +1,8 @@
+schema: qevion.locale_pack.v1
+locale_pack_id: lp_ar_eg_v1
+language: ar
+locale: ar-EG
+dialect: egyptian
+speech_register: neutral
+greeting_refs: [greeting_ar_eg_neutral]
+confirmation_phrases: ["تمام", "أيوه", "صح", "ماشي"]

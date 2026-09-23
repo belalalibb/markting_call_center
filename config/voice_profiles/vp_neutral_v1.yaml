@@ -1,0 +1,9 @@
+schema: qevion.voice_profile.v1
+voice_profile_id: vp_neutral_v1
+display_name: Neutral
+provider_voice_map:
+  mock: mock_voice_1
+  openai_realtime: marin
+speaking_rate: 1.0
+locale: ar-EG
+version: "1"

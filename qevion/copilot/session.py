@@ -44,6 +44,7 @@ _INTEGRATION: dict[MappingResult, IntegrationClass] = {
     MappingResult.REQUIRES_HUMAN: IntegrationClass.CONFIGURATION_ONLY,
     MappingResult.REQUIRES_TOOL: IntegrationClass.NEW_INTEGRATION_REQUIRED,
     MappingResult.UNSUPPORTED: IntegrationClass.NEW_CORE_CAPABILITY_REQUIRED,
+    MappingResult.UNVERIFIED: IntegrationClass.CONFIGURATION_ONLY,  # verify or pick another provider
 }
 
 

@@ -463,7 +463,7 @@ class DiscoveryEngine:
                         blocking=True,
                     )
                 )
-            elif state == "UNVERIFIED":
+            elif action == MappingResult.UNVERIFIED or state == "UNVERIFIED":
                 qs.append(
                     self._q(
                         QuestionKind.CAPABILITY_GAP,
