@@ -19,13 +19,14 @@ from qevion.adapters.decision.rules import RulesDecisionAdapter
 from qevion.adapters.providers.mocks import MockS2SAdapter, MockScriptStep
 from qevion.adapters.providers.openai_realtime import OpenAIRealtimeAdapter
 from qevion.adapters.sinks.memory import MemoryHandoffSink, MemoryOutcomeSink
+from qevion.adapters.telephony.simulated import SimCallState, SimulatedTelephonyAdapter
 from qevion.adapters.tools.memory_backend import MemoryStore, memory_backends
 from qevion.adapters.turn.energy import EnergyTurnAdapter, MockTurnAdapter
 from qevion.adapters.turn.silero import SileroTurnAdapter
 from qevion.adapters.turn.smart_turn import SmartTurnAdapter
 from qevion.admin.credentials import EnvAdminEphemeralResolver
 from qevion.contracts.activity import ActivityBlueprint, ReadinessState
-from qevion.contracts.common import Channel
+from qevion.contracts.common import Channel, Direction, new_id
 from qevion.contracts.composition import Composition
 from qevion.contracts.control import PreflightResult
 from qevion.contracts.event import Event
@@ -35,6 +36,7 @@ from qevion.contracts.simulation import ActivationThresholds, ScenarioCase, Simu
 from qevion.contracts.tenant import LocalePack, Tenant, VoiceProfile
 from qevion.contracts.transport import ServerMessage, ServerMessageType
 from qevion.control.capabilities import CapabilityMapper, RequirementMapping, build_registry
+from qevion.control.contact_policy import ContactDecision, ContactState, evaluate_contact
 from qevion.control.preflight import Preflight, PreflightContext
 from qevion.control.readiness import (
     ActivationGates,
@@ -49,6 +51,31 @@ from qevion.simulation.cases import default_cases
 from qevion.simulation.runner import ScenarioRunner, SimulationDeps
 
 ROOT = Path(__file__).resolve().parents[2]
+
+
+@dataclass
+class OutboundAttempt:
+    """One outbound contact attempt: hook decision → (dial → session) — auditable even when refused."""
+
+    attempt_id: str
+    activity_key: str
+    contact_ref: str
+    decision: ContactDecision
+    call_id: str | None = None
+    call_state: str | None = None
+    session_id: str | None = None
+    created_at: float = field(default_factory=time.time)
+
+    def payload(self) -> dict[str, Any]:
+        return {
+            "attempt_id": self.attempt_id,
+            "activity_key": self.activity_key,
+            "contact_ref": self.contact_ref,
+            "contact_decision": self.decision.payload(),
+            "call_id": self.call_id,
+            "call_state": self.call_state,
+            "session_id": self.session_id,
+        }
 
 
 @dataclass
@@ -79,6 +106,7 @@ class LiveSession:
     composition_id: str = ""
     credential_source: str = "none"
     error: str | None = None
+    outbound_attempt_id: str | None = None
 
 
 class RuntimeStore:
@@ -96,6 +124,9 @@ class RuntimeStore:
         self.compositions: dict[str, Composition] = _load_dir(
             ROOT / "config/compositions", Composition, "composition_id"
         )
+        self.telephony = SimulatedTelephonyAdapter()
+        self.contacts: dict[str, ContactState] = {}
+        self.outbound_attempts: list[OutboundAttempt] = []
         self.default_composition_id = "comp_mock_s2s_v1"
         self.composition = self.compositions[self.default_composition_id]
         self._s2s = MockS2SAdapter([])
@@ -201,6 +232,45 @@ class RuntimeStore:
         if change is not None:
             rec.changes.append(change)
         return rec
+
+    # -------------------------------------------------------------- outbound seam (P5, QV-OUT-DIR)
+    def contact_state(self, contact_ref: str) -> ContactState:
+        return self.contacts.setdefault(contact_ref, ContactState(contact_ref=contact_ref))
+
+    def check_contact(self, key: str, contact_ref: str) -> ContactDecision:
+        bp = self.get_activity(key).blueprint
+        return evaluate_contact(bp.policies.contact_policy_hooks, self.contact_state(contact_ref))
+
+    async def outbound_attempt(
+        self, key: str, contact_ref: str, *, transport: Any, session_id: str | None = None
+    ) -> OutboundAttempt:
+        """QV-OUT-DIR-001/002: hooks first (a refusal is a recorded attempt, no dial), then dial via the
+        telephony seam, then a normal Session on the default composition — same Core, direction=outbound."""
+        rec = self.get_activity(key)
+        bp = rec.blueprint
+        if bp.direction is Direction.INBOUND:
+            raise ValueError("activity is inbound-only")
+        state = self.contact_state(contact_ref)
+        decision = evaluate_contact(bp.policies.contact_policy_hooks, state)
+        attempt = OutboundAttempt(
+            attempt_id=new_id("att"), activity_key=key, contact_ref=contact_ref, decision=decision
+        )
+        self.outbound_attempts.append(attempt)
+        if not decision.allowed:
+            return attempt
+        state.attempts += 1
+        call_id = await self.telephony.dial(bp.identity.tenant_id, contact_ref, bp.identity.activity_id)
+        attempt.call_id = call_id
+        attempt.call_state = self.telephony.state(call_id).value
+        if self.telephony.state(call_id) is not SimCallState.ANSWERED:
+            return attempt
+        sid = session_id or new_id("ses")
+        live = self.build_session(
+            activity_key=key, transport=transport, session_id=sid, channel=Channel.BROWSER_VOICE
+        )
+        live.outbound_attempt_id = attempt.attempt_id
+        attempt.session_id = sid
+        return attempt
 
     def activation_gates(self, key: str) -> ActivationGates:
         rec = self.get_activity(key)

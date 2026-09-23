@@ -49,6 +49,9 @@ class EventType:
     SESSION_RESUMED = "session.resumed"
     SESSION_ENDED = "session.ended"
     SESSION_LIMIT_ENFORCED = "session.limit_enforced"
+    OUTBOUND_CONTACT_CHECKED = "outbound.contact_checked"  # QV-OUT-DIR-002 hook result (allowed/refusals)
+    OUTBOUND_DIAL_STARTED = "outbound.dial_started"
+    OUTBOUND_DIAL_RESULT = "outbound.dial_result"  # answered | no_answer | busy
     TRANSPORT_CONNECTED = "transport.connected"
     TRANSPORT_DISCONNECTED = "transport.disconnected"
     TRANSPORT_PLAYOUT_STARTED = "transport.playout_started"
