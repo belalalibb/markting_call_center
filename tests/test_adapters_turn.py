@@ -11,7 +11,9 @@ from qevion.adapters.turn.smart_turn import SmartTurnAdapter, prosodic_scorer
 from qevion.contracts.provider import TurnDetectorConfig, TurnEventType
 
 FRAME_MS = 20
-CFG = TurnDetectorConfig(detector="silero", threshold=0.5, min_speech_ms=100, min_silence_ms=400, barge_in_min_speech_ms=200)
+CFG = TurnDetectorConfig(
+    detector="silero", threshold=0.5, min_speech_ms=100, min_silence_ms=400, barge_in_min_speech_ms=200
+)
 
 
 def tone(ms: int, amp: int = 8000, hz: float = 220.0) -> bytes:
@@ -21,7 +23,10 @@ def tone(ms: int, amp: int = 8000, hz: float = 220.0) -> bytes:
 
 def decaying(ms: int, start: int = 9000, end: int = 1500) -> bytes:
     n = SAMPLE_RATE * ms // 1000
-    return struct.pack(f"<{n}h", *(int((start + (end - start) * i / n) * math.sin(2 * math.pi * 220 * i / SAMPLE_RATE)) for i in range(n)))
+    return struct.pack(
+        f"<{n}h",
+        *(int((start + (end - start) * i / n) * math.sin(2 * math.pi * 220 * i / SAMPLE_RATE)) for i in range(n)),
+    )
 
 
 def silence(ms: int) -> bytes:
@@ -147,7 +152,10 @@ def test_smart_turn_barge_in_passthrough_and_capabilities() -> None:
     ad = SmartTurnAdapter()
     caps = {c.name: c.state.value for c in ad.capabilities().capabilities}
     assert caps["feature:end_of_turn"] == "PARTIAL" and caps["feature:semantic_eot"] == "UNVERIFIED"
-    assert SmartTurnAdapter(scorer=lambda _p: 0.5, model_backed=True).capabilities().capabilities[1].state.value == "SUPPORTED"
+    assert (
+        SmartTurnAdapter(scorer=lambda _p: 0.5, model_backed=True).capabilities().capabilities[1].state.value
+        == "SUPPORTED"
+    )
     det = ad.new_detector()
     det.configure(CFG)
     ev = run(det, tone(400), assistant_speaking=True)
