@@ -11,12 +11,47 @@ const modes: Record<string, (root: HTMLElement) => Promise<void>> = {
   admin: renderAdmin,
 };
 
+/** Operator login (F-07). Shown when the runtime has QEVION_ADMIN_TOKEN set and this browser has no session. */
+function renderLogin(root: HTMLElement): void {
+  clear(root);
+  const input = h("input", { type: "password", placeholder: "operator token (QEVION_ADMIN_TOKEN)", autocomplete: "current-password" });
+  const msg = h("p", { class: "muted" }, "This QEVION runtime is protected. Enter the operator token set on the server.");
+  const submit = async () => {
+    try {
+      await api.login(input.value);
+      input.value = "";
+      await route();
+      void health();
+    } catch {
+      msg.textContent = "Invalid token — check QEVION_ADMIN_TOKEN on the server.";
+    }
+  };
+  input.addEventListener("keydown", (e) => { if ((e as KeyboardEvent).key === "Enter") void submit(); });
+  root.append(h("section", { class: "card" }, h("h2", {}, "Sign in"), msg,
+    h("div", { class: "row" }, input, h("button", { class: "primary", onClick: () => void submit() }, "Sign in"))));
+}
+
+function devModeBanner(): HTMLElement {
+  return h("div", { class: "banner warn" },
+    "Development mode: no operator token is set, so anyone who can reach this URL can use it (and your provider key). ",
+    "Set QEVION_ADMIN_TOKEN on the server before sharing the link.");
+}
+
 async function route(): Promise<void> {
   const mode = (location.hash.replace(/^#\/?/, "") || "config").split("/")[0] ?? "config";
   const fn = modes[mode] ?? renderConfig;
   document.querySelectorAll<HTMLAnchorElement>("nav a").forEach((a) => a.classList.toggle("active", a.dataset["mode"] === mode));
   const root = document.getElementById("app")!;
   clear(root);
+  let auth: { auth: string; authorized: boolean } = { auth: "disabled", authorized: true };
+  try { auth = await api.authStatus(); } catch { /* older runtime: no auth endpoint */ }
+  if (!auth.authorized) { renderLogin(root); return; }
+  document.getElementById("devbanner")?.remove();
+  if (auth.auth === "disabled") {
+    const b = devModeBanner();
+    b.id = "devbanner";
+    document.getElementById("top")?.after(b);
+  }
   root.append(h("p", { class: "muted" }, "loading…"));
   try {
     await fn(root);
@@ -63,6 +98,7 @@ window.addEventListener("qevion:live", (e) => {
   renderHealth();
 });
 
+window.addEventListener("qevion:unauthorized", () => renderLogin(document.getElementById("app")!));
 window.addEventListener("hashchange", () => void route());
 void route();
 void health();

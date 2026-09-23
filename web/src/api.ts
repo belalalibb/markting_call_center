@@ -9,7 +9,9 @@ async function req<T = Json>(method: string, path: string, body?: unknown, form?
     (init.headers as Record<string, string>)["Content-Type"] = "application/json";
     init.body = JSON.stringify(body);
   }
+  init.credentials = "same-origin"; // operator session cookie (F-07)
   const r = await fetch(path, init);
+  if (r.status === 401 && !path.startsWith("/api/auth/")) window.dispatchEvent(new CustomEvent("qevion:unauthorized"));
   const text = await r.text();
   let data: unknown = text;
   try {
@@ -125,6 +127,9 @@ export interface OutboundAttempt {
 
 export const api = {
   health: () => req("GET", "/api/health"),
+  authStatus: () => req<{ auth: "enabled" | "disabled"; authorized: boolean }>("GET", "/api/auth/status"),
+  login: (token: string) => req("POST", "/api/auth/login", { token, secure: location.protocol === "https:" }),
+  logout: () => req("POST", "/api/auth/logout"),
   // P5/P6: simulation gate → activation
   simulate: (key: string, actor = "operator:web") =>
     req<{ report: SimulationReport } & Json>("POST", `/api/activities/${encodeURIComponent(key)}/simulate`, { actor }),
