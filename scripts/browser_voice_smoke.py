@@ -38,7 +38,12 @@ WS_SHIM = """
       try { const t = JSON.parse(e.data).type; rec.text_types[t] = (rec.text_types[t] || 0) + 1; if (t === 'ping') rec.pings += 1; } catch (_) {}
     });
     const send = ws.send.bind(ws);
-    ws.send = (d) => { if (typeof d === 'string' && d.includes('"pong"')) rec.pongs_sent += 1; return send(d); };
+    ws.__qevion_raw_send = send;
+    ws.send = (d) => {
+      if (typeof d === 'string' && d.includes('"pong"')) rec.pongs_sent += 1;
+      if (typeof d !== 'string' && window.__qevion_mute_capture) return;  // scripted utterance owns the mic
+      return send(d);
+    };
     window.__qevion_last_ws = ws;
     return ws;
   };
@@ -52,16 +57,23 @@ WS_SHIM = """
 # In-page "utterance": 20 ms PCM16@24k frames of a 180 Hz tone with a slow amplitude envelope for `ms`, sent on the
 # live WebSocket exactly like the capture worklet does. Chromium's fake mic emits a beep pattern whose bursts are
 # shorter than the turn plane's min_speech_ms (correctly classified as noise), so the smoke speaks deterministically.
+# While the scripted utterance plays, the real capture path is muted (binary sends from the worklet are dropped) so
+# the turn plane sees one contiguous utterance instead of tone frames interleaved with fake-mic silence/beeps.
 SPEAK_JS = """
 (async (ms) => {
   const ws = window.__qevion_last_ws; if (!ws || ws.readyState !== 1) return false;
   const rate = 24000, frame = rate / 50; let phase = 0;
-  for (let sent = 0; sent < ms; sent += 20) {
-    const buf = new Int16Array(frame);
-    for (let i = 0; i < frame; i++) { const env = 0.6 + 0.4 * Math.sin((sent / 1000) * 6.0); buf[i] = Math.round(9000 * env * Math.sin(2 * Math.PI * 180 * (phase + i) / rate)); }
-    phase += frame; ws.send(buf.buffer);
-    await new Promise(r => setTimeout(r, 20));
-  }
+  window.__qevion_mute_capture = true;
+  try {
+    for (let sent = 0; sent < ms; sent += 20) {
+      const buf = new Int16Array(frame);
+      for (let i = 0; i < frame; i++) { const env = 0.6 + 0.4 * Math.sin((sent / 1000) * 6.0); buf[i] = Math.round(9000 * env * Math.sin(2 * Math.PI * 180 * (phase + i) / rate)); }
+      phase += frame; ws.__qevion_raw_send(buf.buffer);
+      await new Promise(r => setTimeout(r, 20));
+    }
+    // trailing silence so end-of-turn (min_silence_ms) is reached with a clean gap
+    for (let s = 0; s < 700; s += 20) { ws.__qevion_raw_send(new Int16Array(frame).buffer); await new Promise(r => setTimeout(r, 20)); }
+  } finally { window.__qevion_mute_capture = false; }
   return true;
 })
 """
