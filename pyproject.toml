@@ -21,7 +21,6 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-vad = ["onnxruntime>=1.18"]  # Silero VAD (models/silero_vad.onnx via scripts/fetch_models.sh); absent → honest energy fallback
 dev = [
   "pytest>=8",
   "pytest-asyncio>=0.23",
