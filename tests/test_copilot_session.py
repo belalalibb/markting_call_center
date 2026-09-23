@@ -6,7 +6,6 @@ from pathlib import Path
 from typing import Any
 
 import yaml
-
 from qevion.contracts.activity import ActivityBlueprint, ReadinessState
 from qevion.contracts.copilot import DiscoveryStatus, QuestionKind
 from qevion.contracts.event import Event, EventType
@@ -176,7 +175,15 @@ def test_knowledge_gaps_and_conflicts_flow_into_proposal() -> None:
     s, _ = _session()
     _drive_to_review(s)
     s.set_knowledge(
-        [KnowledgeGap(gap_id="g1", tenant_id="t1", gap_class=GapClass.REQUIRED_FOR_EXECUTION, description="d", question_for_operator="Price of X?")],
+        [
+            KnowledgeGap(
+                gap_id="g1",
+                tenant_id="t1",
+                gap_class=GapClass.REQUIRED_FOR_EXECUTION,
+                description="d",
+                question_for_operator="Price of X?",
+            )
+        ],
         [Contradiction(contradiction_id="c1", tenant_id="t1", fact_ids=["f1", "f2"], description="hours differ")],
     )
     p = s.propose()
@@ -222,7 +229,16 @@ def test_explainer_outputs_are_separate_from_proposal() -> None:
     assert "I will not guess" in text and "Why:" in text
     p = s.propose()
     out = s.explain(p)
-    for header in ("# Proposal", "## Draft", "## Decisions", "## Knowledge", "## Capabilities", "## Preflight", "## What could go wrong", "## Next questions"):
+    for header in (
+        "# Proposal",
+        "## Draft",
+        "## Decisions",
+        "## Knowledge",
+        "## Capabilities",
+        "## Preflight",
+        "## What could go wrong",
+        "## Next questions",
+    ):
         assert header in out
     assert "NOT valid yet" in out
     # phrasing port may rephrase but the proposal object is untouched
@@ -231,4 +247,7 @@ def test_explainer_outputs_are_separate_from_proposal() -> None:
 
     s2._explainer = Explainer(phrase=lambda t: t.upper())  # noqa: SLF001
     assert s2.explain(p).startswith("# PROPOSAL")
-    assert p.model_dump() == s.propose().model_copy(update={"proposal_id": p.proposal_id, "produced_at": p.produced_at}).model_dump()
+    assert (
+        p.model_dump()
+        == s.propose().model_copy(update={"proposal_id": p.proposal_id, "produced_at": p.produced_at}).model_dump()
+    )

@@ -175,7 +175,12 @@ class BlueprintComposer:
         uq = _get(pol, "unknown_question_policy.default")
         if uq is not None and "uncertainty_policy" not in pol:
             # mirror: missing/conflicting/stale follow the declared default unless the operator says otherwise
-            pol["uncertainty_policy"] = {"missing": uq, "conflicting": Behavior.STATE_LIMITATION.value, "stale": uq}
+            pol["uncertainty_policy"] = {
+                "missing": uq,
+                "conflicting": Behavior.STATE_LIMITATION.value,
+                "stale": uq,
+                "ambiguous": Behavior.ASK_CLARIFYING_QUESTION.value,
+            }
         d.setdefault("activity_machine", {"table_ref": "generic_default_v1"})
         return d
 
