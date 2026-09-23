@@ -25,7 +25,9 @@ class FakeHttp:
         qid = next(iter(body["questions"]))
         return {
             "model": "jev-1.13.0",
-            "answers": {qid: {"type": "choice", "choice": self.choice, "confidence": self.confidence, "probabilities": {}}},
+            "answers": {
+                qid: {"type": "choice", "choice": self.choice, "confidence": self.confidence, "probabilities": {}}
+            },
             "usage": {"input_tokens": 10, "output_tokens": 2},
         }
 

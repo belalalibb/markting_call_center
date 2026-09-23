@@ -39,7 +39,9 @@ HttpFn = Callable[[str, dict[str, str], dict[str, Any]], dict[str, Any]]  # (url
 
 
 def _urllib_http(url: str, headers: dict[str, str], body: dict[str, Any]) -> dict[str, Any]:
-    req = urllib.request.Request(url, data=json.dumps(body).encode("utf-8"), headers=headers, method="POST")
+    if not url.startswith("https://"):
+        raise ValueError("typesafe: only https endpoints are permitted")
+    req = urllib.request.Request(url, data=json.dumps(body).encode("utf-8"), headers=headers, method="POST")  # noqa: S310
     with urllib.request.urlopen(req, timeout=15) as resp:  # noqa: S310 — https to a configured host
         data: dict[str, Any] = json.loads(resp.read().decode("utf-8"))
         return data
@@ -158,7 +160,11 @@ class TypeSafeDecisionAdapter:
             return "intent", None, {}
         criteria = {opt: ", ".join(patterns.get(opt, [])) or opt.replace("_", " ") for opt in options}
         criteria["none_of_these"] = "does not match any listed intent"
-        q = {"type": "choice", "instructions": "Which intent best matches what the customer said?", "criteria": criteria}
+        q = {
+            "type": "choice",
+            "instructions": "Which intent best matches what the customer said?",
+            "criteria": criteria,
+        }
         return "intent", q, {opt: opt for opt in options}
 
 
