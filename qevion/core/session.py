@@ -328,6 +328,12 @@ class SessionLifecycle(SessionCore):
             update={"instructions": composed.text, "tools": self.composer.provider_tools()}
         )
         self._provider = await self.deps.s2s.open(cfg, self.deps.credential)
+        # F-01 (OPS 5.5 audit): push the full session configuration (instructions, tools, voice, formats, turn
+        # detection) *before* any client audio can reach the provider. Without this, a live S2S provider runs on its
+        # own defaults (different voice/persona, provider VAD auto-responses, no tools) for the whole first
+        # utterance, and QEVION's first commit/response.create collide with the provider's own responses.
+        # `run()` only starts pumping client frames after `start()` returns, so this ordering is guaranteed.
+        await self._provider.update_instructions(composed.text)
         await self.emit(
             EventType.PROVIDER_SESSION_CREATED,
             {"provider": cfg.provider, "model": cfg.model, "instructions_fp": composed.static_fingerprint},
