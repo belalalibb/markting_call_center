@@ -476,6 +476,9 @@ FORWARDED_EVENT_TYPES: frozenset[str] = frozenset(
         "tool.execution_completed",
         "tool.execution_failed",
         "tool.policy_rejected",
+        # session close: primary/secondary outcome codes only (no record fields)
+        "outcome.produced",
+        "session.ended",
     }
 )
 

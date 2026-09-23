@@ -63,6 +63,8 @@ async def main() -> int:
     ws_base = base.replace("http://", "ws://").replace("https://", "wss://")
     url = f"{ws_base}/ws/sessions/{ACTIVITY}?channel=text&composition={COMPOSITION}"
     t0 = time.monotonic()
+    detail: dict[str, Any] = {}
+    outcome_primary: str | None = None
     session_id: str | None = None
     audio_frames = 0
     audio_bytes = 0
@@ -75,7 +77,7 @@ async def main() -> int:
         return int((time.monotonic() - t0) * 1000)
 
     async def drain(ws: Any, until: set[str], timeout: float) -> dict[str, Any]:
-        nonlocal session_id, audio_frames, audio_bytes
+        nonlocal session_id, audio_frames, audio_bytes, outcome_primary
         seen: dict[str, Any] = {"first_audio_ms": None, "response_done_ms": None}
         deadline = time.monotonic() + timeout
         while time.monotonic() < deadline:
@@ -102,8 +104,10 @@ async def main() -> int:
                 et = str(env.get("type"))
                 payload = env.get("payload") or {}
                 events.append({"t_ms": now(), "type": et, "keys": sorted(payload)[:8]})
-                if et.startswith("provider.error") or et == "session.failed":
-                    errors.append(et)
+                if et.startswith("provider.error") or et == "session.failed" or et == "failure.classified":
+                    errors.append(f"{et}:{payload.get('code') or payload.get('class')}")
+                if et == "outcome.produced":
+                    outcome_primary = payload.get("primary")
                 if et in ("s2s.response_done", "provider.response_done", "response.done"):
                     seen["response_done_ms"] = now()
                 if et in until:
@@ -126,17 +130,16 @@ async def main() -> int:
                         "ttfa_ms": (seen["first_audio_ms"] - sent) if seen["first_audio_ms"] else None,
                     }
                 )
+            # session detail is read while the session is still alive (finished sessions are pruned from the store)
+            if session_id:
+                try:
+                    detail = _get(base, f"/api/sessions/{session_id}")
+                except Exception as exc:  # noqa: BLE001
+                    errors.append(f"detail: {exc}")
             await ws.send(json.dumps({"type": "bye"}))
             await drain(ws, {"outcome.produced"}, 6.0)
     except Exception as exc:  # noqa: BLE001
         errors.append(f"{type(exc).__name__}: {str(exc)[:200]}")
-
-    detail: dict[str, Any] = {}
-    if session_id:
-        try:
-            detail = _get(base, f"/api/sessions/{session_id}")
-        except Exception as exc:  # noqa: BLE001
-            errors.append(f"detail: {exc}")
 
     event_types = sorted({e["type"] for e in events})
     provider_ok = detail.get("composition_id") == COMPOSITION and (detail.get("credential_source") or "none") != "none"
@@ -163,7 +166,13 @@ async def main() -> int:
                 "interruptions",
             )
         },
-        "outcome": detail.get("outcome"),
+        "outcome": outcome_primary,
+        "session_events_seen": len(detail.get("events") or []),
+        "tool_calls": [
+            (e.get("payload") or {}).get("tool_id")
+            for e in (detail.get("events") or [])
+            if e.get("type") == "tool.execution_completed"
+        ],
         "turns": turn_timings,
         "audio": {"frames": audio_frames, "bytes": audio_bytes, "ms_pcm16_24k": int(audio_bytes / 2 / 24000 * 1000)},
         "server_message_counts": server_msgs,
