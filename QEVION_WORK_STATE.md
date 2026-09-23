@@ -4,14 +4,15 @@
 
 | Field | Value |
 |---|---|
-| Project phase | P3 — Copilot + Web |
-| Current stage | **P3 COMPLETE** (CP-0006) → P4 Voice Runtime (CP-0007) |
-| Current objective | P4: `qevion/runtime/audio/` AudioWorklet PCM16 capture/playout in `web/`, WS binary framing, `qevion/adapters/providers/openai_realtime.py` (S2S over WebSocket, tool calls, barge-in cancel), turn adapters Silero VAD + Smart Turn (energy fallback on 2vCPU), 7-step interruption t0..t4 measured end-to-end, `comp_s2s_openai_v1` wired with CredentialResolver → CP-0007. (Prev P3: `qevion/copilot/` (dynamic discovery engine: next-question from Blueprint state + gaps + capability mapping; ASK_OWNER escape hatch; Blueprint proposals with Decision records; stop-asking rule) + `qevion/runtime/` FastAPI app (REST for tenants/activities/knowledge/preflight/readiness; WS session endpoint on mocks) + `web/` single TypeScript app with 3 modes: Config Center, Operator Console, Admin (in-memory ephemeral test-key UI for Chat & Calls) → CP-0006 |
-| Last verified checkpoint | CP-0006 (P3 Copilot + Web) — `recovery/checkpoints/CP-0006.md`, tag `cp/CP-0006` |
-| Last known good Git SHA | see `recovery/checkpoints/index.jsonl` last line (CP-0006 = 544078c) |
+| Project phase | P4 — Voice Runtime |
+| Current stage | **P4 COMPLETE** (CP-0007) → P5 Simulation + Activation + Outbound (CP-0008) |
+| Current objective | P5: `qevion/simulation/` scenario runner (scripted caller personas drive `core.session.Session` on the mock composition from Blueprint `simulation_cases`; SimulationReport contract with per-case pass/fail + outcome diff), Activation gates (strict preflight + simulation pass → READY, evidence attached to the readiness transition), Outbound seam (`telephony/simulated` dial → session with `outbound` channel; consent/opt-out invariants) → CP-0008. (Prev P4: OpenAI Realtime + Silero/SmartTurn adapters, compositions + credential source per session, browser voice console with AudioWorklet + VoiceClient, §31 t0..t4 measured E2E over public WSS → CP-0007) |
+| Last verified checkpoint | CP-0007 (P4 Voice Runtime) — `recovery/checkpoints/CP-0007.md`, tag `cp/CP-0007` |
+| Last known good Git SHA | see `recovery/checkpoints/index.jsonl` last line (CP-0007 = bc9e060) |
 | Approval | Operator approved full plan + decisions D1–D15 on 2026-09-22 (see `recovery/analysis/pre_approval_inspection_2026-09-22.md`) |
 
 ## Completed (with evidence)
+- **CP-0007 (P4):** `qevion/adapters/providers/openai_realtime.py` (S2S over WS, injectable socket, session.update/input_audio_buffer/response.cancel/function calls; PermissionError without credential), `qevion/adapters/turn/{silero,smart_turn}.py` (honest fallback capabilities), `runtime/store.py` compositions + adapter registries + `composition_for` + credential source per session + realtime mock for voice + filtered event mirror, `runtime/app.py` `/api/compositions`, `?composition=`, guarded provider failures, `interruptions[]` in session detail; `web/src/audio/{worklet,client}.ts` + voice-wired Operator Console (composition selector, mic + meter, playout, QV-INT metrics card; dist rebuilt); `scripts/e2e_voice_probe.py`. Tests: 219 (+23) — **CI_LOCAL PASS**; evidence `evidence/P4/CP-0007/` (junit, licenses, latency_table ×10 runs over public WSS, e2e_voice_preview); QV-ACC-017/018 accepted (first audio p50 5 ms; all t0..t4 recorded, t1→t3 p95 2 ms server / 11 ms wall), QV-ACC-019 → P6.
 - **CP-0006 (P3):** `qevion/copilot/` — `discovery.py` (state-derived questions from draft holes + gaps + contradictions + preflight + capability mapping; deterministic band/blocking/stage prioritizer; sha256 question ids; stop rule), `composer.py` (answers→draft, Decision records `proposed_by/approved_by`, structural scaffold only), `explainer.py` (human output A + readiness 'what could go wrong'), `session.py` (ConfigSession loop, `config.*` events without business text), `api.py` (HTTP surface, publish gated on valid+approved+no blocking). `qevion/runtime/` — `store.py` (composition root state, registry from adapters + platform tools + locale packs + voice profiles), `app.py` (REST: tenants/activities/preflight/capabilities/transition/registry/knowledge/admin/sessions/events; WS `/ws/sessions/{key}` bridging core Session). `qevion/main.py` composition root (only module importing both runtime and copilot). `web/` Vite+TS (Config Center, Operator Console, Admin; `web/dist` tracked, served by FastAPI). `config/locale_packs`, `config/voice_profiles`. Tests: 196 (+46) — **CI_LOCAL PASS**; evidence `evidence/P3/CP-0006/` (junit, licenses, ACC-014 provenance diff, ACC-016 memory-only key, e2e over public URL); QV-ACC-014..016 accepted. Preview verified: 3 modes load with 0 console errors; WS text session round-trips audio_start/audio/audio_end.
 - Pre-approval inspection & approval — `recovery/analysis/pre_approval_inspection_2026-09-22.md`
 - Recovery Protocol, `.gitignore` — 8f722d5
@@ -32,9 +33,11 @@
 - **CP-0005 (P2):** `qevion/control/preflight.py` (13 deterministic checks, all 20 §11 reason codes, path + fix_hint, approved-Decision waiver, strict/lenient UNVERIFIED), `readiness.py` (table-driven lifecycle, `ActivationGates`, BFS legal path, edit invalidation, immutability), `capabilities.py` (registry aggregated from adapter self-declarations + platform facts; `RequirementMapping`); `qevion/knowledge/parsers.py` (csv/json/yaml/txt/md, locators, size cap, injection flags) + `pipeline.py` (normative 10-step pipeline: entities, facts w/ provenance, relationships, cross-source contradictions with priority resolution or pending+DATA_CONFLICT, ambiguity, 6 gap classes vs Activity needs, customer questions, operational requirements; `StructuredRetriever` approved-only). Tests: 150 total (+57) — **CI_LOCAL PASS**; evidence `evidence/P2/CP-0005/`; QV-ACC-011..013 accepted.
 
 ## In progress
-- none (CP-0006 closed: record 544078c, tag cp/CP-0006, snapshot manifest)
+- none (CP-0007 closed: record bc9e060, tag cp/CP-0007, snapshot manifest)
 
 ## Incidents
+- 2026-09-23 #12: sandbox resets #12–#15 during P4 (venv/node_modules wiped 4×; one interrupted checkpoint step). Zero committed work lost; index.json + CP-0007.md redone after verifying actual state (not blindly re-run). Rule held: commit before first test/build.
+- 2026-09-23 #13: voice WS test hung under TestClient — classified: design (mock provider streamed inline in the provider pump, so client frames were never consumed mid-response; events also not mirrored to client). Fix: realtime mock streams in a background task; runtime sink mirrors a filtered event subset. Not a Core change.
 - 2026-09-22 #1: sandbox reset lost ~1h of uncommitted P0 work. Classified: test/environment. Countermeasure: protocol §8.1 commit-immediately. Redone in small increments.
 - 2026-09-22 #2: two tool interruptions on large (>150-line) heredoc appends; §51–52 append lost once. Countermeasure: appends ≤ ~80 lines per commit, push immediately, verify with `grep -n "^## §"` before each append. No data lost after adoption.
 - 2026-09-22 #6: CI run 35777148614 failed (ruff import order in a test appended after the lint pass). Class: process. Fix: `scripts/ci_local.sh` + protocol §8.2a gate-before-push.
@@ -51,11 +54,12 @@
 
 ## Known risks
 - Sandbox: 2 vCPU / ~1 GB RAM / no GPU → local ASR/TTS candidates are stubs (A9).
-- Real-provider evidence (QV-ACC-022) requires operator-supplied test key (A5) — Admin ephemeral UI lands in P3.
+- Real-provider evidence (QV-ACC-022) requires operator-supplied test key (A5); Admin ephemeral UI exists. ACC-017/018 currently measured on the mock provider only.
+- Browser mic path not exercised headless (no mic in Playwright); WS/binary contract covered by `scripts/e2e_voice_probe.py`.
 
 ## Pending (ordered)
-1. **P4 (CP-0007)**: browser AudioWorklet PCM16 (24k) capture + playout with `playout_started/stopped` timestamps; WS binary frames end-to-end; `openai_realtime` S2S adapter (session.update instructions, input_audio_buffer, response.cancel on barge-in, function calls → ToolPipeline); Silero VAD + Smart Turn adapters behind `TurnDetector` (energy fallback); interruption metrics t0..t4 per §31 written to events; `comp_s2s_openai_v1` selectable per activity; real-provider smoke only with operator test key (A5).
-2. P5 → CP-0008 (Simulation personas + Activation gates + Outbound seam) · P6 → CP-0009 (Evaluation + Evidence + verified Preview URL)
+1. **P5 (CP-0008)**: `qevion/contracts/simulation.py` (`qevion.simulation.v1`: Persona, ScenarioCase, SimulationReport) + schema; `qevion/simulation/runner.py` (drives Session on mock composition with scripted caller turns incl. interruptions/off-topic/opt-out; asserts expected outcome + fields + no forbidden claims); Activation gates wired into readiness (strict preflight + simulation pass + approvals → READY; evidence refs on the transition); Outbound seam (`outbound` channel via `telephony/simulated`, consent/DNC/opt-out invariants, attempt record); REST + Config Center "Simulate"/"Activate" actions; QV-ACC-020/021.
+2. P6 → CP-0009 (Evaluation harness + deterministic replay QV-ACC-019 + Evidence pack + verified Preview URL; real-provider smoke if A5 key present).
 
 ## Exact next action
-`checkpoint.sh CP-0006 P3 "Copilot + runtime API + web app"` → fill record → commit → `tag_checkpoint.sh CP-0006` → `snapshot.sh CP-0006`; then P4 step 1: `web/src/audio/worklet.ts` + `web/src/audio/client.ts` (PCM16 capture/playout, binary WS) and `qevion/adapters/providers/openai_realtime.py` skeleton with capability declaration + contract tests on a recorded event fixture (no key needed).
+P5 step 1: create `qevion/contracts/simulation.py` + register in `qevion/contracts/registry.py` → `scripts/gen_schemas.py` (42 schemas) → round-trip test → commit; then `qevion/simulation/runner.py` skeleton (commit before first test run).
