@@ -26,6 +26,7 @@ from __future__ import annotations
 
 import asyncio
 import base64
+import contextlib
 import json
 from collections.abc import AsyncIterator, Awaitable, Callable
 from typing import Any, Protocol
@@ -133,10 +134,8 @@ class OpenAIRealtimeSession:
         await self._sock.close()
         if self._pump:
             self._pump.cancel()
-            try:
+            with contextlib.suppress(asyncio.CancelledError, Exception):
                 await self._pump
-            except (asyncio.CancelledError, Exception):  # noqa: BLE001
-                pass
         self._events.put_nowait(S2SEvent(type=S2SEventType.CLOSED, raw_type="closed"))
         self._events.put_nowait(None)
         self._audio.put_nowait(None)
@@ -152,7 +151,9 @@ class OpenAIRealtimeSession:
             "tools": render_tools(cfg.tools),
             "tool_choice": "auto",
             "turn_detection": {"type": "server_vad"} if cfg.server_vad else None,
-            "input_audio_transcription": {"model": "whisper-1"} if cfg.language_hint is None else {"model": "whisper-1", "language": cfg.language_hint[:2]},
+            "input_audio_transcription": {"model": "whisper-1"}
+            if cfg.language_hint is None
+            else {"model": "whisper-1", "language": cfg.language_hint[:2]},
         }
         if cfg.voice:
             session["voice"] = cfg.voice
@@ -251,7 +252,9 @@ class OpenAIRealtimeSession:
         elif t == "input_audio_buffer.speech_stopped":
             ev = S2SEvent(type=S2SEventType.INPUT_SPEECH_STOPPED, raw_type=t)
         elif t == "conversation.item.input_audio_transcription.completed":
-            ev = S2SEvent(type=S2SEventType.INPUT_TRANSCRIPT, raw_type=t, text=msg.get("transcript"), item_id=msg.get("item_id"))
+            ev = S2SEvent(
+                type=S2SEventType.INPUT_TRANSCRIPT, raw_type=t, text=msg.get("transcript"), item_id=msg.get("item_id")
+            )
         elif t == "response.created":
             self._current_response = rid
             ev = S2SEvent(type=S2SEventType.RESPONSE_STARTED, raw_type=t, response_id=rid)
@@ -278,7 +281,9 @@ class OpenAIRealtimeSession:
                 raw_type=t,
                 response_id=rid,
                 item_id=msg.get("item_id"),
-                tool_call=ToolCallRequest(call_id=str(msg.get("call_id")), tool_id=str(msg.get("name")), arguments=args),
+                tool_call=ToolCallRequest(
+                    call_id=str(msg.get("call_id")), tool_id=str(msg.get("name")), arguments=args
+                ),
             )
         elif t == "response.done":
             status = (msg.get("response") or {}).get("status")
@@ -321,7 +326,11 @@ class OpenAIRealtimeAdapter:
                 Capability(name="audio:pcm16_24k", state=CapabilityState.SUPPORTED),
                 Capability(name="feature:tool_calls", state=CapabilityState.SUPPORTED),
                 Capability(name="feature:barge_in", state=CapabilityState.SUPPORTED, notes="response.cancel"),
-                Capability(name="feature:server_vad", state=CapabilityState.SUPPORTED, notes="disabled by default; turn plane owns endpointing"),
+                Capability(
+                    name="feature:server_vad",
+                    state=CapabilityState.SUPPORTED,
+                    notes="disabled by default; turn plane owns endpointing",
+                ),
                 Capability(name="feature:input_transcript", state=CapabilityState.SUPPORTED),
             ],
         )
