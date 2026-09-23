@@ -118,7 +118,8 @@ export interface Gates { key: string; unmet: string[]; readiness: string }
 export interface ContactState { contact_ref: string; consent: boolean | null; opted_out: boolean; suppressed: boolean; attempts: number; tags: string[] }
 export interface ContactDecision { key: string; contact_ref: string; allowed: boolean; refusals: string[]; checked_at: string }
 export interface OutboundAttempt {
-  attempt_id: string; activity_key: string; contact_ref: string; allowed: boolean; refusals: string[];
+  attempt_id: string; activity_key: string; contact_ref: string;
+  contact_decision: { allowed: boolean; refusals: string[]; checked_at: string };
   call_id: string | null; call_state: string | null; session_id: string | null; [k: string]: unknown;
 }
 

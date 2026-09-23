@@ -117,7 +117,7 @@ function outboundCard(activities: ActivitySummary[]): HTMLElement {
       if (!rows.length) { attempts.append(h("p", { class: "muted" }, "No outbound attempts yet. Every attempt is recorded, including refusals.")); return; }
       attempts.append(table(["attempt", "activity", "contact", "decision", "call", "session"], rows.slice().reverse().map((a) => [
         h("code", {}, String(a.attempt_id).slice(0, 12)), String(a.activity_key), String(a.contact_ref),
-        a.allowed ? pill("allowed", "ok") : pill(`refused: ${a.refusals.join(",")}`, "bad"),
+        a.contact_decision.allowed ? pill("allowed", "ok") : pill(`refused: ${a.contact_decision.refusals.join(",")}`, "bad"),
         a.call_state ? pill(String(a.call_state), a.call_state === "answered" ? "ok" : "warn") : "—",
         a.session_id ? h("code", {}, String(a.session_id).slice(0, 14)) : "—",
       ])));
