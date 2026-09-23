@@ -117,7 +117,11 @@ class BlueprintComposer:
         elif path == "policies.opt_out":
             _set(draft, "policies.opt_out", {"phrases_ref": "optout_default", "action": str(value)})
         elif path == "policies.contact_policy_hooks":
-            _set(draft, path, value if isinstance(value, dict) else {"consent_required": True, "contact_window": str(value)})
+            _set(
+                draft,
+                path,
+                value if isinstance(value, dict) else {"consent_required": True, "contact_window": str(value)},
+            )
         elif path == "outcome_schema.primary":
             _set(draft, path, [_slug(str(v)) for v in self._as_list(value)])
         elif path in ("completion.success_rules", "completion.failure_rules", "completion.exit_rules"):
@@ -232,7 +236,13 @@ class BlueprintComposer:
         out: list[dict[str, Any]] = []
         for item in BlueprintComposer._as_list(v):
             if isinstance(item, dict):
-                out.append({"name": _slug(str(item.get("name", "field"))), "type": item.get("type", "string"), **{k: x for k, x in item.items() if k not in ("name", "type")}})
+                out.append(
+                    {
+                        "name": _slug(str(item.get("name", "field"))),
+                        "type": item.get("type", "string"),
+                        **{k: x for k, x in item.items() if k not in ("name", "type")},
+                    }
+                )
             else:
                 out.append({"name": _slug(str(item)), "type": "string"})
         return out
@@ -242,7 +252,13 @@ class BlueprintComposer:
         out: list[dict[str, Any]] = []
         for item in BlueprintComposer._as_list(v):
             if isinstance(item, dict):
-                out.append({"source_id": str(item.get("source_id", "src")), "kind": item.get("kind", "file"), **{k: x for k, x in item.items() if k not in ("source_id", "kind")}})
+                out.append(
+                    {
+                        "source_id": str(item.get("source_id", "src")),
+                        "kind": item.get("kind", "file"),
+                        **{k: x for k, x in item.items() if k not in ("source_id", "kind")},
+                    }
+                )
             else:
                 out.append({"source_id": _slug(str(item)), "kind": "file"})
         return out
@@ -252,7 +268,13 @@ class BlueprintComposer:
         out: list[dict[str, Any]] = []
         for item in BlueprintComposer._as_list(v):
             if isinstance(item, dict):
-                out.append({"trigger": str(item.get("trigger", "human_requested")), "destination_ref": str(item.get("destination_ref", "default_queue")), "priority": item.get("priority", "normal")})
+                out.append(
+                    {
+                        "trigger": str(item.get("trigger", "human_requested")),
+                        "destination_ref": str(item.get("destination_ref", "default_queue")),
+                        "priority": item.get("priority", "normal"),
+                    }
+                )
             else:
                 out.append({"trigger": "human_requested", "destination_ref": _slug(str(item))})
         return out
@@ -262,7 +284,14 @@ class BlueprintComposer:
         out: list[dict[str, Any]] = []
         for i, item in enumerate(BlueprintComposer._as_list(v)):
             if isinstance(item, dict):
-                out.append({"id": str(item.get("id", f"obj_{i}")), "pattern": str(item.get("pattern", "")), "status": item.get("status", "ASK_OWNER"), **{k: x for k, x in item.items() if k not in ("id", "pattern", "status")}})
+                out.append(
+                    {
+                        "id": str(item.get("id", f"obj_{i}")),
+                        "pattern": str(item.get("pattern", "")),
+                        "status": item.get("status", "ASK_OWNER"),
+                        **{k: x for k, x in item.items() if k not in ("id", "pattern", "status")},
+                    }
+                )
             else:
                 out.append({"id": f"obj_{i}", "pattern": str(item), "status": "ASK_OWNER"})
         return out
