@@ -1,0 +1,52 @@
+{
+ "kind": "openai-realtime-live-probe",
+ "produced_at": "2026-09-23T14:25:03.766243+00:00",
+ "model_requested": "gpt-realtime",
+ "key_fingerprint": "…FToA",
+ "session_ready": true,
+ "response_done": true,
+ "audio_bytes": 285600,
+ "audio_ms_pcm16_24k": 5950,
+ "text_chars": 52,
+ "errors": [],
+ "exception": null,
+ "timeline": [
+  {
+   "t_ms": 238,
+   "event": "open"
+  },
+  {
+   "t_ms": 250,
+   "event": "session_ready",
+   "raw": "session.created"
+  },
+  {
+   "t_ms": 251,
+   "event": "session_update_sent"
+  },
+  {
+   "t_ms": 251,
+   "event": "text_sent"
+  },
+  {
+   "t_ms": 311,
+   "event": "response_started"
+  },
+  {
+   "t_ms": 588,
+   "event": "first_audio",
+   "bytes": 4800
+  },
+  {
+   "t_ms": 2000,
+   "event": "response_done",
+   "audio_bytes": 285600,
+   "text_chars": 52
+  },
+  {
+   "t_ms": 4044,
+   "event": "closed"
+  }
+ ],
+ "passed": true
+}
