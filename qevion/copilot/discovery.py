@@ -403,10 +403,10 @@ class DiscoveryEngine:
     def _from_mapping(self, rows: list[Any]) -> list[CopilotQuestion]:
         qs: list[CopilotQuestion] = []
         for r in rows:
-            action = MappingResult(str(getattr(r, "action")))
-            req = str(getattr(r, "requirement"))
-            cap = str(getattr(r, "required_capability"))
-            state = str(getattr(r, "current_state"))
+            action = MappingResult(str(r.action))
+            req = str(r.requirement)
+            cap = str(r.required_capability)
+            state = str(r.current_state)
             path = f"capabilities.{cap}"
             refs = [f"mapping:{cap}"]
             if action == MappingResult.REQUIRES_KNOWLEDGE:
