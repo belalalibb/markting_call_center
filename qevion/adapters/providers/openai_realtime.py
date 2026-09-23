@@ -87,6 +87,14 @@ def _rate(fmt: AudioFormat) -> str:
     return {24000: "pcm16", 16000: "pcm16", 8000: "g711_ulaw", 48000: "pcm16"}.get(fmt.sample_rate_hz, "pcm16")
 
 
+def _ga_format(fmt: AudioFormat) -> dict[str, Any]:
+    """GA Realtime audio format object (beta used flat strings). pcm16 carries an explicit rate."""
+    kind = _rate(fmt)
+    if kind == "pcm16":
+        return {"type": "audio/pcm", "rate": 24000}
+    return {"type": "audio/pcmu"}
+
+
 def render_tools(tools: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """tool.v1 declarations → Realtime function tools. Accepts either already-rendered functions or tool.v1."""
     out: list[dict[str, Any]] = []
@@ -142,23 +150,30 @@ class OpenAIRealtimeSession:
 
     # ------------------------------------------------------------- port: out
     async def update_instructions(self, instructions: str) -> None:
+        """GA Realtime session shape (the beta shape — flat formats/modalities/voice, `OpenAI-Beta` header —
+        was retired by the provider; verified live 2026-09-23). Audio config is nested under `audio.input/output`,
+        `turn_detection` lives in `audio.input`, and `turn_detection` is set to None so QEVION's turn plane owns
+        endpointing unless `server_vad` is requested."""
         cfg = self.config
+        transcription: dict[str, Any] = {"model": "whisper-1"}
+        if cfg.language_hint is not None:
+            transcription["language"] = cfg.language_hint[:2]
+        audio_in: dict[str, Any] = {
+            "format": _ga_format(cfg.input_format),
+            "transcription": transcription,
+            "turn_detection": {"type": "server_vad"} if cfg.server_vad else None,
+        }
+        audio_out: dict[str, Any] = {"format": _ga_format(cfg.output_format)}
+        if cfg.voice:
+            audio_out["voice"] = cfg.voice
         session: dict[str, Any] = {
+            "type": "realtime",
             "instructions": instructions,
-            "modalities": ["audio", "text"],
-            "input_audio_format": _rate(cfg.input_format),
-            "output_audio_format": _rate(cfg.output_format),
+            "output_modalities": ["audio"],
+            "audio": {"input": audio_in, "output": audio_out},
             "tools": render_tools(cfg.tools),
             "tool_choice": "auto",
-            "turn_detection": {"type": "server_vad"} if cfg.server_vad else None,
-            "input_audio_transcription": {"model": "whisper-1"}
-            if cfg.language_hint is None
-            else {"model": "whisper-1", "language": cfg.language_hint[:2]},
         }
-        if cfg.voice:
-            session["voice"] = cfg.voice
-        if cfg.temperature is not None:
-            session["temperature"] = cfg.temperature
         session.update(cfg.extra.get("session", {}))
         await self._send({"type": "session.update", "session": session})
 
@@ -338,7 +353,7 @@ class OpenAIRealtimeAdapter:
     async def open(self, config: S2SSessionConfig, credential: str | None) -> OpenAIRealtimeSession:
         if not credential:
             raise PermissionError("openai_realtime: no credential resolved (env / admin store / ephemeral UI)")
-        headers = {"Authorization": f"Bearer {credential}", "OpenAI-Beta": "realtime=v1"}
+        headers = {"Authorization": f"Bearer {credential}"}  # GA endpoint: no OpenAI-Beta header
         sock = await self._factory(f"{self._url}?model={config.model}", headers)
         s = OpenAIRealtimeSession(config, sock)
         s.start()

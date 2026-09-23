@@ -130,7 +130,9 @@ async def test_outbound_mapping() -> None:
         "response.cancel",
     ]
     su = sock.out[0]["session"]
-    assert su["instructions"] == "Be brief." and su["turn_detection"] is None and su["voice"] == "marin"
+    assert su["type"] == "realtime" and su["instructions"] == "Be brief."
+    assert su["audio"]["input"]["turn_detection"] is None and su["audio"]["output"]["voice"] == "marin"
+    assert su["audio"]["input"]["format"] == {"type": "audio/pcm", "rate": 24000}
     assert su["tools"][0]["name"] == "record_field"
     assert base64.b64decode(sock.out[1]["audio"]) == b"\x00\x01" * 240
     assert sock.out[4]["item"]["content"][0]["text"] == "hello"
@@ -147,7 +149,7 @@ async def test_server_vad_mode_does_not_force_response_create() -> None:
     await s.update_instructions("x")
     await s.commit_input()
     assert sock.types() == ["session.update", "input_audio_buffer.commit"]
-    assert sock.out[0]["session"]["turn_detection"] == {"type": "server_vad"}
+    assert sock.out[0]["session"]["audio"]["input"]["turn_detection"] == {"type": "server_vad"}
     await s.close()
 
 
