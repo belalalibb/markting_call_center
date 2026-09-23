@@ -96,7 +96,7 @@ async def main() -> int:
                     if not states or states[-1][1] != ds:
                         states.append((now(), ds))
                 elif t == "event":
-                    et = str(((m.get("payload") or {}).get("type")))
+                    et = str((m.get("payload") or {}).get("type"))
                     events.append((now(), et))
         except websockets.exceptions.ConnectionClosed as e:
             close_code = e.rcvd.code if e.rcvd else (e.sent.code if e.sent else None)
