@@ -17,7 +17,6 @@ from pathlib import Path
 from typing import Any
 
 import yaml
-
 from qevion.eval.corpus import load_blueprint
 from qevion.eval.harness import run_eval, write_reports
 from qevion.replay.player import replay
@@ -75,7 +74,16 @@ async def acc019() -> dict[str, Any]:
         "total_events_compared": sum(int(r["events"]) for r in rows),
         "normalisation": {
             "ids": "<prefix>_<16hex> → <prefix>_<id>",
-            "dropped_keys": ["latency_ms", "client_ts_ms", "server_ts_ms", "checked_at", "produced_at", "recorded_at", "ts", "t0..t4"],
+            "dropped_keys": [
+                "latency_ms",
+                "client_ts_ms",
+                "server_ts_ms",
+                "checked_at",
+                "produced_at",
+                "recorded_at",
+                "ts",
+                "t0..t4",
+            ],
             "compared": ["seq", "kind", "type", "source", "payload"],
         },
         "forced_divergence": forced,
@@ -166,18 +174,37 @@ def main(argv: list[str]) -> int:
         "junit.xml": ("pytest-junit", "scripts/ci_local.sh", ["QV-ACC-019", "QV-EVAL-004", "QV-REPLAY-001"]),
         "licenses.json": ("pip-licenses", "scripts/ci_local.sh → scripts/license_gate.py", ["QV-LIC-001"]),
         "acc019_replay_diff.json": ("replay-diff", "scripts/p6_evidence.py acc019()", ["QV-ACC-019", "QV-REPLAY-001"]),
-        "eval_report.json": ("eval-report", "qevion.eval.harness.run_eval", ["QV-EVAL-001", "QV-EVAL-002", "QV-EVAL-004", "QV-EVAL-006"]),
+        "eval_report.json": (
+            "eval-report",
+            "qevion.eval.harness.run_eval",
+            ["QV-EVAL-001", "QV-EVAL-002", "QV-EVAL-004", "QV-EVAL-006"],
+        ),
         "eval_report.md": ("eval-report-md", "qevion.eval.harness.write_reports", ["QV-EVAL-006"]),
         "corpus_manifest.json": ("eval-corpus", "qevion.eval.corpus.corpus_manifest", ["QV-EVAL-003", "QV-EVAL-005"]),
-        "registry_rollup.json": ("registry-rollup", "scripts/p6_evidence.py registry_rollup()", ["QV-EVID-001", "QV-ACC-001"]),
-        "preview_verification.json": ("preview-verification", "GetServiceUrl + Playwright + curl/websockets probes", ["QV-ACC-015", "QV-OUT-DIR-002"]),
+        "registry_rollup.json": (
+            "registry-rollup",
+            "scripts/p6_evidence.py registry_rollup()",
+            ["QV-EVID-001", "QV-ACC-001"],
+        ),
+        "preview_verification.json": (
+            "preview-verification",
+            "GetServiceUrl + Playwright + curl/websockets probes",
+            ["QV-ACC-015", "QV-OUT-DIR-002"],
+        ),
     }
     items = []
     for name, (kind, by, crit) in kinds.items():
         p = OUT / name
         if p.exists():
             items.append(
-                {"path": f"evidence/P6/CP-0009/{name}", "sha256": _sha(p), "kind": kind, "produced_by": by, "produced_at": now, "criterion_ids": crit}
+                {
+                    "path": f"evidence/P6/CP-0009/{name}",
+                    "sha256": _sha(p),
+                    "kind": kind,
+                    "produced_by": by,
+                    "produced_at": now,
+                    "criterion_ids": crit,
+                }
             )
     (OUT / "index.json").write_text(json.dumps({"checkpoint": "CP-0009", "items": items}, indent=1))
 
