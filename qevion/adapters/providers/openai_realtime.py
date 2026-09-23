@@ -179,7 +179,9 @@ class OpenAIRealtimeSession:
         cfg = self.config
         # Input transcription model is a composition option (binding config `transcription_model`); default
         # whisper-1. OPS 5.5 P2 measured gpt-4o-transcribe CER 0.077 vs whisper-1 0.193 on ar-EG synthetic clips.
-        transcription: dict[str, Any] = {"model": str(cfg.extra.get("transcription_model") or DEFAULT_TRANSCRIPTION_MODEL)}
+        transcription: dict[str, Any] = {
+            "model": str(cfg.extra.get("transcription_model") or DEFAULT_TRANSCRIPTION_MODEL)
+        }
         if cfg.language_hint is not None:
             transcription["language"] = cfg.language_hint[:2]
         audio_in: dict[str, Any] = {
