@@ -24,6 +24,9 @@ from urllib import request
 
 import websockets
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from session_health import fetch_events, verdict  # noqa: E402
+
 ACTIVITY = "act_csat_survey@1.0.0"
 COMPOSITION = "comp_s2s_openai_v1"
 TURNS = ["أهلا", "الخدمة كانت كويسة، أديها أربعة من خمسة", "لا شكرا، مع السلامة"]
@@ -143,8 +146,10 @@ async def main() -> int:
 
     event_types = sorted({e["type"] for e in events})
     provider_ok = detail.get("composition_id") == COMPOSITION and (detail.get("credential_source") or "none") != "none"
-    passed = provider_ok and audio_frames > 0 and not errors and not detail.get("error")
+    health: dict[str, Any] = verdict(fetch_events(base, session_id)) if session_id else {"passed": False}
+    passed = provider_ok and audio_frames > 0 and not errors and not detail.get("error") and bool(health["passed"])
     report = {
+        "core_health": health,
         "kind": "openai-realtime-live-ws-e2e",
         "produced_at": datetime.now(UTC).isoformat(),
         "base": base,

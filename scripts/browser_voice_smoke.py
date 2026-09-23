@@ -24,6 +24,9 @@ from urllib import request
 
 from playwright.async_api import async_playwright
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from session_health import fetch_events, verdict  # noqa: E402
+
 WS_SHIM = """
 (() => {
   const Orig = window.WebSocket;
@@ -221,6 +224,13 @@ async def main() -> int:
         "final_close_1000": final_ok,
         "no_1011": (soak_close or {}).get("code") != 1011 and final_close.get("code") != 1011,
     }
+    # F-11: the Core's own verdict on the session (provider errors, illegal transitions, BLOCKED, outcome)
+    health: dict[str, Any] = {"passed": False, "checks": {"session_found": False}}
+    sid = next((s.get("session_id") for s in reversed(sessions) if s.get("composition_id") == composition), None)
+    if sid:
+        health = verdict(fetch_events(base, str(sid)))
+    for k, v in health["checks"].items():
+        checks[f"core:{k}"] = bool(v)
     passed = all(checks.values())
     report = {
         "kind": "browser-voice-smoke",
@@ -257,6 +267,7 @@ async def main() -> int:
             }
             for s in sessions
         ][-3:],
+        "core_health": health,
         "checks": checks,
         "passed": passed,
     }
