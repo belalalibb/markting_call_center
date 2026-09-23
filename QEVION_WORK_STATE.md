@@ -8,7 +8,7 @@
 | Current stage | **P3 COMPLETE** (CP-0006) → P4 Voice Runtime (CP-0007) |
 | Current objective | P4: `qevion/runtime/audio/` AudioWorklet PCM16 capture/playout in `web/`, WS binary framing, `qevion/adapters/providers/openai_realtime.py` (S2S over WebSocket, tool calls, barge-in cancel), turn adapters Silero VAD + Smart Turn (energy fallback on 2vCPU), 7-step interruption t0..t4 measured end-to-end, `comp_s2s_openai_v1` wired with CredentialResolver → CP-0007. (Prev P3: `qevion/copilot/` (dynamic discovery engine: next-question from Blueprint state + gaps + capability mapping; ASK_OWNER escape hatch; Blueprint proposals with Decision records; stop-asking rule) + `qevion/runtime/` FastAPI app (REST for tenants/activities/knowledge/preflight/readiness; WS session endpoint on mocks) + `web/` single TypeScript app with 3 modes: Config Center, Operator Console, Admin (in-memory ephemeral test-key UI for Chat & Calls) → CP-0006 |
 | Last verified checkpoint | CP-0006 (P3 Copilot + Web) — `recovery/checkpoints/CP-0006.md`, tag `cp/CP-0006` |
-| Last known good Git SHA | see `recovery/checkpoints/index.jsonl` last line (CP-0001) |
+| Last known good Git SHA | see `recovery/checkpoints/index.jsonl` last line (CP-0006 = 544078c) |
 | Approval | Operator approved full plan + decisions D1–D15 on 2026-09-22 (see `recovery/analysis/pre_approval_inspection_2026-09-22.md`) |
 
 ## Completed (with evidence)
@@ -32,7 +32,7 @@
 - **CP-0005 (P2):** `qevion/control/preflight.py` (13 deterministic checks, all 20 §11 reason codes, path + fix_hint, approved-Decision waiver, strict/lenient UNVERIFIED), `readiness.py` (table-driven lifecycle, `ActivationGates`, BFS legal path, edit invalidation, immutability), `capabilities.py` (registry aggregated from adapter self-declarations + platform facts; `RequirementMapping`); `qevion/knowledge/parsers.py` (csv/json/yaml/txt/md, locators, size cap, injection flags) + `pipeline.py` (normative 10-step pipeline: entities, facts w/ provenance, relationships, cross-source contradictions with priority resolution or pending+DATA_CONFLICT, ambiguity, 6 gap classes vs Activity needs, customer questions, operational requirements; `StructuredRetriever` approved-only). Tests: 150 total (+57) — **CI_LOCAL PASS**; evidence `evidence/P2/CP-0005/`; QV-ACC-011..013 accepted.
 
 ## In progress
-- CP-0006 record + tag + snapshot (this commit)
+- none (CP-0006 closed: record 544078c, tag cp/CP-0006, snapshot manifest)
 
 ## Incidents
 - 2026-09-22 #1: sandbox reset lost ~1h of uncommitted P0 work. Classified: test/environment. Countermeasure: protocol §8.1 commit-immediately. Redone in small increments.
