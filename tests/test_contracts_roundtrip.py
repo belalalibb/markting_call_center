@@ -153,6 +153,7 @@ _MINIMAL: dict[str, dict[str, Any]] = {
     },
 }
 _MINIMAL["qevion.interaction_record.v1"] = {"record_id": "r", "outcome": _MINIMAL["qevion.outcome.v1"]}
+_MINIMAL["qevion.copilot.v1"] = {"proposal_id": "p", "config_session_id": "c", "tenant_id": "t"}
 
 
 def _blueprint_minimal() -> dict[str, Any]:

@@ -4,6 +4,7 @@
   "qevion.asr_result.v1": "asr_result_v1.schema.json",
   "qevion.capability_registry.v1": "capability_registry_v1.schema.json",
   "qevion.composition.v1": "composition_v1.schema.json",
+  "qevion.copilot.v1": "copilot_v1.schema.json",
   "qevion.credential_scope.v1": "credential_scope_v1.schema.json",
   "qevion.decision.v1": "decision_v1.schema.json",
   "qevion.decision_result.v1": "decision_result_v1.schema.json",
