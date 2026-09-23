@@ -109,6 +109,9 @@ class MockS2SSession:
             self.log.append(f"cancel:{rid}")
             await self._events.put(S2SEvent(type=S2SEventType.RESPONSE_CANCELLED, response_id=rid))
 
+    async def truncate_response(self, response_id: str, audio_end_ms: int) -> None:
+        self.log.append(f"truncate:{response_id}:{audio_end_ms}")
+
     async def update_instructions(self, instructions: str) -> None:
         self.config = self.config.model_copy(update={"instructions": instructions})
         self.log.append("instructions_updated")

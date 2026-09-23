@@ -141,6 +141,8 @@ class OpenAIRealtimeSession:
         self._pump: asyncio.Task[None] | None = None
         self.sent: list[dict[str, Any]] = []  # outbound message types + sizes only (diagnostics; no audio bytes)
         self._current_response: str | None = None
+        # F-06: response_id → assistant audio item_id (needed for conversation.item.truncate)
+        self._audio_items: dict[str, str] = {}
 
     # ------------------------------------------------------------- lifecycle
     def start(self) -> None:
@@ -221,6 +223,15 @@ class OpenAIRealtimeSession:
         )
         await self._send({"type": "response.create"})
 
+    async def truncate_response(self, response_id: str, audio_end_ms: int) -> None:
+        """F-06: `conversation.item.truncate` so the unheard tail (text + audio) leaves the provider context."""
+        item = self._audio_items.get(response_id)
+        if not item:
+            return
+        await self._send(
+            {"type": "conversation.item.truncate", "item_id": item, "content_index": 0, "audio_end_ms": max(0, audio_end_ms)}
+        )
+
     async def cancel_response(self, response_id: str | None = None) -> None:
         await self._send({"type": "response.cancel"})
         # Also clear any audio queued but not yet pumped to the transport (barge-in step 4, §31).
@@ -291,6 +302,8 @@ class OpenAIRealtimeSession:
             self._current_response = rid
             ev = S2SEvent(type=S2SEventType.RESPONSE_STARTED, raw_type=t, response_id=rid)
         elif t in ("response.audio.delta", "response.output_audio.delta"):
+            if rid and msg.get("item_id") and rid not in self._audio_items:
+                self._audio_items[rid] = str(msg["item_id"])
             pcm = base64.b64decode(msg.get("delta", ""))
             fmt = self.config.output_format
             ref = AudioFrameRef(
