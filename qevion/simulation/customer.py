@@ -70,7 +70,7 @@ class SimulatedCustomerTransport:
                 return
             yield item
 
-    async def close(self, reason: str) -> None:
+    async def close(self, reason: str = "bye") -> None:
         self.closed = True
         self.close_reason = reason
         if self._driver and not self._driver.done():
@@ -115,4 +115,8 @@ class SimulatedCustomerTransport:
         return [m for m in self.sent if m.type is type_]
 
     def assistant_texts(self) -> list[str]:
-        return [m.text or "" for m in self.sent if m.type is ServerMessageType.TRANSCRIPT and m.payload.get("role") != "user"]
+        return [
+            m.text or ""
+            for m in self.sent
+            if m.type is ServerMessageType.TRANSCRIPT and m.payload.get("role") != "user"
+        ]

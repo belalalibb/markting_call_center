@@ -24,6 +24,7 @@ from qevion.adapters.turn.energy import EnergyTurnAdapter
 from qevion.contracts.activity import ActivityBlueprint
 from qevion.contracts.common import Channel, Provenance, new_id
 from qevion.contracts.event import Event, EventType
+from qevion.contracts.ports import ToolBackend
 from qevion.contracts.provider import S2SSessionConfig, ToolCallRequest
 from qevion.contracts.simulation import (
     SAFETY_GRADERS,
@@ -141,6 +142,7 @@ class ScenarioRunner:
         transport = SimulatedCustomerTransport(turns=case.turns)
         provider = MockS2SAdapter(_script_from_case(case))
         outcome_sink, handoff_sink = MemoryOutcomeSink(), MemoryHandoffSink()
+        backends: dict[str, ToolBackend] = dict(memory_backends(store))
         deps = SessionDeps(
             blueprint=self.bp,
             s2s=provider,
@@ -149,7 +151,7 @@ class ScenarioRunner:
             turn=EnergyTurnAdapter().new_detector(),
             decision=RulesDecisionAdapter(),
             tool_declarations=declarations_for_blueprint_permissions(self.bp.tools.permissions),
-            tool_backends=memory_backends(store),
+            tool_backends=backends,
             outcome_sink=outcome_sink,
             handoff_sink=handoff_sink,
             channel=Channel.TEXT if case.channel == "text" else Channel.BROWSER_VOICE,
@@ -162,7 +164,11 @@ class ScenarioRunner:
         run = CaseRun(case, session, transport, outcome_sink, handoff_sink, store, provider)
         if case.injection is Injection.OPT_OUT:
             run.opt_out_turn_index = next(
-                (i for i, t in enumerate(case.turns) if t.kind == "hangup" or (t.text or "").lower().startswith("stop")),
+                (
+                    i
+                    for i, t in enumerate(case.turns)
+                    if t.kind == "hangup" or (t.text or "").lower().startswith("stop")
+                ),
                 None,
             )
         t0 = time.monotonic()

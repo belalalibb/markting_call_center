@@ -12,6 +12,7 @@ import yaml
 from qevion.contracts.activity import ActivityBlueprint
 from qevion.contracts.common import Provenance
 from qevion.contracts.event import EventType
+from qevion.contracts.policy import ClaimRule
 from qevion.contracts.simulation import (
     ActivationThresholds,
     CustomerTurn,
@@ -22,7 +23,6 @@ from qevion.contracts.simulation import (
     ScenarioCase,
     SimulationReport,
 )
-from qevion.contracts.policy import ClaimRule
 from qevion.contracts.tool import PlatformTool
 from qevion.core.tool_pipeline import BudgetGuard
 from qevion.simulation.runner import ScenarioRunner, SimulationDeps, blueprint_fingerprint, build_report, grade
@@ -56,7 +56,9 @@ def happy_case(bp: ActivityBlueprint, kind: PersonaKind = PersonaKind.NORMAL) ->
     turns.append(_say("yes", **_record(req[0], "yes")))
     for i, name in enumerate(req[1:], start=1):
         turns.append(_say(str(i), **_record(name, i if i <= 5 else "yes")))
-    turns.append(_say("that's all", assistant_tool=PlatformTool.SUBMIT_RECORD.value, assistant_tool_args={"fields": {}}))
+    turns.append(
+        _say("that's all", assistant_tool=PlatformTool.SUBMIT_RECORD.value, assistant_tool_args={"fields": {}})
+    )
     return ScenarioCase(
         case_id=f"happy_{kind.value}",
         persona=_persona(kind),
@@ -197,7 +199,9 @@ async def test_report_requires_persona_coverage_and_adversarial(tmp_path: Path) 
     bp = _bp()
     runner = ScenarioRunner(bp)
     # happy-path only → defect (QV-SIM-005)
-    rep = await runner.run([happy_case(bp)], thresholds=ActivationThresholds(required_persona_kinds=[PersonaKind.NORMAL]))
+    rep = await runner.run(
+        [happy_case(bp)], thresholds=ActivationThresholds(required_persona_kinds=[PersonaKind.NORMAL])
+    )
     assert rep.passed is False
     assert any("happy-path-only" in f.message for f in rep.findings)
     assert rep.session_kind == "simulation" and rep.blueprint_fingerprint == blueprint_fingerprint(bp)
@@ -238,7 +242,9 @@ async def test_acc021_budget_guard_terminates_writes_and_emits_event() -> None:
 
 async def test_tool_failure_injection_is_graded_not_raised() -> None:
     bp = _bp()
-    case = happy_case(bp, PersonaKind.CORRECTOR).model_copy(update={"injection": Injection.TOOL_FAILURE, "case_id": "tool_fail"})
+    case = happy_case(bp, PersonaKind.CORRECTOR).model_copy(
+        update={"injection": Injection.TOOL_FAILURE, "case_id": "tool_fail"}
+    )
     run = await ScenarioRunner(bp).run_case(case)
     assert run.error is None
     assert run.payloads(EventType.TOOL_EXECUTION_FAILED), "injected failure not observed"
