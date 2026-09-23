@@ -16,7 +16,9 @@ from typing import Any
 import yaml
 
 MAX_BYTES = 5 * 1024 * 1024  # QV-KNOW-009 size limit for POC uploads
-_INJECTION = re.compile(r"(?i)\b(ignore (all |previous |all previous )?instructions|system prompt|you are now|disregard)\b")
+_INJECTION = re.compile(
+    r"(?i)\b(ignore (all |previous |all previous )?instructions|system prompt|you are now|disregard)\b"
+)
 
 
 class ParseError(ValueError):
