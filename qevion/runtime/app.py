@@ -418,6 +418,25 @@ def _live(s: LiveSession) -> dict[str, Any]:
         "composition_id": s.composition_id,
         "credential_source": s.credential_source,
         "error": s.error,
+        "interruptions": [_interruption(i) for i in s.session.interruptions],
+    }
+
+
+def _interruption(rec: Any) -> dict[str, Any]:
+    """§31 watermarks t0..t4 (ms since session start) for one interruption — QV-INT evidence."""
+    t1 = rec.t1_barge_in_detected
+    return {
+        "response_id": rec.response_id,
+        "t0": rec.t0_user_speech_onset,
+        "t1": t1,
+        "t2": rec.t2_cancel_sent,
+        "t3": rec.t3_playout_stopped,
+        "t4": rec.t4_state_reconciled,
+        "forced": rec.forced,
+        "heard_len": rec.heard_text_len,
+        "unheard_len": rec.unheard_text_len,
+        "t1_to_t3_ms": None if rec.t3_playout_stopped is None else rec.t3_playout_stopped - t1,
+        "t1_to_t4_ms": None if rec.t4_state_reconciled is None else rec.t4_state_reconciled - t1,
     }
 
 

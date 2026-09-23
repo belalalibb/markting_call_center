@@ -85,8 +85,26 @@ export interface CopilotView {
   question_explanations: Record<string, string>;
 }
 
+export interface CompositionSummary {
+  composition_id: string;
+  name?: string;
+  s2s_adapter?: string;
+  turn_adapter?: string;
+  decision_adapter?: string;
+  credential_source?: string | null;
+  [k: string]: unknown;
+}
+
+export interface InterruptionRecord {
+  response_id: string;
+  t0: number; t1: number; t2: number | null; t3: number | null; t4: number | null;
+  forced: boolean; heard_len: number; unheard_len: number;
+  t1_to_t3_ms: number | null; t1_to_t4_ms: number | null;
+}
+
 export const api = {
   health: () => req("GET", "/api/health"),
+  compositions: () => req<CompositionSummary[]>("GET", "/api/compositions"),
   tenants: () => req<Json[]>("GET", "/api/tenants"),
   createTenant: (body: Json) => req("POST", "/api/tenants", body),
   activities: () => req<ActivitySummary[]>("GET", "/api/activities"),
@@ -134,7 +152,8 @@ export const api = {
   copilotPublish: (sid: string) => req("POST", `/api/copilot/sessions/${sid}/publish`),
 };
 
-export function wsUrl(activityKey: string, channel = "text"): string {
+export function wsUrl(activityKey: string, channel = "text", composition?: string): string {
   const proto = location.protocol === "https:" ? "wss:" : "ws:";
-  return `${proto}//${location.host}/ws/sessions/${encodeURIComponent(activityKey)}?channel=${channel}`;
+  const comp = composition ? `&composition=${encodeURIComponent(composition)}` : "";
+  return `${proto}//${location.host}/ws/sessions/${encodeURIComponent(activityKey)}?channel=${channel}${comp}`;
 }

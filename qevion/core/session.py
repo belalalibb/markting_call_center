@@ -620,6 +620,7 @@ class SessionInterruption(SessionTools):
             EventType.LATENCY_SAMPLE,
             {
                 "segment": "interruption",
+                "response_id": rid,
                 "t0": rec.t0_user_speech_onset,
                 "t1": t1,
                 "t2": rec.t2_cancel_sent,

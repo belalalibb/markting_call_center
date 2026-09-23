@@ -67,3 +67,7 @@ tr[data-key] { cursor: pointer; }
 .kv { display: grid; grid-template-columns: max-content 1fr; gap: 4px 12px; font-size: 13px; }
 .kv dt { color: var(--muted); }
 .kv dd { margin: 0; }
+
+/* mic level meter (Operator Console voice mode) */
+.meter { display: inline-block; width: 90px; height: 8px; border-radius: 4px; background: var(--border, #2a2f3a); overflow: hidden; vertical-align: middle; }
+.meter-fill { display: block; height: 100%; width: 0; background: var(--ok, #3fb950); transition: width 60ms linear; }

@@ -1,5 +1,7 @@
-// Operator Console: live chat session over WS (mock composition), state, events, handoffs.
-import { api, wsUrl, type ActivitySummary } from "./api";
+// Operator Console: live text/voice session over WS (selectable composition), state, events, handoffs,
+// and the §31 interruption watermarks (t0..t4) per session.
+import { api, wsUrl, type ActivitySummary, type CompositionSummary, type InterruptionRecord } from "./api";
+import { VoiceClient } from "./audio/client";
 import { clear, errMsg, h, pill, pre, section, table, toast, toneFor } from "./ui";
 
 interface ServerMsg {
@@ -11,51 +13,127 @@ interface ServerMsg {
 }
 
 let ws: WebSocket | null = null;
+let voice: VoiceClient | null = null;
 let currentSid: string | null = null;
 
 let stateRedraw: (m: ServerMsg) => void = () => {};
 let sessionsRedraw: () => Promise<void> = async () => {};
 let eventsPush: (m: ServerMsg) => void = () => {};
+let interruptionsPush: (p: Record<string, unknown>) => void = () => {};
 
 export async function renderConsole(root: HTMLElement): Promise<void> {
   root.className = "";
   clear(root);
-  const activities = await api.activities().catch(() => [] as ActivitySummary[]);
-  root.append(chatCard(activities), stateCard(), sessionsCard(), eventsCard());
+  const [activities, compositions] = await Promise.all([
+    api.activities().catch(() => [] as ActivitySummary[]),
+    api.compositions().catch(() => [] as CompositionSummary[]),
+  ]);
+  root.append(chatCard(activities, compositions), stateCard(), interruptionsCard(), sessionsCard(), eventsCard());
 }
 
-function chatCard(activities: ActivitySummary[]): HTMLElement {
+function compLabel(c: CompositionSummary): string {
+  const cred = c.credential_source && c.credential_source !== "none" ? `cred:${c.credential_source}` : "no credential";
+  return `${c.composition_id}${c["default"] ? " (default)" : ""} — ${cred}`;
+}
+
+function chatCard(activities: ActivitySummary[], compositions: CompositionSummary[]): HTMLElement {
   const box = h("div");
-  const card = section("Live session (text channel, mock provider)", box);
+  const card = section("Live session (text or browser voice)", box);
   const sel = h("select", {}, ...activities.map((a) => h("option", { value: a.key }, `${a.key} — ${a.name} [${a.readiness}]`)));
+  const compSel = h("select", {},
+    h("option", { value: "pinned" }, "pinned — use the activity's pinned composition"),
+    ...compositions.map((c) => h("option", { value: c.composition_id }, compLabel(c))));
+  const def = compositions.find((c) => c["default"]);
+  if (def) compSel.value = def.composition_id;
+  const micBtn = h("button", {}, "🎙 Mic off");
+  const meter = h("span", { class: "meter" }, h("span", { class: "meter-fill" }));
+  const fill = meter.firstElementChild as HTMLElement;
   const chat = h("div", { class: "chat" });
   const input = h("input", { placeholder: "type as the caller… (try a question, field values, or 'stop')" });
   const statusHost = h("span");
+  const voiceStatus = h("span", { class: "muted" }, "");
   const setStatus = (t: string, tone: "ok" | "muted" | "bad") => { clear(statusHost); statusHost.append(pill(t, tone)); };
   setStatus("disconnected", "muted");
   const add = (cls: string, text: string) => { chat.append(h("div", { class: `msg ${cls}` }, text)); chat.scrollTop = chat.scrollHeight; };
   const send = (obj: Record<string, unknown>) => {
     if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ schema: "qevion.transport.v1", client_ts_ms: Date.now(), ...obj }));
   };
+  const sendFrame = (frame: ArrayBuffer) => { if (ws && ws.readyState === WebSocket.OPEN) ws.send(frame); };
+  let lastResponseId: string | null = null;
+  let audioBytesIn = 0;
+
+  const micOff = async () => {
+    if (!voice) return;
+    await voice.stop();
+    voice = null;
+    micBtn.textContent = "🎙 Mic off";
+    fill.style.width = "0%";
+    voiceStatus.textContent = "";
+  };
+  const micOn = async () => {
+    if (voice) return;
+    const v = new VoiceClient(sendFrame, send, {
+      onStatus: (s) => { voiceStatus.textContent = s; },
+      onLevel: (rms) => { fill.style.width = `${Math.min(100, Math.round(rms * 400))}%`; },
+    });
+    try {
+      await v.start();
+      voice = v;
+      micBtn.textContent = "🎙 Mic on";
+    } catch (e) {
+      toast(`microphone unavailable: ${errMsg(e)}`, "bad");
+      voiceStatus.textContent = "mic unavailable — text channel only";
+    }
+  };
+  micBtn.addEventListener("click", () => void (voice ? micOff() : micOn()));
+
   const connect = () => {
     ws?.close();
     clear(chat);
-    ws = new WebSocket(wsUrl(sel.value, "text"));
+    audioBytesIn = 0;
+    const channel = voice ? "browser_voice" : "text";
+    ws = new WebSocket(wsUrl(sel.value, channel, compSel.value));
     ws.binaryType = "arraybuffer";
-    ws.onopen = () => { setStatus("connected", "ok"); add("sys", `connected → ${sel.value}`); send({ type: "hello" }); };
-    ws.onclose = (e) => { setStatus("disconnected", "muted"); add("sys", `closed (${e.code}${e.reason ? ": " + e.reason : ""})`); void sessionsRedraw(); };
+    ws.onopen = () => { setStatus(`connected · ${channel}`, "ok"); add("sys", `connected → ${sel.value} via ${compSel.value} (${channel})`); send({ type: "hello" }); };
+    ws.onclose = (e) => {
+      setStatus("disconnected", "muted");
+      add("sys", `closed (${e.code}${e.reason ? ": " + e.reason : ""})`);
+      voice?.stopPlayout("socket_closed");
+      void sessionsRedraw();
+    };
     ws.onerror = () => { setStatus("error", "bad"); add("sys", "socket error"); };
     ws.onmessage = (ev) => {
-      if (typeof ev.data !== "string") { add("sys", `◼ audio ${(ev.data as ArrayBuffer).byteLength} bytes`); return; }
+      if (typeof ev.data !== "string") {
+        const buf = ev.data as ArrayBuffer;
+        audioBytesIn += buf.byteLength;
+        if (voice) voice.enqueue(buf, lastResponseId);
+        else if (audioBytesIn === buf.byteLength) add("sys", `◼ audio stream started (${buf.byteLength} bytes; mic off → not played)`);
+        return;
+      }
       const m = JSON.parse(ev.data) as ServerMsg;
       currentSid = m.session_id;
       eventsPush(m);
       switch (m.type) {
-        case "ready": add("sys", "session ready"); break;
+        case "ready": add("sys", `session ready (${String(m.payload["composition_id"] ?? compSel.value)})`); break;
         case "transcript": add(m.payload["role"] === "user" ? "user" : "agent", m.text ?? ""); break;
-        case "audio_start": add("agent", m.text ? m.text : "(speaking…)"); send({ type: "playout_started", response_id: m.response_id }); break;
-        case "audio_end": send({ type: "playout_stopped", response_id: m.response_id }); break;
-        case "stop_playout": add("sys", "⏹ interrupted — playout stopped"); break;
+        case "audio_start":
+          lastResponseId = m.response_id ?? null;
+          add("agent", m.text ? m.text : "(speaking…)");
+          // In voice mode the VoiceClient stamps playout_started when the first frame actually reaches the speaker.
+          if (!voice) send({ type: "playout_started", response_id: m.response_id });
+          break;
+        case "audio_end":
+          if (!voice) send({ type: "playout_stopped", response_id: m.response_id });
+          break;
+        case "stop_playout":
+          add("sys", "⏹ interrupted — playout stopped");
+          if (voice) voice.stopPlayout(); else send({ type: "playout_stopped", response_id: m.response_id });
+          break;
+        case "event": {
+          const p = m.payload as { type?: string; payload?: Record<string, unknown> };
+          if (p.type === "latency.sample" && p.payload?.["segment"] === "interruption") interruptionsPush(p.payload);
+          break;
+        }
         case "confirmation_request": {
           const row = h("div", { class: "msg sys" }, `Confirm: ${m.text ?? JSON.stringify(m.payload)} `,
             h("button", { onClick: () => { send({ type: "confirm", call_id: m.payload["call_id"], granted: true }); row.remove(); } }, "Yes"),
@@ -64,8 +142,7 @@ function chatCard(activities: ActivitySummary[]): HTMLElement {
           break;
         }
         case "state": stateRedraw(m); break;
-        case "event": break;
-        case "error": add("sys", `error: ${m.text}`); break;
+        case "error": add("sys", `error: ${m.text}${m.payload["code"] ? ` [${String(m.payload["code"])}]` : ""}`); break;
         case "bye": add("sys", "agent closed the session"); break;
         default: break;
       }
@@ -74,7 +151,11 @@ function chatCard(activities: ActivitySummary[]): HTMLElement {
   const doSend = () => { const t = input.value.trim(); if (!t) return; add("user", t); send({ type: "text", text: t }); input.value = ""; };
   input.addEventListener("keydown", (e) => { if ((e as KeyboardEvent).key === "Enter") doSend(); });
   box.append(
-    h("div", { class: "row" }, sel, h("button", { class: "primary", onClick: connect }, "Connect"), h("button", { class: "danger", onClick: () => send({ type: "bye" }) }, "Hang up"), statusHost),
+    h("div", { class: "row" }, sel, compSel),
+    h("div", { class: "row" },
+      h("button", { class: "primary", onClick: connect }, "Connect"),
+      h("button", { class: "danger", onClick: () => { send({ type: "bye" }); voice?.stopPlayout("hangup"); } }, "Hang up"),
+      micBtn, meter, statusHost, voiceStatus),
     chat,
     h("div", { class: "row" }, input, h("button", { onClick: doSend }, "Send")),
   );
@@ -89,6 +170,39 @@ function stateCard(): HTMLElement {
     box.append(h("dl", { class: "kv" }, ...entries));
   };
   return section("Session state", box);
+}
+
+function fmt(v: number | null | undefined): string { return v === null || v === undefined ? "—" : String(v); }
+
+function interruptionsCard(): HTMLElement {
+  const rows: InterruptionRecord[] = [];
+  const box = h("div", {}, h("p", { class: "muted" }, "§31 watermarks per interruption (ms since session start): t0 speech onset · t1 barge-in · t2 cancel sent · t3 playout stopped · t4 reconciled."));
+  const redraw = () => {
+    clear(box);
+    if (!rows.length) { box.append(h("p", { class: "muted" }, "No interruptions yet — speak (or type) while the agent is talking.")); return; }
+    box.append(table(["response", "t0", "t1", "t2", "t3", "t4", "t1→t3", "t1→t4", "heard/unheard", "forced"], rows.map((r) => [
+      h("code", {}, String(r.response_id).slice(0, 10)), fmt(r.t0), fmt(r.t1), fmt(r.t2), fmt(r.t3), fmt(r.t4),
+      r.t1_to_t3_ms === null ? "—" : pill(`${r.t1_to_t3_ms} ms`, r.t1_to_t3_ms <= 300 ? "ok" : "warn"),
+      r.t1_to_t4_ms === null ? "—" : pill(`${r.t1_to_t4_ms} ms`, r.t1_to_t4_ms <= 500 ? "ok" : "warn"),
+      `${r.heard_len}/${r.unheard_len}`, r.forced ? pill("forced", "bad") : "no",
+    ])));
+  };
+  interruptionsPush = (p) => {
+    const t1 = Number(p["t1"]);
+    const t3 = p["t3"] === null || p["t3"] === undefined ? null : Number(p["t3"]);
+    const t4 = p["t4"] === null || p["t4"] === undefined ? null : Number(p["t4"]);
+    rows.unshift({
+      response_id: String(p["response_id"] ?? ""),
+      t0: Number(p["t0"]), t1,
+      t2: p["t2"] === null || p["t2"] === undefined ? null : Number(p["t2"]),
+      t3, t4, forced: Boolean(p["forced"]),
+      heard_len: Number(p["heard_len"] ?? 0), unheard_len: Number(p["unheard_len"] ?? 0),
+      t1_to_t3_ms: t3 === null ? null : t3 - t1, t1_to_t4_ms: t4 === null ? null : t4 - t1,
+    });
+    redraw();
+  };
+  redraw();
+  return section("Interruption metrics (QV-INT)", box);
 }
 
 function sessionsCard(): HTMLElement {
