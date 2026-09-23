@@ -241,8 +241,14 @@ async def test_error_fatality_classification() -> None:
     ad, sock = make()
     s = await ad.open(CFG, "k")
     cases = [
-        ({"type": "invalid_request_error", "code": "input_audio_buffer_commit_empty", "message": "buffer too small"}, False),
-        ({"type": "invalid_request_error", "code": "conversation_already_has_active_response", "message": "busy"}, False),
+        (
+            {"type": "invalid_request_error", "code": "input_audio_buffer_commit_empty", "message": "buffer too small"},
+            False,
+        ),
+        (
+            {"type": "invalid_request_error", "code": "conversation_already_has_active_response", "message": "busy"},
+            False,
+        ),
         ({"type": "invalid_request_error", "code": "invalid_api_key", "message": "bad key"}, True),
         ({"type": "authentication_error", "code": None, "message": "no"}, True),
         ({"type": "insufficient_quota", "code": "insufficient_quota", "message": "quota"}, True),

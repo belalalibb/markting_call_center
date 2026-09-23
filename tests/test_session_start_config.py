@@ -88,5 +88,7 @@ async def test_voice_first_provider_message_is_full_session_update() -> None:
 
 @pytest.mark.asyncio
 async def test_text_first_provider_message_is_session_update() -> None:
-    out = await _run(Channel.TEXT, lambda tr: tr.client_sends(ClientMessage.model_validate({"type": "text", "text": "hi"})))
+    out = await _run(
+        Channel.TEXT, lambda tr: tr.client_sends(ClientMessage.model_validate({"type": "text", "text": "hi"}))
+    )
     assert [m["type"] for m in out][0] == "session.update"

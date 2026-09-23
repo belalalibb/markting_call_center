@@ -36,7 +36,13 @@ def test_admin_key_hijack_is_refused_without_token(monkeypatch: pytest.MonkeyPat
     r = c.post("/api/admin/test-key", json={"provider": "openai", "value": "ATTACKER-9999", "ttl_seconds": 60})
     assert r.status_code == 401
     assert c.delete("/api/admin/test-key").status_code == 401
-    for path in ("/api/events", "/api/sessions", "/api/activities", "/api/compositions", "/api/admin/credentials/openai"):
+    for path in (
+        "/api/events",
+        "/api/sessions",
+        "/api/activities",
+        "/api/compositions",
+        "/api/admin/credentials/openai",
+    ):
         assert c.get(path).status_code == 401, path
     # open: health, auth status (so the UI can render the login prompt)
     assert c.get("/api/health").status_code == 200

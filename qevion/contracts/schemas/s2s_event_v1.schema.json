@@ -79,6 +79,11 @@
           "title": "Code",
           "type": "string"
         },
+        "fatal": {
+          "default": true,
+          "title": "Fatal",
+          "type": "boolean"
+        },
         "message": {
           "title": "Message",
           "type": "string"
