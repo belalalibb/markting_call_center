@@ -8,3 +8,4 @@
 {"id":"CP-0008","ts":"2026-09-23T04:33:50Z","phase":"P5","git_sha":"270c56c33b59b8fb1cec4a4f3ec01400e4d0a15e","title":"Simulation harness + Activation gates + Outbound seam","status":"VERIFIED"}
 {"id":"CP-0009","ts":"2026-09-23T05:53:24Z","phase":"P6","git_sha":"321044913bf913e669c926f6e4aa664e1525ac11","title":"Evaluation + Replay + Web gates/outbound + Evidence + Preview","status":"VERIFIED"}
 {"id":"CP-0010","ts":"2026-09-23T13:03:38Z","phase":"P6+","git_sha":"29cf55614c945c9e6582562b0a74166293ac010e","title":"TypeSafe Jev live decision role (rules+typesafe), WS E2E + smoke evidence","status":"VERIFIED"}
+{"id":"CP-0011","ts":"2026-09-23T14:26:41Z","phase":"P6+","git_sha":"73a8de5cbae6f50642ec4dfcb24d26c9ad0844d7","title":"OpenAI Realtime GA live S2S verification + live-found fixes (QV-ACC-022 accepted)","status":"VERIFIED"}
