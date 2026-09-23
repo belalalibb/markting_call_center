@@ -17,7 +17,7 @@ dist/
 build/
 # node
 node_modules/
-web/dist/
+# web/dist is tracked on purpose: qevion/main.py serves it and sandbox resets must not lose the preview
 # heavy evidence artifacts (index is committed)
 evidence/artifacts/
 *.wav
