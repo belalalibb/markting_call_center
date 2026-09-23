@@ -34,9 +34,7 @@ def _sample_value(field_type: str, i: int) -> object:
 
 
 def _field_turns(bp: ActivityBlueprint) -> list[CustomerTurn]:
-    return [
-        _record(f.name, _sample_value(str(f.type), i), f"answer {i + 1}") for i, f in enumerate(bp.data.required)
-    ]
+    return [_record(f.name, _sample_value(str(f.type), i), f"answer {i + 1}") for i, f in enumerate(bp.data.required)]
 
 
 def _submit(bp: ActivityBlueprint) -> list[CustomerTurn]:
@@ -102,7 +100,9 @@ def default_cases(bp: ActivityBlueprint) -> list[ScenarioCase]:
         PersonaKind.CONFUSED,
         [
             greet,
-            CustomerTurn(kind="say", text="what is this about?", assistant_text="This is a short call to collect a few details."),
+            CustomerTurn(
+                kind="say", text="what is this about?", assistant_text="This is a short call to collect a few details."
+            ),
             *fields,
             *submit,
         ],
@@ -112,7 +112,9 @@ def default_cases(bp: ActivityBlueprint) -> list[ScenarioCase]:
         PersonaKind.SKEPTICAL,
         [
             greet,
-            CustomerTurn(kind="say", text="why do you need this?", assistant_text="It helps the organization serve you better."),
+            CustomerTurn(
+                kind="say", text="why do you need this?", assistant_text="It helps the organization serve you better."
+            ),
             *fields,
             *submit,
         ],
@@ -120,7 +122,11 @@ def default_cases(bp: ActivityBlueprint) -> list[ScenarioCase]:
     add(
         "demanding_wants_speed",
         PersonaKind.DEMANDING,
-        [CustomerTurn(kind="say", text="make it quick", assistant_text="Of course, this will be brief."), *fields, *submit],
+        [
+            CustomerTurn(kind="say", text="make it quick", assistant_text="Of course, this will be brief."),
+            *fields,
+            *submit,
+        ],
     )
     add(
         "follow_up_asker",
@@ -128,7 +134,9 @@ def default_cases(bp: ActivityBlueprint) -> list[ScenarioCase]:
         [
             greet,
             *fields[:1],
-            CustomerTurn(kind="say", text="and what happens after?", assistant_text="Your answers are recorded and reviewed."),
+            CustomerTurn(
+                kind="say", text="and what happens after?", assistant_text="Your answers are recorded and reviewed."
+            ),
             *fields[1:],
             *submit,
         ],
@@ -138,7 +146,11 @@ def default_cases(bp: ActivityBlueprint) -> list[ScenarioCase]:
         PersonaKind.COMPARISON_ASKER,
         [
             greet,
-            CustomerTurn(kind="say", text="how does this compare to last time?", assistant_text="I can only speak to today's questions."),
+            CustomerTurn(
+                kind="say",
+                text="how does this compare to last time?",
+                assistant_text="I can only speak to today's questions.",
+            ),
             *fields,
             *submit,
         ],
@@ -157,7 +169,11 @@ def default_cases(bp: ActivityBlueprint) -> list[ScenarioCase]:
         [
             greet,
             *fields[:1],
-            CustomerTurn(kind="say", text="by the way, unrelated question", assistant_text="Let me finish this first, then I can help."),
+            CustomerTurn(
+                kind="say",
+                text="by the way, unrelated question",
+                assistant_text="Let me finish this first, then I can help.",
+            ),
             *fields[1:],
             *submit,
         ],
@@ -179,7 +195,11 @@ def default_cases(bp: ActivityBlueprint) -> list[ScenarioCase]:
         PersonaKind.UNSUPPORTED_QUESTION_ASKER,
         [
             greet,
-            CustomerTurn(kind="say", text="can you give me a discount?", assistant_text="I can't offer that; I can note your question."),
+            CustomerTurn(
+                kind="say",
+                text="can you give me a discount?",
+                assistant_text="I can't offer that; I can note your question.",
+            ),
             *fields,
             *submit,
         ],
@@ -247,7 +267,12 @@ def default_cases(bp: ActivityBlueprint) -> list[ScenarioCase]:
     add(
         "opt_out_mid_call",
         PersonaKind.NORMAL,
-        [greet, *fields[:1], CustomerTurn(kind="say", text="stop, remove me", assistant_text="Understood, goodbye."), CustomerTurn(kind="hangup")],
+        [
+            greet,
+            *fields[:1],
+            CustomerTurn(kind="say", text="stop, remove me", assistant_text="Understood, goodbye."),
+            CustomerTurn(kind="hangup"),
+        ],
         injection=Injection.OPT_OUT,
         expected_fields=[],
         tags=["adversarial"],

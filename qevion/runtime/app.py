@@ -18,8 +18,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, ValidationError
 
 from qevion.contracts.activity import ActivityBlueprint, ReadinessState
-from qevion.contracts.simulation import ActivationThresholds
 from qevion.contracts.common import Channel, new_id
+from qevion.contracts.simulation import ActivationThresholds
 from qevion.contracts.tenant import Tenant
 from qevion.contracts.transport import ClientMessage, ServerMessage, ServerMessageType
 from qevion.control.readiness import IllegalReadinessTransitionError

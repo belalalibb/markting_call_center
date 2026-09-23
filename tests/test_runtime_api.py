@@ -426,7 +426,9 @@ def test_activation_refused_before_simulation_names_unmet_gates(client: TestClie
     before = client.get(f"/api/activities/{key}").json()["readiness"]
     r = client.post(f"/api/activities/{key}/activate", json={"actor": "op"})
     assert r.status_code == 409
-    assert "simulation_passed" in r.json()["detail"]["unmet"] or "not in transition table" in r.json()["detail"]["reason"]
+    assert (
+        "simulation_passed" in r.json()["detail"]["unmet"] or "not in transition table" in r.json()["detail"]["reason"]
+    )
     assert client.get(f"/api/activities/{key}").json()["readiness"] == before
     g = client.get(f"/api/activities/{key}/gates").json()
     assert "simulation_passed" in g["unmet"]
@@ -453,8 +455,8 @@ def test_simulate_then_activate_happy_path(client: TestClient) -> None:
     a = client.post(f"/api/activities/{key}/activate", json={"actor": "op"})
     assert a.status_code == 200, a.text
     assert a.json()["readiness"] == "ACTIVE"
-    assert a.json()["change"]["refs"]["simulation_report_ref"].startswith("simulation:")
-    assert a.json()["change"]["refs"]["preflight_result_ref"].startswith("preflight:")
+    assert a.json()["change"]["simulation_report_ref"].startswith("simulation:")
+    assert a.json()["change"]["preflight_result_ref"].startswith("preflight:")
 
 
 def test_acc020_seeded_violation_blocks_simulation_and_activation(client: TestClient) -> None:
