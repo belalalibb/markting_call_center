@@ -1,7 +1,7 @@
 # QEVION Traceability Matrix (§56). Machine-readable; updated at every checkpoint.
 # status: planned | implemented | evidenced | accepted | waived | retired
 schema: qevion.registry.traceability.v1
-updated_at: "2026-09-22"
+updated_at: "2026-09-23"
 sources:
   SPEC_V23: docs/archive/QEVION_VOICE_RUNTIME_POC_SPEC_v2.3_ARCHIVED.md
   MP_X2: docs/inputs/important_rebuild_master_prompt.md#X2
@@ -88,7 +88,7 @@ acceptance:
   QV-ACC-016: { phase: P3,   status: accepted, evidence: [evidence/P3/CP-0006/acc016_memory_only_key.json, evidence/P3/CP-0006/e2e_preview.json] }
   QV-ACC-017: { phase: P4,   status: accepted, evidence: [evidence/P4/CP-0007/latency_table.json, evidence/P4/CP-0007/e2e_voice_preview.json] }
   QV-ACC-018: { phase: P4,   status: accepted, evidence: [evidence/P4/CP-0007/latency_table.json, evidence/P4/CP-0007/junit.xml] }
-  QV-ACC-019: { phase: P4,   status: in_progress, evidence: [], note: "replay harness deferred to P6 (CP-0009) with evaluation; mock realtime pacing makes wall-clock nondeterministic, replay must use recorded event seq" }
+  QV-ACC-019: { phase: P6,   status: accepted, evidence: [evidence/P6/CP-0009/acc019_replay_diff.json, evidence/P6/CP-0009/junit.xml], note: "42/42 recorded cases (A/B/C, all personas + adversarial) replay to identical canonical event streams + outcomes; mutated Blueprint -> fingerprint divergence reported; wall-clock keys normalised out (seq/kind/type/source/payload compared)" }
   QV-ACC-020: { phase: P5,   status: accepted, evidence: [evidence/P5/CP-0008/acc020_simulation_gate.json, evidence/P5/CP-0008/simulation_report_clean.json, evidence/P5/CP-0008/junit.xml] }
   QV-ACC-021: { phase: P5,   status: accepted, evidence: [evidence/P5/CP-0008/acc021_budget_guard.json, evidence/P5/CP-0008/junit.xml] }
-  QV-ACC-022: { phase: P6,   status: planned, evidence: [], depends_on: A5 }
+  QV-ACC-022: { phase: P6,   status: blocked, evidence: [], depends_on: A5, note: "no operator-supplied real-provider key present in this sandbox (A5); OpenAI Realtime adapter + Admin ephemeral test-key path exist (CP-0007); smoke to run when a key is provided" }
