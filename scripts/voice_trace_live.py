@@ -208,6 +208,11 @@ async def main() -> int:
             await asyncio.wait_for(rd, 8)
         except Exception:  # noqa: BLE001
             pass
+    await asyncio.sleep(1.0)  # let the server finish close() before reading the final session state
+    try:
+        detail = get(f"/api/sessions/{st['sid']}")
+    except Exception as e:  # noqa: BLE001
+        detail = {"error": str(e)}
     evs = fetch_events(BASE, st["sid"], HDR) if st["sid"] else []
     health = verdict(evs)
     # A session where nobody was heard is not healthy (P2: a broken VAD produced 0 turns yet passed all checks).
