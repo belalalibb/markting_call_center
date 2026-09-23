@@ -201,3 +201,22 @@ async def test_prompt_client_ack_is_not_forced_during_audio_barge_in() -> None:
     assert not any(e.type == "failure.classified" and e.payload.get("class") == "playout_stop_timeout" for e in s.events)
     assert rec.t3_playout_stopped is not None and rec.t3_playout_stopped - rec.t1_barge_in_detected < 150
     await _bye(tr, task)
+
+
+@pytest.mark.asyncio
+async def test_bye_always_produces_a_record_even_when_provider_stream_ends_first() -> None:
+    """close() triggered from the client pump awaits provider.close(), which ends the provider event stream; run()
+    then tears down all pumps. The close must still complete (record + outcome), not die half-way."""
+    s, tr, prov, task = await _session([MockScriptStep(text="hi", audio_ms=200)])
+    orig_close = prov.close
+
+    async def slow_close() -> None:  # provider ends its stream, then takes a moment to finish closing
+        await orig_close()
+        await asyncio.sleep(0.05)
+
+    prov.close = slow_close
+    tr.client_sends(ClientMessage.model_validate({"type": "bye"}))
+    rec = await asyncio.wait_for(task, 5)
+    assert rec is not None and s.record is rec
+    assert any(e.type == "outcome.produced" for e in s.events)
+    assert any(e.type == "session.ended" for e in s.events)
