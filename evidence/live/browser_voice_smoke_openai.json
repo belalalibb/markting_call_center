@@ -1,0 +1,105 @@
+{
+ "kind": "browser-voice-smoke",
+ "produced_at": "2026-09-23T17:08:16.375483+00:00",
+ "base": "https://8000-isz79tc9619nuds9326qh-ecea8f22.sandbox.novita.ai",
+ "activity": "act_order_intake@1.0.0",
+ "composition": "comp_s2s_openai_v1",
+ "key_injected_for": "openai",
+ "target_seconds": 75.0,
+ "survived_ms": 85586,
+ "header_samples": [
+  [
+   9125,
+   "live · comp_s2s_openai_v1 · browser_voice · openai_realtime:gpt-realtime"
+  ],
+  [
+   85413,
+   "ok · default comp_mock_s2s_v1 · 3 activities · 1 live"
+  ]
+ ],
+ "status_pills": [
+  "ok · default comp_mock_s2s_v1 · 3 activities · 1 live",
+  "disconnected (1000)",
+  "INTERRUPTED",
+  "ENGAGED",
+  "idle",
+  "48 ms",
+  "48 ms",
+  "ended"
+ ],
+ "ready_line": "session ready — composition comp_s2s_openai_v1 · browser_voice · s2s openai_realtime:gpt-realtime · credential ephemeral_ui",
+ "chat": [
+  [
+   9115,
+   "connected → act_order_intake@1.0.0 via comp_s2s_openai_v1 (browser_voice) — waiting for session ready…"
+  ],
+  [
+   9115,
+   "session ready — composition comp_s2s_openai_v1 · browser_voice · s2s openai_realtime:gpt-realtime · credential ephemeral_ui"
+  ],
+  [
+   11614,
+   "(speaking…)"
+  ],
+  [
+   11614,
+   "⏹ interrupted — playout stopped"
+  ],
+  [
+   85408,
+   "closed (1000: user_bye)"
+  ]
+ ],
+ "ws": {
+  "text_types": {
+   "state": 4,
+   "ready": 1,
+   "event": 9,
+   "audio_start": 1,
+   "stop_playout": 1,
+   "ping": 7
+  },
+  "binary": 0,
+  "pings": 7,
+  "pongs_sent": 7,
+  "close": {
+   "code": 1000,
+   "reason": "user_bye",
+   "at": 1790183296145
+  }
+ },
+ "speaking_cycles": 0,
+ "spoken_user_turns": 1,
+ "close_during_soak": null,
+ "console_errors": [],
+ "sessions_after": [
+  {
+   "session_id": "ses_5c817c1a61b74008",
+   "composition_id": "comp_s2s_openai_v1",
+   "channel": "browser_voice",
+   "credential_source": "ephemeral_ui",
+   "running": false,
+   "error": null,
+   "close_code": 1000,
+   "close_reason": "user_bye",
+   "heartbeat": {
+    "sent": 7,
+    "last_rtt_ms": 3.4,
+    "dropped_audio_frames": 0
+   }
+  }
+ ],
+ "checks": {
+  "mic_on": true,
+  "connected": true,
+  "session_ready": true,
+  "header_shows_actual_composition": true,
+  "speaking_then_listening": false,
+  "second_user_turn": false,
+  "heartbeat_answered": true,
+  "no_close_during_soak": true,
+  "final_close_1000": true,
+  "no_1011": true
+ },
+ "passed": false
+}
