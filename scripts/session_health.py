@@ -26,12 +26,16 @@ def verdict(events: list[dict[str, Any]], *, fatal_only: bool = False) -> dict[s
     if fatal_only:
         perrs = [p for p in perrs if p.get("fatal", True)]
     illegal = [
-        e["payload"] for e in events
+        e["payload"]
+        for e in events
         if e["type"] == "failure.classified" and e["payload"].get("class") == "illegal_dialog_transition"
     ]
     blocked = [
-        e for e in events
-        if e["type"] == "state.changed" and e["payload"].get("machine") == "activity" and e["payload"].get("to") == "BLOCKED"
+        e
+        for e in events
+        if e["type"] == "state.changed"
+        and e["payload"].get("machine") == "activity"
+        and e["payload"].get("to") == "BLOCKED"
     ]
     outcome = next((e["payload"].get("primary") for e in reversed(events) if e["type"] == "outcome.produced"), None)
     checks = {
