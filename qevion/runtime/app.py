@@ -9,12 +9,24 @@ from __future__ import annotations
 
 import asyncio
 import contextlib
+import hmac
 import time
 from collections.abc import AsyncIterator
 from typing import Any
 
 import yaml
-from fastapi import FastAPI, File, Form, HTTPException, Query, UploadFile, WebSocket, WebSocketDisconnect
+from fastapi import (
+    FastAPI,
+    File,
+    Form,
+    HTTPException,
+    Query,
+    Request,
+    Response,
+    UploadFile,
+    WebSocket,
+    WebSocketDisconnect,
+)
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, ValidationError
 
@@ -24,6 +36,14 @@ from qevion.contracts.simulation import ActivationThresholds
 from qevion.contracts.tenant import Tenant
 from qevion.contracts.transport import ClientMessage, ClientMessageType, ServerMessage, ServerMessageType
 from qevion.control.readiness import IllegalReadinessTransitionError
+from qevion.runtime.auth import (
+    COOKIE,
+    OperatorAuthMiddleware,
+    configured_token,
+    cookie_value,
+    cors_origins,
+    request_is_authorized,
+)
 from qevion.runtime.store import NAMED_SCRIPTS, LiveSession, RuntimeStore
 
 START = time.time()
@@ -177,6 +197,11 @@ class SimulateBody(BaseModel):
     thresholds: ActivationThresholds | None = None
 
 
+class LoginBody(BaseModel):
+    token: str
+    secure: bool = False  # set Secure on the cookie (HTTPS deployments)
+
+
 class TestKeyBody(BaseModel):
     provider: str
     value: str
@@ -192,12 +217,44 @@ def create_app(store: RuntimeStore | None = None) -> FastAPI:
     store = store or RuntimeStore()
     app = FastAPI(title="QEVION runtime", version="0.3.0")
     app.state.store = store
-    app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
+    # F-07: explicit CORS allow-list (none by default → the same-origin UI works, foreign pages are refused) and an
+    # operator-token guard on every /api and /ws route (see runtime/auth.py for the model).
+    origins = cors_origins()
+    if origins:
+        app.add_middleware(
+            CORSMiddleware, allow_origins=origins, allow_credentials=True, allow_methods=["*"], allow_headers=["*"]
+        )
+    app.add_middleware(OperatorAuthMiddleware)
+
+    # ------------------------------------------------------------------ auth
+    @app.get("/api/auth/status")
+    async def auth_status(request: Request) -> dict[str, Any]:
+        token = configured_token()
+        return {
+            "auth": "enabled" if token else "disabled",
+            "authorized": token is None or request_is_authorized(request.scope, token),
+        }
+
+    @app.post("/api/auth/login")
+    async def auth_login(body: LoginBody, response: Response) -> dict[str, Any]:
+        token = configured_token()
+        if token is None:
+            return {"auth": "disabled", "authorized": True}
+        if not hmac.compare_digest(body.token.strip(), token):
+            raise HTTPException(401, "invalid operator token")
+        response.set_cookie(COOKIE, cookie_value(token), httponly=True, samesite="strict", secure=body.secure)
+        return {"auth": "enabled", "authorized": True}
+
+    @app.post("/api/auth/logout")
+    async def auth_logout(response: Response) -> dict[str, Any]:
+        response.delete_cookie(COOKIE)
+        return {"ok": True}
 
     # ------------------------------------------------------------------ health
     @app.get("/api/health")
     async def health() -> dict[str, Any]:
         return {
+            "auth": "enabled" if configured_token() else "disabled",
             "status": "ok",
             "uptime_s": round(time.time() - START, 1),
             "composition": store.composition.composition_id,
