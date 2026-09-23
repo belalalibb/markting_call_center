@@ -80,6 +80,7 @@ class SimulationDeps:
     budget_factory: Callable[[], BudgetGuard] = BudgetGuard
     composition_id: str = "comp_mock_s2s_v1"
     event_sink: EventSinkFn | None = None
+    decision_factory: Callable[[], Any] = RulesDecisionAdapter  # rules by default; live smokes may layer a provider
 
 
 @dataclass
@@ -149,7 +150,7 @@ class ScenarioRunner:
             s2s_config=S2SSessionConfig(provider="mock", model="mock-sim"),
             transport=transport,
             turn=EnergyTurnAdapter().new_detector(),
-            decision=RulesDecisionAdapter(),
+            decision=self.deps.decision_factory(),
             tool_declarations=declarations_for_blueprint_permissions(self.bp.tools.permissions),
             tool_backends=backends,
             outcome_sink=outcome_sink,
