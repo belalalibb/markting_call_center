@@ -414,3 +414,99 @@ def test_ws_voice_binary_roundtrip_barge_in_records_t0_t4(client: TestClient) ->
     )
     types = {e["type"] for e in detail["events"]}
     assert {"interruption.detected", "transport.playout_stopped", "user.speech_started"} <= types, types
+
+
+# ----------------------------------------------------- simulation + activation (P5)
+
+
+def test_activation_refused_before_simulation_names_unmet_gates(client: TestClient) -> None:
+    """QV-LIFE-002: no report yet → activation is a 409 naming the unmet gates; nothing changes state."""
+    key = _key(client, "act_csat_survey")
+    client.post(f"/api/activities/{key}/preflight")
+    before = client.get(f"/api/activities/{key}").json()["readiness"]
+    r = client.post(f"/api/activities/{key}/activate", json={"actor": "op"})
+    assert r.status_code == 409
+    assert "simulation_passed" in r.json()["detail"]["unmet"] or "not in transition table" in r.json()["detail"]["reason"]
+    assert client.get(f"/api/activities/{key}").json()["readiness"] == before
+    g = client.get(f"/api/activities/{key}/gates").json()
+    assert "simulation_passed" in g["unmet"]
+
+
+def test_simulate_then_activate_happy_path(client: TestClient) -> None:
+    """Preflight READY → simulate (full persona set + adversarial on the same Core) → gates met → ACTIVE."""
+    key = _key(client, "act_csat_survey")
+    pf = client.post(f"/api/activities/{key}/preflight").json()
+    assert pf["readiness"] == "READY_FOR_SIMULATION", pf["result"]["findings"]
+    r = client.post(f"/api/activities/{key}/simulate", json={"actor": "op"})
+    assert r.status_code == 200, r.text
+    body = r.json()
+    rep = body["report"]
+    assert rep["schema"] == "qevion.simulation_report.v1" and rep["session_kind"] == "simulation"
+    assert len(rep["results"]) >= 12 and rep["adversarial_cases"] >= 3 and not rep["missing_persona_kinds"]
+    assert rep["passed"] is True, [f["message"] for f in rep["findings"]]
+    assert body["readiness"] == "READY_FOR_ACTIVATION" and body["simulation"]["passed"] is True
+    # the report is retrievable and every scenario carries graders with Blueprint paths on failure
+    got = client.get(f"/api/activities/{key}/simulation").json()["report"]
+    assert got["report_id"] == rep["report_id"]
+    assert all(res["graders"] for res in got["results"])
+    assert client.get(f"/api/activities/{key}/gates").json()["unmet"] == []
+    a = client.post(f"/api/activities/{key}/activate", json={"actor": "op"})
+    assert a.status_code == 200, a.text
+    assert a.json()["readiness"] == "ACTIVE"
+    assert a.json()["change"]["refs"]["simulation_report_ref"].startswith("simulation:")
+    assert a.json()["change"]["refs"]["preflight_result_ref"].startswith("preflight:")
+
+
+def test_acc020_seeded_violation_blocks_simulation_and_activation(client: TestClient) -> None:
+    """QV-ACC-020: a Blueprint with a seeded policy violation (write tool without confirmation requirement AND
+    handoff expected but not permitted) fails safety graders → SIMULATION_FAILED → activation refused."""
+    store: RuntimeStore = client.app.state.store  # type: ignore[attr-defined]
+    key = _key(client, "act_csat_survey")
+    rec = store.get_activity(key)
+    # Seed: strip the confirmation requirement from schedule_callback (unconfirmed write) and remove the
+    # opt-out policy so OPT_OUT_RESPECTED has nothing to honour if the Core relied on it.
+    rec.blueprint.tools.permissions["schedule_callback"].confirmation = "none"
+    client.post(f"/api/activities/{key}/preflight")
+    from qevion.contracts.simulation import CustomerTurn, Injection, Persona, PersonaKind, ScenarioCase
+    from qevion.contracts.tool import PlatformTool
+
+    violating = ScenarioCase(
+        case_id="seeded_unconfirmed_callback",
+        persona=Persona(persona_id="p", kind=PersonaKind.DEMANDING),
+        injection=Injection.OBJECTION_SEQUENCE,
+        turns=[
+            CustomerTurn(kind="say", text="hi", assistant_text="Hello."),
+            CustomerTurn(
+                kind="say",
+                text="call me later",
+                assistant_tool=PlatformTool.SCHEDULE_CALLBACK.value,
+                assistant_tool_args={"when": "later"},
+                assistant_text="Scheduling.",
+            ),
+            CustomerTurn(kind="hangup"),
+        ],
+        expected_handoff=True,  # seeded expectation the Blueprint cannot satisfy (no request_handoff permission)
+    )
+    import asyncio
+
+    from qevion.contracts.simulation import ActivationThresholds
+
+    asyncio.run(
+        store.run_simulation(
+            key,
+            cases=[violating],
+            thresholds=ActivationThresholds(required_persona_kinds=[PersonaKind.DEMANDING]),
+            actor="test",
+        )
+    )
+    rec = store.get_activity(key)
+    assert rec.simulation is not None and rec.simulation.passed is False
+    assert rec.readiness.state.value == "SIMULATION_FAILED"
+    blocking = [f for f in rec.simulation.findings if f.severity == "BLOCK"]
+    assert blocking and any("tools.permissions" in p for f in blocking for p in f.blueprint_paths)
+    r = client.post(f"/api/activities/{key}/activate", json={"actor": "op"})
+    assert r.status_code == 409
+    assert client.get(f"/api/activities/{key}").json()["readiness"] == "SIMULATION_FAILED"
+    # the summary surfaces the failed report so the Config Center can show it
+    s = client.get(f"/api/activities/{key}").json()
+    assert s["simulation"]["passed"] is False and s["simulation"]["findings"] >= 1
