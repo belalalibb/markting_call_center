@@ -11,6 +11,7 @@ import hashlib
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
+from collections.abc import Callable
 from typing import Any
 
 import yaml
@@ -32,7 +33,7 @@ from qevion.contracts.composition import Composition
 from qevion.contracts.control import PreflightResult
 from qevion.contracts.event import Event
 from qevion.contracts.knowledge import KnowledgeSource, SourceKind
-from qevion.contracts.provider import ProviderRole, S2SSessionConfig
+from qevion.contracts.provider import ProviderRole, S2SSessionConfig, ToolCallRequest
 from qevion.contracts.simulation import ActivationThresholds, ScenarioCase, SimulationReport
 from qevion.contracts.tenant import LocalePack, Tenant, VoiceProfile
 from qevion.contracts.transport import ServerMessage, ServerMessageType
@@ -468,6 +469,24 @@ FORWARDED_EVENT_TYPES: frozenset[str] = frozenset(
         "handoff.acknowledged",
     }
 )
+
+
+def _callback_script(bp: ActivityBlueprint) -> list[MockScriptStep]:
+    """Mock script that asks to schedule a callback (confirm_before_execute) on the 2nd user turn — exercises the
+    confirmation gate and the decision port with a *spoken* customer reply (live decision-provider smokes)."""
+    steps = [MockScriptStep(text=f"Hello, this is {bp.identity.name}. How can I help?")]
+    steps.append(
+        MockScriptStep(
+            text="I can arrange a callback.",
+            tool_call=ToolCallRequest(call_id="live_cb_1", tool_id="schedule_callback", arguments={"when": "tomorrow"}),
+        )
+    )
+    steps.append(MockScriptStep(text="Done. Anything else?"))
+    steps.append(MockScriptStep(text="Goodbye."))
+    return steps
+
+
+NAMED_SCRIPTS: dict[str, Callable[[ActivityBlueprint], list[MockScriptStep]]] = {"callback": _callback_script}
 
 
 def _default_script(bp: ActivityBlueprint) -> list[MockScriptStep]:

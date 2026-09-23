@@ -23,7 +23,7 @@ from qevion.contracts.simulation import ActivationThresholds
 from qevion.contracts.tenant import Tenant
 from qevion.contracts.transport import ClientMessage, ServerMessage, ServerMessageType
 from qevion.control.readiness import IllegalReadinessTransitionError
-from qevion.runtime.store import LiveSession, RuntimeStore
+from qevion.runtime.store import NAMED_SCRIPTS, LiveSession, RuntimeStore
 
 START = time.time()
 
@@ -401,7 +401,11 @@ def create_app(store: RuntimeStore | None = None) -> FastAPI:
 
     @app.websocket("/ws/sessions/{activity_key}")
     async def ws_session(
-        ws: WebSocket, activity_key: str, channel: str = "text", composition: str | None = None
+        ws: WebSocket,
+        activity_key: str,
+        channel: str = "text",
+        composition: str | None = None,
+        script: str | None = None,
     ) -> None:
         await ws.accept()
         try:
@@ -414,7 +418,12 @@ def create_app(store: RuntimeStore | None = None) -> FastAPI:
         ch = Channel(channel) if channel in {c.value for c in Channel} else Channel.TEXT
         try:
             live = store.build_session(
-                activity_key=activity_key, transport=transport, session_id=sid, channel=ch, composition_id=composition
+                activity_key=activity_key,
+                transport=transport,
+                session_id=sid,
+                channel=ch,
+                composition_id=composition,
+                script=NAMED_SCRIPTS[script](store.get_activity(activity_key).blueprint) if script in NAMED_SCRIPTS else None,
             )
         except KeyError as e:
             await ws.close(code=4400, reason=str(e)[:120])
