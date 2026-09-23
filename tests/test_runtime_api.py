@@ -339,3 +339,70 @@ def test_ws_silero_composition_runs_on_mock_provider(client: TestClient) -> None
         ws.send_text(json.dumps({"type": "bye"}))
     s = client.get("/api/sessions").json()[-1]
     assert s["composition_id"] == "comp_mock_smart_v1" and s["error"] is None
+
+
+# ------------------------------------------------------- voice binary path (P4)
+
+
+def _pcm_frame(ms: int = 20, amplitude: int = 0, rate: int = 24000) -> bytes:
+    """PCM16 mono frame: constant-amplitude square-ish tone (or silence when amplitude=0)."""
+    import struct
+
+    n = rate * ms // 1000
+    return struct.pack(f"<{n}h", *([amplitude, -amplitude] * (n // 2)))
+
+
+def test_ws_voice_binary_roundtrip_barge_in_records_t0_t4(client: TestClient) -> None:
+    """Browser-voice channel: binary PCM16 in → provider audio out (binary) → loud frames during playout
+    trigger the §31 interruption (stop_playout) and the session records t0..t4 watermarks (QV-INT)."""
+    key = _key(client, "act_csat_survey")
+    with client.websocket_connect(f"/ws/sessions/{key}?channel=browser_voice&composition=comp_mock_s2s_v1") as ws:
+        ws.receive_text()
+        ws.send_text(json.dumps({"type": "hello"}))
+        audio_in = 0
+        response_id: str | None = None
+        for _ in range(60):
+            m = ws.receive()
+            if m.get("bytes"):
+                audio_in += len(m["bytes"])
+                if response_id:
+                    break
+            elif m.get("text"):
+                j = json.loads(m["text"])
+                if j["type"] == "audio_start":
+                    response_id = j["response_id"]
+        assert response_id is not None and audio_in > 0, "no provider audio reached the transport"
+        # Barge in: 20 loud frames (400 ms) while the assistant is speaking → BARGE_IN → stop_playout.
+        for _ in range(20):
+            ws.send_bytes(_pcm_frame(20, amplitude=6000))
+        got_stop = False
+        interruption: dict[str, Any] | None = None
+        for _ in range(200):
+            m = ws.receive()
+            if not m.get("text"):
+                continue
+            j = json.loads(m["text"])
+            if j["type"] == "stop_playout":
+                got_stop = True
+                ws.send_text(json.dumps({"type": "playout_stopped", "response_id": j["response_id"], "client_ts_ms": 1}))
+            elif j["type"] == "event":
+                ev = j["payload"]
+                if ev.get("type") == "latency.sample" and ev["payload"].get("segment") == "interruption":
+                    interruption = ev["payload"]
+                    break
+        assert got_stop, "stop_playout never sent"
+        assert interruption is not None, "interruption latency.sample never emitted"
+        assert interruption["response_id"] == response_id
+        assert interruption["t0"] <= interruption["t1"] <= interruption["t2"] <= interruption["t3"] <= interruption["t4"]
+        assert interruption["forced"] is False
+        # Then silence → END_OF_TURN → provider commit (next response).
+        for _ in range(30):
+            ws.send_bytes(_pcm_frame(20, amplitude=0))
+        ws.send_text(json.dumps({"type": "bye"}))
+    s = client.get("/api/sessions").json()[-1]
+    detail = client.get(f"/api/sessions/{s['session_id']}").json()
+    assert detail["interruptions"] and detail["interruptions"][0]["response_id"] == response_id
+    rec = detail["interruptions"][0]
+    assert rec["t1_to_t3_ms"] is not None and rec["t1_to_t4_ms"] is not None and rec["t1_to_t4_ms"] >= rec["t1_to_t3_ms"]
+    types = {e["type"] for e in detail["events"]}
+    assert {"interruption.detected", "transport.playout_stopped", "user_speech.started"} <= types, types
