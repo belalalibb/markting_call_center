@@ -40,6 +40,19 @@ scripts/recovery/snapshot.sh CP-000N                      # tarball + manifest (
 scripts/recovery/restore.sh                               # venv / deps after a fresh sandbox
 ```
 
-Runtime setup (`pyproject.toml`, `web/`) lands in P0.2; see `QEVION_WORK_STATE.md` for the current stage.
+## Running the runtime
 
-**Status:** P0.1 — spec v3 and recovery infrastructure landed; scaffold next.
+```bash
+python3.13 -m venv .venv && .venv/bin/pip install -e ".[dev]"
+.venv/bin/python -m qevion.main            # uvicorn with WS keepalive tuned for browser_voice (ping 25 s / timeout 60 s)
+# equivalent: .venv/bin/uvicorn qevion.main:app --host 0.0.0.0 --port 8000 --ws-ping-interval 25 --ws-ping-timeout 60
+```
+
+Provider keys never go into tracked files: export `OPENAI_API_KEY` / `TYPESAFE_API_KEY`, or inject a memory-only
+key via `POST /api/admin/test-key {"provider": "openai", "value": "…", "ttl_seconds": 900}`.
+
+Live checks (evidence carries key fingerprints only): `scripts/ws_keepalive_soak.py` (protocol soak),
+`scripts/browser_voice_smoke.py --base <url> --composition comp_s2s_openai_v1 --inject-key-env OPENAI_API_KEY`
+(real Chromium, fake mic), `scripts/openai_realtime_live_ws.py`, `scripts/typesafe_live_ws.py`.
+
+See `QEVION_WORK_STATE.md` for the current stage and exact next action.
