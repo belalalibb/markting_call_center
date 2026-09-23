@@ -152,7 +152,9 @@ def mount(app: FastAPI, ctx: CopilotContext) -> dict[str, ConfigSession]:
         if proposal.draft is None or not proposal.draft_valid:
             raise HTTPException(409, {"reason": "draft_invalid", "errors": proposal.validation_errors})
         if proposal.unapproved_decisions:
-            raise HTTPException(409, {"reason": "unapproved_decisions", "paths": [d.item_path for d in proposal.unapproved_decisions]})
+            raise HTTPException(
+                409, {"reason": "unapproved_decisions", "paths": [d.item_path for d in proposal.unapproved_decisions]}
+            )
         key = ctx.publish(proposal.draft)
         return {"activity_key": key, "readiness_state": proposal.readiness_state.value, "status": proposal.status.value}
 

@@ -1,6 +1,7 @@
-"""Composition root: runtime app + copilot routes + static web UI. Only this module may import both sides.
+"""Composition root (outside runtime/ and copilot/): runtime app + copilot routes + static web UI.
+This is the only module allowed to import both `qevion.runtime` and `qevion.copilot` (import-linter).
 
-Run: `uvicorn qevion.runtime.main:app --host 0.0.0.0 --port 8000`
+Run: `uvicorn qevion.main:app --host 0.0.0.0 --port 8000`
 """
 
 from __future__ import annotations
