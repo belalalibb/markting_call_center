@@ -76,6 +76,11 @@ async def test_barge_in_after_response_done_while_audio_still_playing() -> None:
     await asyncio.sleep(0.05)
     assert s.audible_response() == rid
     await _speak(tr, 20)  # 400 ms of speech > barge_in_min_speech_ms (200)
+    # the memory transport has no client answering stop_playout → the 300 ms force-stop path completes reconcile
+    for _ in range(100):
+        if s.interruptions:
+            break
+        await asyncio.sleep(0.02)
     det = [e for e in s.events if e.type == "interruption.detected"]
     assert det and det[0].payload["after_generation"] is True
     assert "stop_playout" in _sent_types(tr)  # the client is told to stop the audible tail
