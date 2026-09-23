@@ -49,7 +49,7 @@ async def test_blueprint_change_is_detected_as_divergence() -> None:
     case = default_cases(bp)[0]
     run = await ScenarioRunner(bp).run_case(case)
     rec = record(run, bp)
-    changed = bp.model_copy(update={"activity_version": bp.activity_version + "-mutated"})
+    changed = bp.model_copy(update={"identity": bp.identity.model_copy(update={"version": "9.9.9"})})
     res = await replay(rec, changed)
     assert not res.fingerprint_match
     assert not res.deterministic
