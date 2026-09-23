@@ -137,6 +137,7 @@ class MockS2SSession:
     # -- internals ---------------------------------------------------------------------
     _current_step_text: str = ""
     _current_step_audio_ms: int = 0
+    realtime: bool = False
 
     async def _play_next(self) -> None:
         if not self.script:
@@ -175,15 +176,18 @@ class MockS2SSession:
             await self._audio.put((ref, pcm))
             await self._events.put(S2SEvent(type=S2SEventType.RESPONSE_AUDIO_DELTA, response_id=rid, audio=ref))
             sent += chunk_ms
-            await asyncio.sleep(0)  # yield so interruption can land mid-response
+            # realtime=True paces chunks like a live provider (browser voice / interruption tests);
+            # otherwise just yield so interruption can land mid-response.
+            await asyncio.sleep(chunk_ms / 1000 if self.realtime else 0)
         await self._events.put(S2SEvent(type=S2SEventType.RESPONSE_DONE, response_id=rid, text=text))
 
 
 class MockS2SAdapter:
     name = "mock"
 
-    def __init__(self, script: list[MockScriptStep] | None = None) -> None:
+    def __init__(self, script: list[MockScriptStep] | None = None, realtime: bool = False) -> None:
         self.script = script or []
+        self.realtime = realtime
         self.sessions: list[MockS2SSession] = []
 
     def capabilities(self) -> AdapterCapabilities:
@@ -201,7 +205,7 @@ class MockS2SAdapter:
         )
 
     async def open(self, config: S2SSessionConfig, credential: str | None) -> MockS2SSession:
-        s = MockS2SSession(config=config, script=list(self.script))
+        s = MockS2SSession(config=config, script=list(self.script), realtime=self.realtime)
         self.sessions.append(s)
         return s
 

@@ -241,7 +241,8 @@ class RuntimeStore:
         if s2s is None:
             raise KeyError(f"s2s adapter {s2s_b.adapter!r} not registered")
         if s2s_b.adapter == "mock":
-            s2s = MockS2SAdapter(script or _default_script(bp))
+            # Voice channels get realtime-paced mock audio so playout/interruption behave like a live provider.
+            s2s = MockS2SAdapter(script or _default_script(bp), realtime=channel is Channel.BROWSER_VOICE)
         turn_ad = self.turn_adapters.get(turn_b.adapter if turn_b else "energy", self._turn)
         decision = self.decision_adapters.get(dec_b.adapter if dec_b else "rules", self._decision)
         credential, cred_src = self.credentials.resolve(s2s_b.adapter, bp.identity.tenant_id)

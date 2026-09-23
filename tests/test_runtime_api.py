@@ -359,6 +359,8 @@ def test_ws_voice_binary_roundtrip_barge_in_records_t0_t4(client: TestClient) ->
     with client.websocket_connect(f"/ws/sessions/{key}?channel=browser_voice&composition=comp_mock_s2s_v1") as ws:
         ws.receive_text()
         ws.send_text(json.dumps({"type": "hello"}))
+        # Client-side end-of-turn (the browser's "start talking" gesture) → provider greets with audio.
+        ws.send_text(json.dumps({"type": "audio_commit"}))
         audio_in = 0
         response_id: str | None = None
         for _ in range(60):
