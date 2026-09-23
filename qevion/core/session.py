@@ -73,6 +73,9 @@ EventSink = Callable[[Event], Awaitable[None]]
 Clock = Callable[[], int]  # ms since session start (injected for replay determinism, QV-RT-008)
 
 _CANCEL_FORCE_MS = 300
+# F-02 safety net: a done response is considered audible for its audio duration (+grace) after playout start
+# when the client never reports playout_stopped (old clients, lost message).
+_AUDIBLE_GRACE_MS = 400
 
 
 def _digest(text: str) -> dict[str, Any]:
@@ -134,6 +137,7 @@ class ResponseTrack:
     audio_ms_sent: int = 0
     cancelled: bool = False
     done: bool = False
+    playout_started_ms: int | None = None  # F-02: client-reported start of audible playout
 
 
 class SessionCore:
@@ -178,6 +182,7 @@ class SessionCore:
         self._provider: S2SSession | None = None
         self._responses: dict[str, ResponseTrack] = {}
         self._current_response: str | None = None
+        self._audible: str | None = None  # F-02: response currently audible at the client (may outlive generation)
         self._speech_onset_ms: int | None = None
         self._pending_confirm: dict[str, asyncio.Future[bool | None]] = {}
         self._playout_stopped = asyncio.Event()
@@ -567,20 +572,48 @@ class SessionTools(SessionLifecycle):
 class SessionInterruption(SessionTools):
     """§31 seven-step interruption protocol + confirmation gate (QV-CONF)."""
 
+    def audible_response(self) -> str | None:
+        """F-02: the response the user can *currently hear*. A live provider generates audio faster than realtime,
+        so `response.done` arrives long before playout ends; the response stays audible until the client reports
+        `playout_stopped` (drained / stopped) or, as a safety net for clients that never report, until the
+        wall-clock duration of the audio sent (+ grace) has elapsed since playout started."""
+        rid = self._audible
+        if rid is None:
+            return None
+        tr = self._responses.get(rid)
+        if tr is None or tr.cancelled:
+            self._audible = None
+            return None
+        start = tr.playout_started_ms if tr.playout_started_ms is not None else tr.started_ms
+        if tr.done and self.clock() > start + tr.audio_ms_sent + _AUDIBLE_GRACE_MS:
+            self._audible = None
+            return None
+        return rid
+
     async def interrupt(self, *, onset_ms: int, detected_ms: int | None = None) -> InterruptionRecord | None:
         rid = self._current_response
-        if self.dialog.state is not DialogState.SPEAKING or rid is None or not self._provider:
+        late = False
+        if self.dialog.state is not DialogState.SPEAKING or rid is None:
+            # F-02: barge-in during the audible tail after provider response.done (dialog already LISTENING)
+            rid = self.audible_response()
+            late = rid is not None
+        if rid is None or not self._provider:
             return None
         tr = self._responses[rid]
         rec = InterruptionRecord(
             response_id=rid, t0_user_speech_onset=onset_ms, t1_barge_in_detected=detected_ms or self.clock()
         )
         # 1 DETECT
-        await self.emit(EventType.INTERRUPTION_DETECTED, {"response_id": rid, "audio_ms_sent": tr.audio_ms_sent})
-        await self.dialog_fire("barge_in", "user speech during assistant response")
-        # 2 CANCEL
+        await self.emit(
+            EventType.INTERRUPTION_DETECTED,
+            {"response_id": rid, "audio_ms_sent": tr.audio_ms_sent, "after_generation": late},
+        )
+        if not late:
+            await self.dialog_fire("barge_in", "user speech during assistant response")
+        # 2 CANCEL (provider generation only if still running; client playout always)
         self._playout_stopped.clear()
-        await self._provider.cancel_response(rid)
+        if not tr.done:
+            await self._provider.cancel_response(rid)
         await self._send(ServerMessageType.STOP_PLAYOUT, response_id=rid)
         rec.t2_cancel_sent = self.clock()
         await self.emit(EventType.ASSISTANT_RESPONSE_CANCELLED, {"response_id": rid, "t2_ms": rec.t2_cancel_sent})
@@ -594,12 +627,19 @@ class SessionInterruption(SessionTools):
         rec.t3_playout_stopped = self.clock()
         # 3 RECONCILE — keep only what the user plausibly heard; the unheard tail never persists as context.
         tr.cancelled = True
-        rec.played_ms = tr.audio_ms_sent
-        elapsed = rec.t1_barge_in_detected - tr.started_ms
-        heard_ratio = 1.0 if tr.audio_ms_sent == 0 else min(1.0, max(0.0, elapsed / tr.audio_ms_sent))
+        self._audible = None
+        # heard = wall-clock playout time (from client playout_started when known), capped by audio actually sent
+        start = tr.playout_started_ms if tr.playout_started_ms is not None else tr.started_ms
+        played = max(0, min(tr.audio_ms_sent, rec.t1_barge_in_detected - start))
+        rec.played_ms = played
+        heard_ratio = 1.0 if tr.audio_ms_sent == 0 else played / tr.audio_ms_sent
         heard_len = int(len(tr.text) * heard_ratio)
         rec.heard_text_len, rec.unheard_text_len = heard_len, len(tr.text) - heard_len
         tr.text = tr.text[:heard_len]
+        # F-06: the provider must forget the unheard tail too (text + audio), not only our local copy
+        if tr.audio_ms_sent:
+            await self._provider.truncate_response(rid, played)
+            await self.emit(EventType.ASSISTANT_RESPONSE_TRUNCATED, {"response_id": rid, "audio_end_ms": played})
         rec.t4_state_reconciled = self.clock()
         self.facts.interruption_count += 1
         self.interruptions.append(rec)
@@ -640,6 +680,10 @@ class SessionInterruption(SessionTools):
         self._current_response = None
         # 4 ACCEPT → caller commits the new turn (5); FieldStore untouched by construction (6); provider responds (7).
         return rec
+
+    async def _provider_cancel(self, rid: str) -> None:
+        if self._provider:
+            await self._provider.cancel_response(rid)
 
     def heard_context(self) -> list[str]:
         """What the user actually heard (QV-INT-002) — reconciled assistant text per response."""
@@ -738,7 +782,7 @@ class Session(SessionInterruption):
         """Text channel input == a committed user turn."""
         if self._closed or not self._provider:
             return
-        if self.dialog.state is DialogState.SPEAKING:
+        if self.dialog.state is DialogState.SPEAKING or self.audible_response() is not None:
             await self.interrupt(onset_ms=self.clock())
         if self.dialog.state is DialogState.WAITING_CONFIRMATION and self._pending_confirm:
             await self.resolve_confirmation_from_text(text)
@@ -753,7 +797,8 @@ class Session(SessionInterruption):
         """Audio frame from transport: turn plane first (authoritative), then forward to provider."""
         if self._closed or not self._provider:
             return
-        speaking = self.dialog.state is DialogState.SPEAKING
+        # F-02: the turn plane must know the user can still *hear* the agent after provider generation ended
+        speaking = self.dialog.state is DialogState.SPEAKING or self.audible_response() is not None
         for tev in self.deps.turn.push(pcm16, self.clock(), speaking):
             await self.handle_turn_event(tev)
         await self._provider.send_audio(pcm16, ref)
@@ -800,7 +845,15 @@ class Session(SessionInterruption):
                     EventType.TRANSPORT_PLAYOUT_STOPPED,
                     {"response_id": msg.response_id, "client_ts_ms": msg.client_ts_ms},
                 )
+                # F-02: client finished (drained) or stopped playout → the agent is no longer audible
+                if self._audible is not None and (msg.response_id in (None, self._audible)):
+                    ended = self._audible
+                    self._audible = None
+                    await self.emit(EventType.ASSISTANT_PLAYOUT_ENDED, {"response_id": ended})
             case ClientMessageType.PLAYOUT_STARTED:
+                tr0 = self._responses.get(msg.response_id or "")
+                if tr0 is not None and tr0.playout_started_ms is None:
+                    tr0.playout_started_ms = self.clock()
                 await self.emit(EventType.TRANSPORT_PLAYOUT_STARTED, {"response_id": msg.response_id})
             case ClientMessageType.AUDIO_COMMIT:
                 await self.handle_turn_event(
@@ -820,8 +873,20 @@ class Session(SessionInterruption):
         match ev.type:
             case S2SEventType.RESPONSE_STARTED:
                 rid = rid or new_id("resp")
+                if self.dialog.state is DialogState.INTERRUPTED:
+                    # F-04: the provider started a response while we are still reconciling a barge-in (the user is
+                    # mid-utterance). Its audio would contradict the dialog state; cancel it and never forward it.
+                    self._responses[rid] = ResponseTrack(response_id=rid, started_ms=self.clock(), cancelled=True)
+                    await self._provider_cancel(rid)
+                    await self.emit(
+                        EventType.ASSISTANT_RESPONSE_CANCELLED,
+                        {"response_id": rid, "reason": "started_while_interrupted"},
+                        source=src,
+                    )
+                    return
                 self._responses[rid] = ResponseTrack(response_id=rid, started_ms=self.clock())
                 self._current_response = rid
+                self._audible = rid
                 self._playout_stopped.clear()
                 await self.emit(EventType.ASSISTANT_RESPONSE_STARTED, {"response_id": rid}, source=src)
                 await self.dialog_fire("response_started")
@@ -835,13 +900,28 @@ class Session(SessionInterruption):
                 if tr and not tr.cancelled and ev.audio:
                     tr.audio_ms_sent += ev.audio.duration_ms
             case S2SEventType.RESPONSE_TOOL_CALL:
+                trc = self._responses.get(rid)
+                if trc is not None and trc.cancelled:
+                    # F-04: never execute tools requested by a response we cancelled / refused
+                    await self.emit(
+                        EventType.FAILURE_CLASSIFIED,
+                        {"class": "tool_call_from_cancelled_response", "response_id": rid},
+                    )
+                    return
                 if ev.tool_call:
                     await self.dialog_fire("tool_requested")
                     await self.run_tool(ev.tool_call.call_id, ev.tool_call.tool_id, ev.tool_call.arguments)
             case S2SEventType.RESPONSE_DONE:
                 tr = self._responses.get(rid)
+                if tr and tr.cancelled and rid != self._current_response:
+                    # F-04: a response we refused (started while INTERRUPTED) / already cancelled — no client
+                    # messages, no dialog transitions (it never owned the dialog)
+                    tr.done = True
+                    return
                 if tr:
                     tr.done = True
+                    if tr.audio_ms_sent == 0 and self._audible == rid:
+                        self._audible = None  # silent (tool-only) response: nothing is audible
                     await self.emit(
                         EventType.ASSISTANT_RESPONSE_ENDED,
                         {"response_id": tr.response_id, "audio_ms": tr.audio_ms_sent, **_digest(tr.text)},

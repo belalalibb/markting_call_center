@@ -65,6 +65,9 @@ class EventType:
     ASSISTANT_RESPONSE_STARTED = "assistant.response_started"
     ASSISTANT_RESPONSE_ENDED = "assistant.response_ended"
     ASSISTANT_RESPONSE_CANCELLED = "assistant.response_cancelled"
+    ASSISTANT_RESPONSE_TRUNCATED = "assistant.response_truncated"  # F-06 provider context cut to heard audio
+    ASSISTANT_PLAYOUT_ENDED = "assistant.playout_ended"  # F-02 client finished playing (audible → silent)
+    USER_TRANSCRIPT = "user.transcript"  # F-10 provider input transcript (digest), distinct from turn commit
     INTERRUPTION_DETECTED = "interruption.detected"
     STATE_CHANGED = "state.changed"
     FIELD_RECORDED = "field.recorded"
