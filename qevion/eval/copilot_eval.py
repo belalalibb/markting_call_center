@@ -235,7 +235,9 @@ def drive(case: CopilotEvalCase, *, max_rounds: int = 25) -> CopilotRun:
         for _ in range(max_rounds):
             prop = session.propose()
             proposals.append(prop)
-            qs = session.next_questions(limit=50)
+            # operator works from the proposal's question list (includes preflight- and mapping-derived questions)
+            qs = list(prop.questions)
+            session.mark_asked(qs)
             if not qs or prop.status is DiscoveryStatus.REVIEW:
                 break
             progressed = False
