@@ -9,9 +9,9 @@ from __future__ import annotations
 import asyncio
 import hashlib
 import time
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
-from collections.abc import Callable
 from typing import Any
 
 import yaml

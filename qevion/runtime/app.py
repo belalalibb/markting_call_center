@@ -423,7 +423,9 @@ def create_app(store: RuntimeStore | None = None) -> FastAPI:
                 session_id=sid,
                 channel=ch,
                 composition_id=composition,
-                script=NAMED_SCRIPTS[script](store.get_activity(activity_key).blueprint) if script in NAMED_SCRIPTS else None,
+                script=NAMED_SCRIPTS[script](store.get_activity(activity_key).blueprint)
+                if script in NAMED_SCRIPTS
+                else None,
             )
         except KeyError as e:
             await ws.close(code=4400, reason=str(e)[:120])
