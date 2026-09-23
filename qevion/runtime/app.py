@@ -261,6 +261,8 @@ def create_app(store: RuntimeStore | None = None) -> FastAPI:
             "tenants": len(store.tenants),
             "activities": len(store.activities),
             "sessions_live": sum(1 for s in store.sessions.values() if s.task and not s.task.done()),
+            # F-09: whether Silero really runs or the honest energy fallback is used
+            "silero_model_available": bool(getattr(store.turn_adapters.get("silero"), "model_available", False)),
         }
 
     # ----------------------------------------------------------------- tenants
@@ -641,6 +643,10 @@ def _session_facts(live: LiveSession) -> dict[str, Any]:
         "s2s_model": live.session.deps.s2s_config.model,
         "credential_source": live.credential_source,
         "decision_credential_source": live.decision_credential_source,
+        # F-09: the detector that actually runs (e.g. `silero_fallback_energy` when the ONNX model is missing),
+        # never just the configured name.
+        "turn_detector": live.turn_detector,
+        "transcription_model": live.session.deps.s2s_config.extra.get("transcription_model"),
         "heartbeat_interval_s": HEARTBEAT_INTERVAL_S,
     }
 
@@ -749,6 +755,8 @@ def _live(s: LiveSession) -> dict[str, Any]:
         "close_reason": s.close_reason,
         "heartbeat": s.heartbeat,
         "channel": s.session.deps.channel.value,
+        "turn_detector": s.turn_detector,
+        "transcription_model": s.session.deps.s2s_config.extra.get("transcription_model"),
     }
 
 

@@ -109,6 +109,7 @@ class LiveSession:
     composition_id: str = ""
     credential_source: str = "none"
     decision_credential_source: str = "none"
+    turn_detector: str = ""
     error: str | None = None
     outbound_attempt_id: str | None = None
     close_code: int | None = None  # WS close code observed by the server pump (1000 = clean; 1011 = keepalive)
@@ -425,6 +426,7 @@ class RuntimeStore:
             voice = self.voice_profiles[bp.locale.voice_profile_ref].provider_voice_map.get(s2s_b.adapter)
         turn_det = turn_ad.new_detector()
         turn_det.configure(comp.turn)
+        live.turn_detector = str(getattr(turn_det, "detector_name", type(turn_det).__name__))
         deps = SessionDeps(
             blueprint=bp,
             s2s=s2s,
@@ -433,6 +435,7 @@ class RuntimeStore:
                 model=s2s_b.model or "mock-1",
                 voice=voice,
                 language_hint=bp.locale.locale,
+                extra={k: v for k, v in s2s_b.config.items() if k in ("transcription_model",)},
                 tools=[
                     d.model_dump(mode="json")
                     for d in declarations_for_blueprint_permissions(bp.tools.permissions).values()

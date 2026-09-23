@@ -108,6 +108,9 @@ _FATAL_ERROR_CODES = {
 }
 
 
+DEFAULT_TRANSCRIPTION_MODEL = "whisper-1"
+
+
 def _is_fatal(error_type: str, code: object) -> bool:
     return error_type in _FATAL_ERROR_TYPES or (isinstance(code, str) and code in _FATAL_ERROR_CODES)
 
@@ -174,7 +177,9 @@ class OpenAIRealtimeSession:
         `turn_detection` lives in `audio.input`, and `turn_detection` is set to None so QEVION's turn plane owns
         endpointing unless `server_vad` is requested."""
         cfg = self.config
-        transcription: dict[str, Any] = {"model": "whisper-1"}
+        # Input transcription model is a composition option (binding config `transcription_model`); default
+        # whisper-1. OPS 5.5 P2 measured gpt-4o-transcribe CER 0.077 vs whisper-1 0.193 on ar-EG synthetic clips.
+        transcription: dict[str, Any] = {"model": str(cfg.extra.get("transcription_model") or DEFAULT_TRANSCRIPTION_MODEL)}
         if cfg.language_hint is not None:
             transcription["language"] = cfg.language_hint[:2]
         audio_in: dict[str, Any] = {

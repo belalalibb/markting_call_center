@@ -3,7 +3,7 @@ schema: qevion.composition.v1
 composition_id: comp_s2s_openai_v1
 mode: s2s
 bindings:
-  - { role: s2s, adapter: openai_realtime, model: gpt-realtime }
+  - { role: s2s, adapter: openai_realtime, model: gpt-realtime, config: { transcription_model: gpt-4o-transcribe } }
   - { role: turn, adapter: silero }
   - { role: decision, adapter: rules }
 turn: { detector: silero, threshold: 0.5, min_speech_ms: 120, min_silence_ms: 500, barge_in_min_speech_ms: 200 }
