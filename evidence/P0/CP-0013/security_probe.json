@@ -1,0 +1,28 @@
+{
+ "base": "http://localhost:8000",
+ "token_configured": false,
+ "no_token": {
+  "POST /api/admin/test-key": 401,
+  "DELETE /api/admin/test-key": 401,
+  "GET /api/events": 401,
+  "GET /api/sessions": 401,
+  "GET /api/admin/credentials/openai": 401,
+  "WS /ws/sessions": 403,
+  "GET /api/health": 200
+ },
+ "with_token": {
+  "GET /api/sessions": 401,
+  "GET /api/admin/credentials/openai": 401,
+  "WS /ws/sessions": 403
+ },
+ "cors_foreign_origin_allowed": null,
+ "checks": {
+  "admin_write_refused": true,
+  "reads_refused": true,
+  "ws_refused": true,
+  "health_open": true,
+  "token_grants_access": false,
+  "cors_not_wildcard": true
+ },
+ "passed": false
+}

@@ -78,7 +78,7 @@ def main() -> int:
         "reads_refused": all(
             nt[k] == 401 for k in ("GET /api/events", "GET /api/sessions", "GET /api/admin/credentials/openai")
         ),
-        "ws_refused": nt["WS /ws/sessions"] == 4401,
+        "ws_refused": nt["WS /ws/sessions"] in (4401, 403),  # uvicorn maps a pre-accept close to HTTP 403
         "health_open": nt["GET /api/health"] == 200,
         "token_grants_access": wt["GET /api/sessions"] == 200
         and wt["GET /api/admin/credentials/openai"] == 200
