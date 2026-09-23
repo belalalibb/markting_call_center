@@ -1,0 +1,49 @@
+{
+ "checkpoint": "CP-0007",
+ "items": [
+  {
+   "path": "evidence/P4/CP-0007/junit.xml",
+   "sha256": "dadf14c2417eb3b25263c56d87d72777888cff9114d73ff46b30a028bf92d9f2",
+   "kind": "pytest-junit",
+   "produced_by": "scripts/ci_local.sh (219 tests, 0 failures)",
+   "produced_at": "2026-09-23T03:31:14.030413+00:00",
+   "criterion_ids": [
+    "QV-ACC-018",
+    "QV-INT-001",
+    "QV-EVT-001"
+   ]
+  },
+  {
+   "path": "evidence/P4/CP-0007/licenses.json",
+   "sha256": "7d6f76d47bdaeec3ace30f91ef3ff536e2d76ed3505b37cb24870ef17ff6d1fe",
+   "kind": "pip-licenses",
+   "produced_by": "scripts/ci_local.sh \u2192 scripts/license_gate.py",
+   "produced_at": "2026-09-23T03:31:14.030487+00:00",
+   "criterion_ids": [
+    "QV-LIC-001"
+   ]
+  },
+  {
+   "path": "evidence/P4/CP-0007/latency_table.json",
+   "sha256": "e76f4d3360629e55f43cfb45c6998520ac8864d3643bb2ba32a0079ee986b393",
+   "kind": "latency-table",
+   "produced_by": "scripts/e2e_voice_probe.py \u00d710 over public WSS preview",
+   "produced_at": "2026-09-23T03:31:14.030545+00:00",
+   "criterion_ids": [
+    "QV-ACC-017",
+    "QV-ACC-018"
+   ]
+  },
+  {
+   "path": "evidence/P4/CP-0007/e2e_voice_preview.json",
+   "sha256": "f84b2a45c2f9ac00256ed3703e8bfce7ad8ce02c48cfaa19e69a5b9b54772a33",
+   "kind": "e2e-preview",
+   "produced_by": "scripts/e2e_voice_probe.py (single run, full payload)",
+   "produced_at": "2026-09-23T03:31:14.030583+00:00",
+   "criterion_ids": [
+    "QV-ACC-017",
+    "QV-ACC-018"
+   ]
+  }
+ ]
+}
