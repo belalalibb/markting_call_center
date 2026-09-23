@@ -6,7 +6,8 @@ Key comes ONLY from env `TYPESAFE_API_KEY` (never from files, never printed; evi
 measure how often the fallback is consulted and whether it ever contradicts rules.
 
 Usage: TYPESAFE_API_KEY=... .venv/bin/python scripts/typesafe_live_smoke.py [out.json]
-Exit 0 when every accepted answer matches the label; 1 on mismatches; 2 when no key (A5).
+Exit 0 when no *accepted* answer contradicts its label and the Core session passes (abstentions are safe);
+1 on contradictions; 2 when no key (A5).
 """
 
 from __future__ import annotations
@@ -86,7 +87,6 @@ async def _case(ad: TypeSafeDecisionAdapter, req: DecisionRequest, text: str, ex
 
 async def _core_session(key: str) -> dict[str, Any]:
     import yaml
-
     from qevion.contracts.activity import ActivityBlueprint
     from qevion.contracts.event import EventType
     from qevion.contracts.simulation import CustomerTurn
@@ -161,6 +161,9 @@ async def main(argv: list[str]) -> int:
     core = await _core_session(key)
     lat = sorted(x["latency_ms"] for x in rows)
     mismatches = sum(1 for x in rows if not x["ok"])
+    # a wrong *accepted* answer is a contradiction (bad); an UNKNOWN on a labelled case is an abstention (safe: re-ask)
+    contradictions = sum(1 for x in rows if not x["ok"] and x["got"] is not None)
+    abstentions = sum(1 for x in rows if not x["ok"] and x["got"] is None)
     report: dict[str, Any] = {
         "provider": "typesafe",
         "base_url": DEFAULT_BASE_URL,
@@ -180,16 +183,27 @@ async def main(argv: list[str]) -> int:
             "cases": len(rows),
             "matches": len(rows) - mismatches,
             "mismatches": mismatches,
+            "contradictions": contradictions,
+            "abstentions": abstentions,
+            "core_session_passed": bool(core.get("passed")) and bool(core.get("callback_executed")),
             "provider_calls": ts.calls + layered.fallback.calls,
-            "latency_ms": {"p50": int(statistics.median(lat)), "p95": lat[max(0, int(len(lat) * 0.95) - 1)], "max": lat[-1]},
+            "latency_ms": {
+                "p50": int(statistics.median(lat)),
+                "p95": lat[max(0, int(len(lat) * 0.95) - 1)],
+                "max": lat[-1],
+            },
             "last_usage": ts.last_usage,
         },
     }
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(report, ensure_ascii=False, indent=2))
-    brief = {"out": str(out_path), **report["summary"], "layered": {k: v for k, v in report["layered"].items() if k != "rows"}}
+    brief = {
+        "out": str(out_path),
+        **report["summary"],
+        "layered": {k: v for k, v in report["layered"].items() if k != "rows"},
+    }
     print(json.dumps(brief, ensure_ascii=False, indent=2))
-    return 0 if mismatches == 0 else 1
+    return 0 if contradictions == 0 and report["summary"]["core_session_passed"] else 1
 
 
 if __name__ == "__main__":
