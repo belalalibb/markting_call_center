@@ -1,0 +1,94 @@
+{
+ "checkpoint": "CP-0009",
+ "items": [
+  {
+   "path": "evidence/P6/CP-0009/junit.xml",
+   "sha256": "2fa8f0076fb64a2d994f1274aae782c5e1551047b5611855dc06727997094747",
+   "kind": "pytest-junit",
+   "produced_by": "scripts/ci_local.sh",
+   "produced_at": "2026-09-23T05:52:59.059022+00:00",
+   "criterion_ids": [
+    "QV-ACC-019",
+    "QV-EVAL-004",
+    "QV-REPLAY-001"
+   ]
+  },
+  {
+   "path": "evidence/P6/CP-0009/licenses.json",
+   "sha256": "bfe6a408ade090448fa0aa2c043e612329f78282a6b613f2327e3ff5752bd9f9",
+   "kind": "pip-licenses",
+   "produced_by": "scripts/ci_local.sh \u2192 scripts/license_gate.py",
+   "produced_at": "2026-09-23T05:52:59.059022+00:00",
+   "criterion_ids": [
+    "QV-LIC-001"
+   ]
+  },
+  {
+   "path": "evidence/P6/CP-0009/acc019_replay_diff.json",
+   "sha256": "29811d32e10a6293bf89e591b3037281f7a54d24337570aa7260eca52ce390b0",
+   "kind": "replay-diff",
+   "produced_by": "scripts/p6_evidence.py acc019()",
+   "produced_at": "2026-09-23T05:52:59.059022+00:00",
+   "criterion_ids": [
+    "QV-ACC-019",
+    "QV-REPLAY-001"
+   ]
+  },
+  {
+   "path": "evidence/P6/CP-0009/eval_report.json",
+   "sha256": "e2da17e4b045174d23760363c7ede71b1b16586c8023db24f2bf3e1761d76e84",
+   "kind": "eval-report",
+   "produced_by": "qevion.eval.harness.run_eval",
+   "produced_at": "2026-09-23T05:52:59.059022+00:00",
+   "criterion_ids": [
+    "QV-EVAL-001",
+    "QV-EVAL-002",
+    "QV-EVAL-004",
+    "QV-EVAL-006"
+   ]
+  },
+  {
+   "path": "evidence/P6/CP-0009/eval_report.md",
+   "sha256": "06a4ffd01c59f3722236d6d1c372f337810f54b73f2fb4d860a56c0d62ae541e",
+   "kind": "eval-report-md",
+   "produced_by": "qevion.eval.harness.write_reports",
+   "produced_at": "2026-09-23T05:52:59.059022+00:00",
+   "criterion_ids": [
+    "QV-EVAL-006"
+   ]
+  },
+  {
+   "path": "evidence/P6/CP-0009/corpus_manifest.json",
+   "sha256": "ae60e1946ac97c04f9d31ef84d6fa7a49b2e9516309bef3ef921076b654207d3",
+   "kind": "eval-corpus",
+   "produced_by": "qevion.eval.corpus.corpus_manifest",
+   "produced_at": "2026-09-23T05:52:59.059022+00:00",
+   "criterion_ids": [
+    "QV-EVAL-003",
+    "QV-EVAL-005"
+   ]
+  },
+  {
+   "path": "evidence/P6/CP-0009/registry_rollup.json",
+   "sha256": "0d8db526c3e32ef24dccea4bbf13c1db7f9b2ea794fb8a53164ba554ed6e50c4",
+   "kind": "registry-rollup",
+   "produced_by": "scripts/p6_evidence.py registry_rollup()",
+   "produced_at": "2026-09-23T05:52:59.059022+00:00",
+   "criterion_ids": [
+    "QV-EVID-001",
+    "QV-ACC-001"
+   ]
+  },
+  {
+   "path": "evidence/P6/CP-0009/preview_verification.json",
+   "sha256": "5bf3683ab64f2b368058333db530db3f6d546232c53845b478fb33f713d9cd1c",
+   "kind": "preview-verification",
+   "produced_by": "GetServiceUrl + Playwright + curl/websockets probes",
+   "produced_at": "2026-09-23T05:52:59.059022+00:00",
+   "criterion_ids": [
+    "QV-ACC-015",
+    "QV-OUT-DIR-002"
+   ]
+  }
+ ]
+}

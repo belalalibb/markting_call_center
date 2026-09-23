@@ -1,0 +1,668 @@
+{
+  "criterion": "QV-ACC-019",
+  "passed": true,
+  "cases": 42,
+  "deterministic_cases": 42,
+  "total_events_compared": 5460,
+  "normalisation": {
+    "ids": "<prefix>_<16hex> → <prefix>_<id>",
+    "dropped_keys": [
+      "latency_ms",
+      "client_ts_ms",
+      "server_ts_ms",
+      "checked_at",
+      "produced_at",
+      "recorded_at",
+      "ts",
+      "t0..t4"
+    ],
+    "compared": [
+      "seq",
+      "kind",
+      "type",
+      "source",
+      "payload"
+    ]
+  },
+  "forced_divergence": {
+    "fingerprint_match": false,
+    "deterministic": false,
+    "first_divergence_field": "blueprint_fingerprint",
+    "lifecycle": [
+      "replay.started",
+      "replay.diverged"
+    ]
+  },
+  "rows": [
+    {
+      "fixture": "activity_a_restaurant",
+      "case_id": "normal_complete",
+      "recording_id": "rec_9437a9ad424e478a",
+      "events": 126,
+      "replayed_events": 126,
+      "divergences": 0,
+      "outcome_match": true,
+      "deterministic": true,
+      "digest": "9437a9ad424e478a",
+      "lifecycle": [
+        "replay.started",
+        "replay.completed"
+      ]
+    },
+    {
+      "fixture": "activity_a_restaurant",
+      "case_id": "confused_needs_clarification",
+      "recording_id": "rec_a56c1fddbe5cb9f9",
+      "events": 138,
+      "replayed_events": 138,
+      "divergences": 0,
+      "outcome_match": true,
+      "deterministic": true,
+      "digest": "a56c1fddbe5cb9f9",
+      "lifecycle": [
+        "replay.started",
+        "replay.completed"
+      ]
+    },
+    {
+      "fixture": "activity_a_restaurant",
+      "case_id": "skeptical_asks_purpose",
+      "recording_id": "rec_c6126069ef4c2302",
+      "events": 138,
+      "replayed_events": 138,
+      "divergences": 0,
+      "outcome_match": true,
+      "deterministic": true,
+      "digest": "c6126069ef4c2302",
+      "lifecycle": [
+        "replay.started",
+        "replay.completed"
+      ]
+    },
+    {
+      "fixture": "activity_a_restaurant",
+      "case_id": "demanding_wants_speed",
+      "recording_id": "rec_acc3a94f49fbc850",
+      "events": 126,
+      "replayed_events": 126,
+      "divergences": 0,
+      "outcome_match": true,
+      "deterministic": true,
+      "digest": "acc3a94f49fbc850",
+      "lifecycle": [
+        "replay.started",
+        "replay.completed"
+      ]
+    },
+    {
+      "fixture": "activity_a_restaurant",
+      "case_id": "follow_up_asker",
+      "recording_id": "rec_a8f43b9e89985d6c",
+      "events": 138,
+      "replayed_events": 138,
+      "divergences": 0,
+      "outcome_match": true,
+      "deterministic": true,
+      "digest": "a8f43b9e89985d6c",
+      "lifecycle": [
+        "replay.started",
+        "replay.completed"
+      ]
+    },
+    {
+      "fixture": "activity_a_restaurant",
+      "case_id": "comparison_asker",
+      "recording_id": "rec_3d680141ddaeeed3",
+      "events": 138,
+      "replayed_events": 138,
+      "divergences": 0,
+      "outcome_match": true,
+      "deterministic": true,
+      "digest": "3d680141ddaeeed3",
+      "lifecycle": [
+        "replay.started",
+        "replay.completed"
+      ]
+    },
+    {
+      "fixture": "activity_a_restaurant",
+      "case_id": "corrector_changes_answer",
+      "recording_id": "rec_ebf4c9183376dcc1",
+      "events": 150,
+      "replayed_events": 150,
+      "divergences": 0,
+      "outcome_match": true,
+      "deterministic": true,
+      "digest": "ebf4c9183376dcc1",
+      "lifecycle": [
+        "replay.started",
+        "replay.completed"
+      ]
+    },
+    {
+      "fixture": "activity_a_restaurant",
+      "case_id": "topic_switcher",
+      "recording_id": "rec_40957fdd905f1c5b",
+      "events": 138,
+      "replayed_events": 138,
+      "divergences": 0,
+      "outcome_match": true,
+      "deterministic": true,
+      "digest": "40957fdd905f1c5b",
+      "lifecycle": [
+        "replay.started",
+        "replay.completed"
+      ]
+    },
+    {
+      "fixture": "activity_a_restaurant",
+      "case_id": "interrupter",
+      "recording_id": "rec_8d8a3167bcb45b4a",
+      "events": 138,
+      "replayed_events": 138,
+      "divergences": 0,
+      "outcome_match": true,
+      "deterministic": true,
+      "digest": "8d8a3167bcb45b4a",
+      "lifecycle": [
+        "replay.started",
+        "replay.completed"
+      ]
+    },
+    {
+      "fixture": "activity_a_restaurant",
+      "case_id": "unsupported_question",
+      "recording_id": "rec_fe4bdb365e0948fc",
+      "events": 138,
+      "replayed_events": 138,
+      "divergences": 0,
+      "outcome_match": true,
+      "deterministic": true,
+      "digest": "fe4bdb365e0948fc",
+      "lifecycle": [
+        "replay.started",
+        "replay.completed"
+      ]
+    },
+    {
+      "fixture": "activity_a_restaurant",
+      "case_id": "tool_failure_first_write",
+      "recording_id": "rec_d515a98112f9780c",
+      "events": 123,
+      "replayed_events": 123,
+      "divergences": 0,
+      "outcome_match": true,
+      "deterministic": true,
+      "digest": "d515a98112f9780c",
+      "lifecycle": [
+        "replay.started",
+        "replay.completed"
+      ]
+    },
+    {
+      "fixture": "activity_a_restaurant",
+      "case_id": "incomplete_info_hangup",
+      "recording_id": "rec_ec5158aa5b6f9969",
+      "events": 45,
+      "replayed_events": 45,
+      "divergences": 0,
+      "outcome_match": true,
+      "deterministic": true,
+      "digest": "ec5158aa5b6f9969",
+      "lifecycle": [
+        "replay.started",
+        "replay.completed"
+      ]
+    },
+    {
+      "fixture": "activity_a_restaurant",
+      "case_id": "human_request",
+      "recording_id": "rec_360d37f33deb723d",
+      "events": 45,
+      "replayed_events": 45,
+      "divergences": 0,
+      "outcome_match": true,
+      "deterministic": true,
+      "digest": "360d37f33deb723d",
+      "lifecycle": [
+        "replay.started",
+        "replay.completed"
+      ]
+    },
+    {
+      "fixture": "activity_a_restaurant",
+      "case_id": "opt_out_mid_call",
+      "recording_id": "rec_fa265a8598c74528",
+      "events": 57,
+      "replayed_events": 57,
+      "divergences": 0,
+      "outcome_match": true,
+      "deterministic": true,
+      "digest": "fa265a8598c74528",
+      "lifecycle": [
+        "replay.started",
+        "replay.completed"
+      ]
+    },
+    {
+      "fixture": "activity_b_clinic",
+      "case_id": "normal_complete",
+      "recording_id": "rec_bb5b4ac2ebe2d79c",
+      "events": 125,
+      "replayed_events": 125,
+      "divergences": 0,
+      "outcome_match": true,
+      "deterministic": true,
+      "digest": "bb5b4ac2ebe2d79c",
+      "lifecycle": [
+        "replay.started",
+        "replay.completed"
+      ]
+    },
+    {
+      "fixture": "activity_b_clinic",
+      "case_id": "confused_needs_clarification",
+      "recording_id": "rec_37454a2ee120c82e",
+      "events": 137,
+      "replayed_events": 137,
+      "divergences": 0,
+      "outcome_match": true,
+      "deterministic": true,
+      "digest": "37454a2ee120c82e",
+      "lifecycle": [
+        "replay.started",
+        "replay.completed"
+      ]
+    },
+    {
+      "fixture": "activity_b_clinic",
+      "case_id": "skeptical_asks_purpose",
+      "recording_id": "rec_e42b13e040500aaf",
+      "events": 137,
+      "replayed_events": 137,
+      "divergences": 0,
+      "outcome_match": true,
+      "deterministic": true,
+      "digest": "e42b13e040500aaf",
+      "lifecycle": [
+        "replay.started",
+        "replay.completed"
+      ]
+    },
+    {
+      "fixture": "activity_b_clinic",
+      "case_id": "demanding_wants_speed",
+      "recording_id": "rec_891de5174d967386",
+      "events": 125,
+      "replayed_events": 125,
+      "divergences": 0,
+      "outcome_match": true,
+      "deterministic": true,
+      "digest": "891de5174d967386",
+      "lifecycle": [
+        "replay.started",
+        "replay.completed"
+      ]
+    },
+    {
+      "fixture": "activity_b_clinic",
+      "case_id": "follow_up_asker",
+      "recording_id": "rec_4639a018ab24c3fd",
+      "events": 137,
+      "replayed_events": 137,
+      "divergences": 0,
+      "outcome_match": true,
+      "deterministic": true,
+      "digest": "4639a018ab24c3fd",
+      "lifecycle": [
+        "replay.started",
+        "replay.completed"
+      ]
+    },
+    {
+      "fixture": "activity_b_clinic",
+      "case_id": "comparison_asker",
+      "recording_id": "rec_10cf24ff5c0532a9",
+      "events": 137,
+      "replayed_events": 137,
+      "divergences": 0,
+      "outcome_match": true,
+      "deterministic": true,
+      "digest": "10cf24ff5c0532a9",
+      "lifecycle": [
+        "replay.started",
+        "replay.completed"
+      ]
+    },
+    {
+      "fixture": "activity_b_clinic",
+      "case_id": "corrector_changes_answer",
+      "recording_id": "rec_ffb6bd8da8491c28",
+      "events": 146,
+      "replayed_events": 146,
+      "divergences": 0,
+      "outcome_match": true,
+      "deterministic": true,
+      "digest": "ffb6bd8da8491c28",
+      "lifecycle": [
+        "replay.started",
+        "replay.completed"
+      ]
+    },
+    {
+      "fixture": "activity_b_clinic",
+      "case_id": "topic_switcher",
+      "recording_id": "rec_a427713ad7456515",
+      "events": 137,
+      "replayed_events": 137,
+      "divergences": 0,
+      "outcome_match": true,
+      "deterministic": true,
+      "digest": "a427713ad7456515",
+      "lifecycle": [
+        "replay.started",
+        "replay.completed"
+      ]
+    },
+    {
+      "fixture": "activity_b_clinic",
+      "case_id": "interrupter",
+      "recording_id": "rec_a2ba5df8ab291a5c",
+      "events": 137,
+      "replayed_events": 137,
+      "divergences": 0,
+      "outcome_match": true,
+      "deterministic": true,
+      "digest": "a2ba5df8ab291a5c",
+      "lifecycle": [
+        "replay.started",
+        "replay.completed"
+      ]
+    },
+    {
+      "fixture": "activity_b_clinic",
+      "case_id": "unsupported_question",
+      "recording_id": "rec_56770a7f0e30e5d6",
+      "events": 137,
+      "replayed_events": 137,
+      "divergences": 0,
+      "outcome_match": true,
+      "deterministic": true,
+      "digest": "56770a7f0e30e5d6",
+      "lifecycle": [
+        "replay.started",
+        "replay.completed"
+      ]
+    },
+    {
+      "fixture": "activity_b_clinic",
+      "case_id": "tool_failure_first_write",
+      "recording_id": "rec_4650c38a6f18cc4b",
+      "events": 124,
+      "replayed_events": 124,
+      "divergences": 0,
+      "outcome_match": true,
+      "deterministic": true,
+      "digest": "4650c38a6f18cc4b",
+      "lifecycle": [
+        "replay.started",
+        "replay.completed"
+      ]
+    },
+    {
+      "fixture": "activity_b_clinic",
+      "case_id": "incomplete_info_hangup",
+      "recording_id": "rec_1b6b291808e30ef7",
+      "events": 45,
+      "replayed_events": 45,
+      "divergences": 0,
+      "outcome_match": true,
+      "deterministic": true,
+      "digest": "1b6b291808e30ef7",
+      "lifecycle": [
+        "replay.started",
+        "replay.completed"
+      ]
+    },
+    {
+      "fixture": "activity_b_clinic",
+      "case_id": "human_request",
+      "recording_id": "rec_298b0b0f5443924c",
+      "events": 45,
+      "replayed_events": 45,
+      "divergences": 0,
+      "outcome_match": true,
+      "deterministic": true,
+      "digest": "298b0b0f5443924c",
+      "lifecycle": [
+        "replay.started",
+        "replay.completed"
+      ]
+    },
+    {
+      "fixture": "activity_b_clinic",
+      "case_id": "opt_out_mid_call",
+      "recording_id": "rec_7454af0b12164f8d",
+      "events": 57,
+      "replayed_events": 57,
+      "divergences": 0,
+      "outcome_match": true,
+      "deterministic": true,
+      "digest": "7454af0b12164f8d",
+      "lifecycle": [
+        "replay.started",
+        "replay.completed"
+      ]
+    },
+    {
+      "fixture": "activity_c_survey",
+      "case_id": "normal_complete",
+      "recording_id": "rec_9bebe70977bb2b3d",
+      "events": 177,
+      "replayed_events": 177,
+      "divergences": 0,
+      "outcome_match": true,
+      "deterministic": true,
+      "digest": "9bebe70977bb2b3d",
+      "lifecycle": [
+        "replay.started",
+        "replay.completed"
+      ]
+    },
+    {
+      "fixture": "activity_c_survey",
+      "case_id": "confused_needs_clarification",
+      "recording_id": "rec_dda0b286ddb76c97",
+      "events": 189,
+      "replayed_events": 189,
+      "divergences": 0,
+      "outcome_match": true,
+      "deterministic": true,
+      "digest": "dda0b286ddb76c97",
+      "lifecycle": [
+        "replay.started",
+        "replay.completed"
+      ]
+    },
+    {
+      "fixture": "activity_c_survey",
+      "case_id": "skeptical_asks_purpose",
+      "recording_id": "rec_0b1380c9e5d2f109",
+      "events": 189,
+      "replayed_events": 189,
+      "divergences": 0,
+      "outcome_match": true,
+      "deterministic": true,
+      "digest": "0b1380c9e5d2f109",
+      "lifecycle": [
+        "replay.started",
+        "replay.completed"
+      ]
+    },
+    {
+      "fixture": "activity_c_survey",
+      "case_id": "demanding_wants_speed",
+      "recording_id": "rec_796e362477a0788e",
+      "events": 177,
+      "replayed_events": 177,
+      "divergences": 0,
+      "outcome_match": true,
+      "deterministic": true,
+      "digest": "796e362477a0788e",
+      "lifecycle": [
+        "replay.started",
+        "replay.completed"
+      ]
+    },
+    {
+      "fixture": "activity_c_survey",
+      "case_id": "follow_up_asker",
+      "recording_id": "rec_4562f9b1cab888ca",
+      "events": 189,
+      "replayed_events": 189,
+      "divergences": 0,
+      "outcome_match": true,
+      "deterministic": true,
+      "digest": "4562f9b1cab888ca",
+      "lifecycle": [
+        "replay.started",
+        "replay.completed"
+      ]
+    },
+    {
+      "fixture": "activity_c_survey",
+      "case_id": "comparison_asker",
+      "recording_id": "rec_0caf09c5775cbf7a",
+      "events": 189,
+      "replayed_events": 189,
+      "divergences": 0,
+      "outcome_match": true,
+      "deterministic": true,
+      "digest": "0caf09c5775cbf7a",
+      "lifecycle": [
+        "replay.started",
+        "replay.completed"
+      ]
+    },
+    {
+      "fixture": "activity_c_survey",
+      "case_id": "corrector_changes_answer",
+      "recording_id": "rec_2250236a2781a9d2",
+      "events": 194,
+      "replayed_events": 194,
+      "divergences": 0,
+      "outcome_match": true,
+      "deterministic": true,
+      "digest": "2250236a2781a9d2",
+      "lifecycle": [
+        "replay.started",
+        "replay.completed"
+      ]
+    },
+    {
+      "fixture": "activity_c_survey",
+      "case_id": "topic_switcher",
+      "recording_id": "rec_ff89ba125532e5fb",
+      "events": 189,
+      "replayed_events": 189,
+      "divergences": 0,
+      "outcome_match": true,
+      "deterministic": true,
+      "digest": "ff89ba125532e5fb",
+      "lifecycle": [
+        "replay.started",
+        "replay.completed"
+      ]
+    },
+    {
+      "fixture": "activity_c_survey",
+      "case_id": "interrupter",
+      "recording_id": "rec_fe317cd1eade4b34",
+      "events": 189,
+      "replayed_events": 189,
+      "divergences": 0,
+      "outcome_match": true,
+      "deterministic": true,
+      "digest": "fe317cd1eade4b34",
+      "lifecycle": [
+        "replay.started",
+        "replay.completed"
+      ]
+    },
+    {
+      "fixture": "activity_c_survey",
+      "case_id": "unsupported_question",
+      "recording_id": "rec_378897d4e63ba14e",
+      "events": 189,
+      "replayed_events": 189,
+      "divergences": 0,
+      "outcome_match": true,
+      "deterministic": true,
+      "digest": "378897d4e63ba14e",
+      "lifecycle": [
+        "replay.started",
+        "replay.completed"
+      ]
+    },
+    {
+      "fixture": "activity_c_survey",
+      "case_id": "tool_failure_first_write",
+      "recording_id": "rec_0fffa4a65347a75d",
+      "events": 177,
+      "replayed_events": 177,
+      "divergences": 0,
+      "outcome_match": true,
+      "deterministic": true,
+      "digest": "0fffa4a65347a75d",
+      "lifecycle": [
+        "replay.started",
+        "replay.completed"
+      ]
+    },
+    {
+      "fixture": "activity_c_survey",
+      "case_id": "incomplete_info_hangup",
+      "recording_id": "rec_b8e2d8aaf0f931a6",
+      "events": 45,
+      "replayed_events": 45,
+      "divergences": 0,
+      "outcome_match": true,
+      "deterministic": true,
+      "digest": "b8e2d8aaf0f931a6",
+      "lifecycle": [
+        "replay.started",
+        "replay.completed"
+      ]
+    },
+    {
+      "fixture": "activity_c_survey",
+      "case_id": "callback_confirmed",
+      "recording_id": "rec_2cec1774a394705d",
+      "events": 46,
+      "replayed_events": 46,
+      "divergences": 0,
+      "outcome_match": true,
+      "deterministic": true,
+      "digest": "2cec1774a394705d",
+      "lifecycle": [
+        "replay.started",
+        "replay.completed"
+      ]
+    },
+    {
+      "fixture": "activity_c_survey",
+      "case_id": "opt_out_mid_call",
+      "recording_id": "rec_1cf60ed5a9fdfd18",
+      "events": 57,
+      "replayed_events": 57,
+      "divergences": 0,
+      "outcome_match": true,
+      "deterministic": true,
+      "digest": "1cf60ed5a9fdfd18",
+      "lifecycle": [
+        "replay.started",
+        "replay.completed"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,273 @@
+{
+  "generated_at": "2026-09-23T05:52:59.058726+00:00",
+  "checkpoint": "CP-0009",
+  "criteria": 22,
+  "by_status": {
+    "planned": 2,
+    "evidenced": 1,
+    "accepted": 18,
+    "blocked": 1
+  },
+  "all_evidence_files_present": true,
+  "p6_checks": {
+    "QV-ACC-019_replay": true,
+    "QV-EVAL-004_copilot_suite": true
+  },
+  "rows": [
+    {
+      "criterion": "QV-ACC-001",
+      "phase": "P0",
+      "status": "planned",
+      "evidence": [],
+      "evidence_missing": [],
+      "note": null,
+      "depends_on": null
+    },
+    {
+      "criterion": "QV-ACC-002",
+      "phase": "P0",
+      "status": "evidenced",
+      "evidence": [
+        "evidence/P0/CP-0002/index.json"
+      ],
+      "evidence_missing": [],
+      "note": null,
+      "depends_on": null
+    },
+    {
+      "criterion": "QV-ACC-003",
+      "phase": "P0.2",
+      "status": "accepted",
+      "evidence": [
+        "evidence/P0/CP-0002/junit.xml",
+        "evidence/P0/CP-0003/junit.xml"
+      ],
+      "evidence_missing": [],
+      "note": null,
+      "depends_on": null
+    },
+    {
+      "criterion": "QV-ACC-004",
+      "phase": "P0.2",
+      "status": "accepted",
+      "evidence": [
+        "evidence/P0/CP-0002/index.json",
+        "evidence/P0/CP-0003/index.json"
+      ],
+      "evidence_missing": [],
+      "note": null,
+      "depends_on": null
+    },
+    {
+      "criterion": "QV-ACC-005",
+      "phase": "P1",
+      "status": "planned",
+      "evidence": [],
+      "evidence_missing": [],
+      "note": null,
+      "depends_on": null
+    },
+    {
+      "criterion": "QV-ACC-006",
+      "phase": "P1",
+      "status": "accepted",
+      "evidence": [
+        "evidence/P1/CP-0004/junit.xml",
+        "evidence/P1/CP-0004/index.json"
+      ],
+      "evidence_missing": [],
+      "note": null,
+      "depends_on": null
+    },
+    {
+      "criterion": "QV-ACC-007",
+      "phase": "P1",
+      "status": "accepted",
+      "evidence": [
+        "evidence/P1/CP-0004/junit.xml",
+        "evidence/P1/CP-0004/index.json"
+      ],
+      "evidence_missing": [],
+      "note": null,
+      "depends_on": null
+    },
+    {
+      "criterion": "QV-ACC-008",
+      "phase": "P1",
+      "status": "accepted",
+      "evidence": [
+        "evidence/P1/CP-0004/junit.xml",
+        "evidence/P1/CP-0004/index.json"
+      ],
+      "evidence_missing": [],
+      "note": null,
+      "depends_on": null
+    },
+    {
+      "criterion": "QV-ACC-009",
+      "phase": "P1",
+      "status": "accepted",
+      "evidence": [
+        "evidence/P1/CP-0004/junit.xml",
+        "evidence/P1/CP-0004/index.json"
+      ],
+      "evidence_missing": [],
+      "note": null,
+      "depends_on": null
+    },
+    {
+      "criterion": "QV-ACC-010",
+      "phase": "P1",
+      "status": "accepted",
+      "evidence": [
+        "evidence/P1/CP-0004/junit.xml",
+        "evidence/P1/CP-0004/index.json"
+      ],
+      "evidence_missing": [],
+      "note": null,
+      "depends_on": null
+    },
+    {
+      "criterion": "QV-ACC-011",
+      "phase": "P2",
+      "status": "accepted",
+      "evidence": [
+        "evidence/P2/CP-0005/junit.xml",
+        "evidence/P2/CP-0005/index.json"
+      ],
+      "evidence_missing": [],
+      "note": null,
+      "depends_on": null
+    },
+    {
+      "criterion": "QV-ACC-012",
+      "phase": "P2",
+      "status": "accepted",
+      "evidence": [
+        "evidence/P2/CP-0005/junit.xml",
+        "evidence/P2/CP-0005/index.json"
+      ],
+      "evidence_missing": [],
+      "note": null,
+      "depends_on": null
+    },
+    {
+      "criterion": "QV-ACC-013",
+      "phase": "P2",
+      "status": "accepted",
+      "evidence": [
+        "evidence/P2/CP-0005/junit.xml",
+        "evidence/P2/CP-0005/index.json"
+      ],
+      "evidence_missing": [],
+      "note": null,
+      "depends_on": null
+    },
+    {
+      "criterion": "QV-ACC-014",
+      "phase": "P3",
+      "status": "accepted",
+      "evidence": [
+        "evidence/P3/CP-0006/acc014_provenance_diff.json",
+        "evidence/P3/CP-0006/index.json"
+      ],
+      "evidence_missing": [],
+      "note": null,
+      "depends_on": null
+    },
+    {
+      "criterion": "QV-ACC-015",
+      "phase": "P3",
+      "status": "accepted",
+      "evidence": [
+        "evidence/P3/CP-0006/junit.xml",
+        "evidence/P3/CP-0006/e2e_preview.json"
+      ],
+      "evidence_missing": [],
+      "note": null,
+      "depends_on": null
+    },
+    {
+      "criterion": "QV-ACC-016",
+      "phase": "P3",
+      "status": "accepted",
+      "evidence": [
+        "evidence/P3/CP-0006/acc016_memory_only_key.json",
+        "evidence/P3/CP-0006/e2e_preview.json"
+      ],
+      "evidence_missing": [],
+      "note": null,
+      "depends_on": null
+    },
+    {
+      "criterion": "QV-ACC-017",
+      "phase": "P4",
+      "status": "accepted",
+      "evidence": [
+        "evidence/P4/CP-0007/latency_table.json",
+        "evidence/P4/CP-0007/e2e_voice_preview.json"
+      ],
+      "evidence_missing": [],
+      "note": null,
+      "depends_on": null
+    },
+    {
+      "criterion": "QV-ACC-018",
+      "phase": "P4",
+      "status": "accepted",
+      "evidence": [
+        "evidence/P4/CP-0007/latency_table.json",
+        "evidence/P4/CP-0007/junit.xml"
+      ],
+      "evidence_missing": [],
+      "note": null,
+      "depends_on": null
+    },
+    {
+      "criterion": "QV-ACC-019",
+      "phase": "P6",
+      "status": "accepted",
+      "evidence": [
+        "evidence/P6/CP-0009/acc019_replay_diff.json",
+        "evidence/P6/CP-0009/junit.xml"
+      ],
+      "evidence_missing": [],
+      "note": "42/42 recorded cases (A/B/C, all personas + adversarial) replay to identical canonical event streams + outcomes; mutated Blueprint -> fingerprint divergence reported; wall-clock keys normalised out (seq/kind/type/source/payload compared)",
+      "depends_on": null
+    },
+    {
+      "criterion": "QV-ACC-020",
+      "phase": "P5",
+      "status": "accepted",
+      "evidence": [
+        "evidence/P5/CP-0008/acc020_simulation_gate.json",
+        "evidence/P5/CP-0008/simulation_report_clean.json",
+        "evidence/P5/CP-0008/junit.xml"
+      ],
+      "evidence_missing": [],
+      "note": null,
+      "depends_on": null
+    },
+    {
+      "criterion": "QV-ACC-021",
+      "phase": "P5",
+      "status": "accepted",
+      "evidence": [
+        "evidence/P5/CP-0008/acc021_budget_guard.json",
+        "evidence/P5/CP-0008/junit.xml"
+      ],
+      "evidence_missing": [],
+      "note": null,
+      "depends_on": null
+    },
+    {
+      "criterion": "QV-ACC-022",
+      "phase": "P6",
+      "status": "blocked",
+      "evidence": [],
+      "evidence_missing": [],
+      "note": "no operator-supplied real-provider key present in this sandbox (A5); OpenAI Realtime adapter + Admin ephemeral test-key path exist (CP-0007); smoke to run when a key is provided",
+      "depends_on": "A5"
+    }
+  ]
+}

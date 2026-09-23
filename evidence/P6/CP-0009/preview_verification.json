@@ -1,0 +1,19 @@
+{
+  "url": "https://8000-iusm8avo40zoetr6k99cm-5634da27.sandbox.novita.ai",
+  "verified_at": "2026-09-23T05:52:59.034045+00:00",
+  "modes": [
+    "#/config",
+    "#/console",
+    "#/admin"
+  ],
+  "method": "Playwright console capture (0 errors) + bundle grep for new panels + REST/WS probes",
+  "probes": {
+    "activate_before_gates": "409 unmet=[preflight_ready, simulation_passed, version_frozen]",
+    "preflight": "READY \u2192 READY_FOR_SIMULATION",
+    "simulate": "14 cases passed safety 1.0 completion 1.0 \u2192 READY_FOR_ACTIVATION",
+    "gates": "unmet=[]",
+    "activate": "200 \u2192 ACTIVE",
+    "outbound_ws_refused": "4403 no_consent,opted_out,outside_contact_window (attempt recorded)",
+    "outbound_ws_window": "4403 outside_contact_window (window 10:00-20:00 Africa/Cairo)"
+  }
+}
