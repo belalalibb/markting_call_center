@@ -20,7 +20,6 @@ from typing import Any
 import pytest
 import uvicorn
 import websockets
-
 from qevion.main import build
 from qevion.runtime.app import HEARTBEAT_INTERVAL_S, INBOUND_QUEUE_MAX, WsTransport
 from qevion.runtime.store import RuntimeStore
