@@ -104,6 +104,7 @@ async def main() -> int:
         "sid": None,
         "starts": 0,
         "ends": 0,
+        "voiced_ends": 0,
         "stops": 0,
         "last_end_ms": 0,
         "ready": None,
@@ -130,6 +131,8 @@ async def main() -> int:
                         await ws.send(json.dumps({"type": "playout_started", "response_id": m.get("response_id")}))
                     if t == "audio_end":
                         st["speaking"], st["ends"], st["last_end_ms"] = False, st["ends"] + 1, now()
+                        if int((m.get("payload") or {}).get("audio_ms") or 0) > 0:
+                            st["voiced_ends"] += 1
                     if t == "stop_playout":
                         st["speaking"], st["stops"] = False, st["stops"] + 1
                         await ws.send(json.dumps({"type": "playout_stopped", "response_id": m.get("response_id")}))
@@ -157,6 +160,7 @@ async def main() -> int:
             log.append((now(), "cli:utterance_end", name))
 
         await silence_for(2.0)
+        voiced0 = 0
         for i, name in enumerate(PLAN):
             if i > 0 and "--bargein" in sys.argv:
                 for _ in range(500):
@@ -166,15 +170,14 @@ async def main() -> int:
                 await silence_for(0.6)
                 log.append((now(), "cli:bargein", ""))
             elif i > 0 and "--late-bargein" in sys.argv:
-                ends0 = st["ends"]
                 for _ in range(750):
-                    if st["ends"] > ends0:
+                    if st["voiced_ends"] > voiced0:
                         break
                     await silence_for(0.02)
                 await silence_for(1.0)
                 log.append((now(), "cli:late_bargein", ""))
             await stream(name)
-            seen = st["starts"]
+            seen, voiced0 = st["starts"], st["voiced_ends"]
             waited = 0.0
             while waited < 15.0:
                 await silence_for(0.5)
@@ -187,7 +190,9 @@ async def main() -> int:
                 ):
                     await silence_for(1.5)
                     break
-                if ("--bargein" in sys.argv and st["speaking"]) or ("--late-bargein" in sys.argv and st["ends"] > 0):
+                if ("--bargein" in sys.argv and st["speaking"]) or (
+                    "--late-bargein" in sys.argv and st["voiced_ends"] > voiced0
+                ):
                     break
         await silence_for(2.5)
         detail: dict[str, Any] = {}
