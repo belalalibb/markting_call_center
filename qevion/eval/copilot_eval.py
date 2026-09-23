@@ -214,9 +214,13 @@ def drive(case: CopilotEvalCase, *, max_rounds: int = 25) -> CopilotRun:
     if p.fixture:
         raw = _fixture(p.fixture)
         if p.missing_tool_id:
-            raw.setdefault("tools", {}).setdefault("required", []).append(
-                {"tool_id": p.missing_tool_id, "purpose": "push lead to external CRM"}
-            )
+            tools = raw.setdefault("tools", {})
+            tools.setdefault("required", []).append({"tool_id": p.missing_tool_id, "purpose": "push lead to external CRM"})
+            tools.setdefault("permissions", {})[p.missing_tool_id] = {
+                "impact": "write",
+                "confirmation": "confirm_before_execute",
+                "authorization_scope": "activity",
+            }
         session.seed_draft(raw, operator_id=OPERATOR)
     if p.planted_gaps or p.planted_conflicts:
         _plant_knowledge(session, p.planted_gaps, p.planted_conflicts)
@@ -244,6 +248,10 @@ def drive(case: CopilotEvalCase, *, max_rounds: int = 25) -> CopilotRun:
                     progressed = True
                 elif q.target_path.startswith("knowledge.gaps."):
                     session.answer(q.question_id, "operator supplied value", operator_id=OPERATOR)
+                    progressed = True
+                elif q.target_path.startswith("capabilities.knowledge:"):
+                    # REQUIRES_KNOWLEDGE → operator uploads/points to a source (AnswerType.UPLOAD)
+                    session.answer(q.question_id, f"upload://{q.target_path.split(':', 1)[1]}", operator_id=OPERATOR)
                     progressed = True
                 elif q.target_path in p.answers:
                     session.answer(q.question_id, p.answers[q.target_path], operator_id=OPERATOR)
