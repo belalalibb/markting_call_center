@@ -7,8 +7,8 @@
 | Project phase | P5 — Simulation + Activation + Outbound |
 | Current stage | **P6 COMPLETE** + **post-P6 live real-provider verification DONE**: TypeSafe Jev (decision role, CP-0010) and **OpenAI Realtime GA (S2S role, CP-0011)** — QV-ACC-022 **accepted**; next = Phase B closure review / backlog |
 | Current objective | Phase B closure: all planned checkpoints CP-0001..CP-0009 verified. Open: QV-ACC-022 real-provider smoke (A5 key needed), QV-ACC-001 final inspection, QV-ACC-005. Backlog: bounded-LLM simulated customer, CRM/DNC adapter seam, Silero ONNX model fetch, real-provider latency table, audio-mode eval subset (license-clean fixtures). |
-| Last verified checkpoint | CP-0010 (TypeSafe live decision role) — `recovery/checkpoints/CP-0010.md`, tag `cp/CP-0010` → 7639084 |
-| Last known good Git SHA | see `recovery/checkpoints/index.jsonl` last line (CP-0010 = 29cf556 described, tag 7639084) |
+| Last verified checkpoint | CP-0011 (OpenAI Realtime GA live S2S) — `recovery/checkpoints/CP-0011.md`, tag `cp/CP-0011` → 435177d |
+| Last known good Git SHA | see `recovery/checkpoints/index.jsonl` last line (CP-0011, tag 435177d) |
 | Approval | Operator approved full plan + decisions D1–D15 on 2026-09-22 (see `recovery/analysis/pre_approval_inspection_2026-09-22.md`) |
 
 ## Completed (with evidence)
