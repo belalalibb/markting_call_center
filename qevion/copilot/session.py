@@ -109,15 +109,25 @@ class ConfigSession:
                 self.state.asked[q.question_id] = q
                 self._emit(
                     EventType.CONFIG_QUESTION_ASKED,
-                    {"question_id": q.question_id, "kind": q.kind.value, "target_path": q.target_path, "blocking": q.blocking},
+                    {
+                        "question_id": q.question_id,
+                        "kind": q.kind.value,
+                        "target_path": q.target_path,
+                        "blocking": q.blocking,
+                    },
                 )
         return qs
 
     def answer(self, question_id: str, value: Any, *, operator_id: str) -> None:
         q = self._require(question_id)
-        self.state.decisions = self._composer.apply(self.state.draft, self.state.decisions, Answer(q, value, operator_id))
+        self.state.decisions = self._composer.apply(
+            self.state.draft, self.state.decisions, Answer(q, value, operator_id)
+        )
         self.state.answered_paths.add(q.target_path)
-        self._emit(EventType.CONFIG_ANSWER_RECEIVED, {"question_id": question_id, "target_path": q.target_path, "mode": "answer"})
+        self._emit(
+            EventType.CONFIG_ANSWER_RECEIVED,
+            {"question_id": question_id, "target_path": q.target_path, "mode": "answer"},
+        )
 
     def accept(self, question_id: str, *, operator_id: str) -> None:
         q = self._require(question_id)
@@ -125,14 +135,20 @@ class ConfigSession:
             raise ValueError(f"question {question_id} has no proposal to accept")
         self.state.decisions = self._composer.accept_proposal(self.state.draft, self.state.decisions, q, operator_id)
         self.state.answered_paths.add(q.target_path)
-        self._emit(EventType.CONFIG_ANSWER_RECEIVED, {"question_id": question_id, "target_path": q.target_path, "mode": "accept"})
+        self._emit(
+            EventType.CONFIG_ANSWER_RECEIVED,
+            {"question_id": question_id, "target_path": q.target_path, "mode": "accept"},
+        )
 
     def defer(self, question_id: str) -> None:
         q = self._require(question_id)
         if q.blocking:
             raise ValueError(f"blocking question {question_id} cannot be deferred")
         self.state.deferred_paths.add(q.target_path)
-        self._emit(EventType.CONFIG_ANSWER_RECEIVED, {"question_id": question_id, "target_path": q.target_path, "mode": "defer"})
+        self._emit(
+            EventType.CONFIG_ANSWER_RECEIVED,
+            {"question_id": question_id, "target_path": q.target_path, "mode": "defer"},
+        )
 
     def approve_decision(self, item_path: str, *, operator_id: str) -> None:
         for i, d in enumerate(self.state.decisions):
@@ -180,9 +196,14 @@ class ConfigSession:
             readiness = ReadinessState.BLOCKED
         else:
             status = DiscoveryStatus.REVIEW
-            readiness = ReadinessState.NEEDS_CONFIGURATION if composed.decisions and any(
-                d.approved_by is None for d in composed.decisions
-            ) else ReadinessState.READY_FOR_PREFLIGHT
+            unapproved = any(d.approved_by is None for d in composed.decisions)
+            # REVIEW with a preflight-clean draft: READY_FOR_SIMULATION only if preflight actually ran clean
+            if unapproved:
+                readiness = ReadinessState.NEEDS_CONFIGURATION
+            elif self._preflight_ctx is not None and not findings:
+                readiness = ReadinessState.READY_FOR_SIMULATION
+            else:
+                readiness = ReadinessState.NEEDS_CONFIGURATION
         return BlueprintProposal(
             proposal_id=f"{st.config_session_id}-p{st.proposal_count}",
             config_session_id=st.config_session_id,
@@ -209,7 +230,9 @@ class ConfigSession:
         return self._explainer.explain_question(self._require(question_id))
 
     # ---------------------------------------------------------------- internals
-    def _inputs(self, *, preflight: list[PreflightFinding] | None = None, mapping: list[Any] | None = None) -> DiscoveryInputs:
+    def _inputs(
+        self, *, preflight: list[PreflightFinding] | None = None, mapping: list[Any] | None = None
+    ) -> DiscoveryInputs:
         st = self.state
         return DiscoveryInputs(
             draft=st.draft,
