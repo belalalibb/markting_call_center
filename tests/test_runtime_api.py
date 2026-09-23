@@ -267,3 +267,66 @@ def test_ws_invalid_client_message_reports_error(client: TestClient) -> None:
         else:
             raise AssertionError("no error message")
         ws.send_text(json.dumps({"type": "bye"}))
+
+
+# ------------------------------------------------------------- compositions (P4)
+
+
+def test_compositions_listed_with_credential_source(client: TestClient) -> None:
+    comps = {c["composition_id"]: c for c in client.get("/api/compositions").json()}
+    assert comps["comp_mock_s2s_v1"]["default"] is True
+    assert comps["comp_s2s_openai_v1"]["bindings"][0]["adapter"] == "openai_realtime"
+    assert comps["comp_s2s_openai_v1"]["credential_source"] in {"none", "env", "admin_store", "ephemeral_ui"}
+
+
+def test_ws_unknown_composition_closes_4400(client: TestClient) -> None:
+    from starlette.websockets import WebSocketDisconnect
+
+    key = _key(client, "act_csat_survey")
+    with pytest.raises(WebSocketDisconnect) as ei, client.websocket_connect(f"/ws/sessions/{key}?composition=nope") as ws:
+        ws.receive_text()
+    assert ei.value.code == 4400
+
+
+def test_ws_real_provider_without_credential_reports_error_not_crash(client: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:
+    store: RuntimeStore = client.app.state.store  # type: ignore[attr-defined]
+    monkeypatch.setattr(store.credentials, "env", {})  # hide any sandbox OPENAI_API_KEY
+    store.credentials.admin_store.clear()
+    key = _key(client, "act_csat_survey")
+    with client.websocket_connect(f"/ws/sessions/{key}?composition=pinned") as ws:
+        got: list[dict[str, Any]] = []
+        for _ in range(10):
+            try:
+                m = ws.receive()
+            except Exception:  # noqa: BLE001 — closed by server
+                break
+            if m.get("text"):
+                got.append(json.loads(m["text"]))
+            if any(g["type"] == "error" for g in got):
+                break
+        err = next(g for g in got if g["type"] == "error")
+        assert err["payload"]["code"] == "provider_credential_missing"
+    s = client.get("/api/sessions").json()[-1]
+    assert s["composition_id"] == "comp_s2s_openai_v1" and s["credential_source"] == "none" and s["error"]
+    assert s["running"] is False
+
+
+def test_ws_silero_composition_runs_on_mock_provider(client: TestClient) -> None:
+    """A composition can mix silero/smart_turn turn detection with the mock provider."""
+    store: RuntimeStore = client.app.state.store  # type: ignore[attr-defined]
+    from qevion.contracts.composition import Composition
+
+    store.compositions["comp_mock_smart_v1"] = Composition.model_validate(
+        {
+            "composition_id": "comp_mock_smart_v1",
+            "mode": "s2s",
+            "bindings": [{"role": "s2s", "adapter": "mock"}, {"role": "turn", "adapter": "smart_turn"}, {"role": "decision", "adapter": "rules"}],
+        }
+    )
+    key = _key(client, "act_order_intake")
+    with client.websocket_connect(f"/ws/sessions/{key}?composition=comp_mock_smart_v1") as ws:
+        first = json.loads(ws.receive_text())
+        assert first["type"] in {"ready", "state"}
+        ws.send_text(json.dumps({"type": "bye"}))
+    s = client.get("/api/sessions").json()[-1]
+    assert s["composition_id"] == "comp_mock_smart_v1" and s["error"] is None
