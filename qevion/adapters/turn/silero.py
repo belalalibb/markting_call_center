@@ -72,7 +72,7 @@ class _OnnxModel:
 
     def __init__(self, path: Path) -> None:
         import numpy as np  # noqa: PLC0415 — optional heavy import
-        import onnxruntime as ort  # type: ignore[import-not-found]  # noqa: PLC0415
+        import onnxruntime as ort  # noqa: PLC0415
 
         self._np = np
         opts = ort.SessionOptions()
@@ -115,11 +115,17 @@ class SileroTurnAdapter:
             role=ProviderRole.TURN,
             capabilities=[
                 Capability(name="feature:barge_in", state=CapabilityState.SUPPORTED),
-                Capability(name="feature:end_of_turn", state=CapabilityState.PARTIAL, notes="VAD silence-based; pair with smart_turn"),
+                Capability(
+                    name="feature:end_of_turn",
+                    state=CapabilityState.PARTIAL,
+                    notes="VAD silence-based; pair with smart_turn",
+                ),
                 Capability(
                     name="feature:vad:silero",
                     state=vad_state,
-                    notes=None if self.model_available else "models/silero_vad.onnx or onnxruntime missing → energy fallback",
+                    notes=None
+                    if self.model_available
+                    else "models/silero_vad.onnx or onnxruntime missing → energy fallback",
                 ),
                 Capability(name="language:any", state=CapabilityState.SUPPORTED, notes="language-agnostic VAD"),
             ],

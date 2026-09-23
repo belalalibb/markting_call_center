@@ -44,7 +44,10 @@ def prosodic_scorer(pcm16: bytes, *, tail_ms: int = 600) -> float:
     tail = [r for r in rms[-tail_n * 2 :] if r > 250][-tail_n:]
     if len(tail) < 3:
         return 0.5
-    first, last = sum(tail[: len(tail) // 2]) / (len(tail) // 2), sum(tail[len(tail) // 2 :]) / (len(tail) - len(tail) // 2)
+    first, last = (
+        sum(tail[: len(tail) // 2]) / (len(tail) // 2),
+        sum(tail[len(tail) // 2 :]) / (len(tail) - len(tail) // 2),
+    )
     decay = (first - last) / max(first, 1.0)  # >0 falling
     score = 0.5 + 0.5 * max(-1.0, min(1.0, decay * 2))
     return float(max(0.0, min(1.0, score)))
@@ -117,7 +120,9 @@ class SmartTurnDetector:
 class SmartTurnAdapter:
     name = "smart_turn"
 
-    def __init__(self, *, prob_fn: ProbFn = rms_probability, scorer: EndOfTurnScorer | None = None, model_backed: bool = False) -> None:
+    def __init__(
+        self, *, prob_fn: ProbFn = rms_probability, scorer: EndOfTurnScorer | None = None, model_backed: bool = False
+    ) -> None:
         self._prob_fn = prob_fn
         self._scorer = scorer or prosodic_scorer
         self._model_backed = model_backed and scorer is not None
@@ -133,13 +138,18 @@ class SmartTurnAdapter:
                     state=CapabilityState.SUPPORTED if self._model_backed else CapabilityState.PARTIAL,
                     notes=None if self._model_backed else "prosodic heuristic scorer (no model on 2 vCPU)",
                 ),
-                Capability(name="feature:semantic_eot", state=CapabilityState.SUPPORTED if self._model_backed else CapabilityState.UNVERIFIED),
+                Capability(
+                    name="feature:semantic_eot",
+                    state=CapabilityState.SUPPORTED if self._model_backed else CapabilityState.UNVERIFIED,
+                ),
                 Capability(name="language:any", state=CapabilityState.SUPPORTED),
             ],
         )
 
     def new_detector(self) -> SmartTurnDetector:
-        return SmartTurnDetector(vad=EnergyTurnDetector(prob_fn=self._prob_fn, detector_name="vad"), scorer=self._scorer)
+        return SmartTurnDetector(
+            vad=EnergyTurnDetector(prob_fn=self._prob_fn, detector_name="vad"), scorer=self._scorer
+        )
 
 
 __all__ = ["EndOfTurnScorer", "SmartTurnAdapter", "SmartTurnDetector", "prosodic_scorer"]
