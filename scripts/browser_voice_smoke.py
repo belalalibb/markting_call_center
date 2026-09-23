@@ -192,7 +192,17 @@ async def main() -> int:
         "sessions_after": [
             {
                 k: s.get(k)
-                for k in ("session_id", "composition_id", "channel", "credential_source", "running", "error", "close_code", "close_reason", "heartbeat")
+                for k in (
+                    "session_id",
+                    "composition_id",
+                    "channel",
+                    "credential_source",
+                    "running",
+                    "error",
+                    "close_code",
+                    "close_reason",
+                    "heartbeat",
+                )
             }
             for s in sessions
         ][-3:],
