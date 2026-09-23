@@ -1,0 +1,357 @@
+{
+  "provider": "typesafe",
+  "base_url": "https://api.typesafe.ai",
+  "key_fingerprint": "aadacc669062",
+  "ran_at": "2026-09-23T13:02:15.603808+00:00",
+  "models": [
+    "jev-latest",
+    "jev-preview"
+  ],
+  "cases": [
+    {
+      "kind": "interpret_confirmation",
+      "text": "أيوه تمام ماشي",
+      "expected": true,
+      "got": true,
+      "ok": true,
+      "source": "LLM_VALIDATED",
+      "confidence": 0.99,
+      "reason": null,
+      "latency_ms": 198,
+      "model": "jev-1.13.0"
+    },
+    {
+      "kind": "interpret_confirmation",
+      "text": "اه يا باشا اتفقنا",
+      "expected": true,
+      "got": true,
+      "ok": true,
+      "source": "LLM_VALIDATED",
+      "confidence": 1.0,
+      "reason": null,
+      "latency_ms": 208,
+      "model": "jev-1.13.0"
+    },
+    {
+      "kind": "interpret_confirmation",
+      "text": "تمام كده صح",
+      "expected": true,
+      "got": true,
+      "ok": true,
+      "source": "LLM_VALIDATED",
+      "confidence": 0.96,
+      "reason": null,
+      "latency_ms": 174,
+      "model": "jev-1.13.0"
+    },
+    {
+      "kind": "interpret_confirmation",
+      "text": "لأ استنى خلّيهم تلاتة",
+      "expected": false,
+      "got": false,
+      "ok": true,
+      "source": "LLM_VALIDATED",
+      "confidence": 0.9,
+      "reason": null,
+      "latency_ms": 337,
+      "model": "jev-1.13.0"
+    },
+    {
+      "kind": "interpret_confirmation",
+      "text": "لا مش عايز",
+      "expected": false,
+      "got": false,
+      "ok": true,
+      "source": "LLM_VALIDATED",
+      "confidence": 0.99,
+      "reason": null,
+      "latency_ms": 193,
+      "model": "jev-1.13.0"
+    },
+    {
+      "kind": "interpret_confirmation",
+      "text": "خلاص بلاش",
+      "expected": false,
+      "got": false,
+      "ok": true,
+      "source": "LLM_VALIDATED",
+      "confidence": 0.63,
+      "reason": null,
+      "latency_ms": 188,
+      "model": "jev-1.13.0"
+    },
+    {
+      "kind": "interpret_confirmation",
+      "text": "mashy tamam",
+      "expected": true,
+      "got": true,
+      "ok": true,
+      "source": "LLM_VALIDATED",
+      "confidence": 0.6,
+      "reason": null,
+      "latency_ms": 225,
+      "model": "jev-1.13.0"
+    },
+    {
+      "kind": "interpret_confirmation",
+      "text": "la2 msh 3ayez",
+      "expected": false,
+      "got": null,
+      "ok": false,
+      "source": "UNKNOWN",
+      "confidence": 0.22,
+      "reason": "typesafe low confidence 0.22 < 0.6 (choice=yes)",
+      "latency_ms": 201,
+      "model": "jev-1.13.0"
+    },
+    {
+      "kind": "interpret_confirmation",
+      "text": "yes please go ahead",
+      "expected": true,
+      "got": true,
+      "ok": true,
+      "source": "LLM_VALIDATED",
+      "confidence": 1.0,
+      "reason": null,
+      "latency_ms": 199,
+      "model": "jev-1.13.0"
+    },
+    {
+      "kind": "interpret_confirmation",
+      "text": "no, cancel that",
+      "expected": false,
+      "got": false,
+      "ok": true,
+      "source": "LLM_VALIDATED",
+      "confidence": 1.0,
+      "reason": null,
+      "latency_ms": 193,
+      "model": "jev-1.13.0"
+    },
+    {
+      "kind": "interpret_confirmation",
+      "text": "هو ده بكام؟",
+      "expected": null,
+      "got": null,
+      "ok": true,
+      "source": "UNKNOWN",
+      "confidence": 0.98,
+      "reason": "typesafe low confidence 0.98 < 0.6 (choice=ambiguous)",
+      "latency_ms": 206,
+      "model": "jev-1.13.0"
+    },
+    {
+      "kind": "interpret_confirmation",
+      "text": "ممكن تعيد تاني؟",
+      "expected": null,
+      "got": null,
+      "ok": true,
+      "source": "UNKNOWN",
+      "confidence": 0.84,
+      "reason": "typesafe low confidence 0.84 < 0.6 (choice=ambiguous)",
+      "latency_ms": 179,
+      "model": "jev-1.13.0"
+    },
+    {
+      "kind": "classify_intent",
+      "text": "الأكل وصل بارد ومتأخر",
+      "expected": "complaint",
+      "got": "complaint",
+      "ok": true,
+      "source": "LLM_VALIDATED",
+      "confidence": 1.0,
+      "reason": null,
+      "latency_ms": 205,
+      "model": "jev-1.13.0"
+    },
+    {
+      "kind": "classify_intent",
+      "text": "عايز أطلب اتنين برجر",
+      "expected": "order",
+      "got": "order",
+      "ok": true,
+      "source": "LLM_VALIDATED",
+      "confidence": 1.0,
+      "reason": null,
+      "latency_ms": 213,
+      "model": "jev-1.13.0"
+    },
+    {
+      "kind": "classify_intent",
+      "text": "ممكن أكلم حد من الإدارة؟",
+      "expected": "human_request",
+      "got": "human_request",
+      "ok": true,
+      "source": "LLM_VALIDATED",
+      "confidence": 1.0,
+      "reason": null,
+      "latency_ms": 238,
+      "model": "jev-1.13.0"
+    },
+    {
+      "kind": "classify_intent",
+      "text": "السعر غالي هفكر",
+      "expected": "objection",
+      "got": "objection",
+      "ok": true,
+      "source": "LLM_VALIDATED",
+      "confidence": 1.0,
+      "reason": null,
+      "latency_ms": 204,
+      "model": "jev-1.13.0"
+    },
+    {
+      "kind": "classify_intent",
+      "text": "شيلني من القايمة",
+      "expected": "opt_out",
+      "got": null,
+      "ok": false,
+      "source": "UNKNOWN",
+      "confidence": 0.56,
+      "reason": "typesafe low confidence 0.56 < 0.75 (choice=order)",
+      "latency_ms": 292,
+      "model": "jev-1.13.0"
+    },
+    {
+      "kind": "classify_intent",
+      "text": "3ayez 2 burger w pepsi",
+      "expected": "order",
+      "got": "order",
+      "ok": true,
+      "source": "LLM_VALIDATED",
+      "confidence": 1.0,
+      "reason": null,
+      "latency_ms": 188,
+      "model": "jev-1.13.0"
+    }
+  ],
+  "layered": {
+    "rows": [
+      {
+        "text": "أيوه تمام ماشي",
+        "expected": true,
+        "got": true,
+        "source": "RULE",
+        "confidence": 1.0
+      },
+      {
+        "text": "اه يا باشا اتفقنا",
+        "expected": true,
+        "got": true,
+        "source": "RULE",
+        "confidence": 0.7999999999999999
+      },
+      {
+        "text": "تمام كده صح",
+        "expected": true,
+        "got": true,
+        "source": "RULE",
+        "confidence": 0.8999999999999999
+      },
+      {
+        "text": "لأ استنى خلّيهم تلاتة",
+        "expected": false,
+        "got": false,
+        "source": "RULE",
+        "confidence": 0.7999999999999999
+      },
+      {
+        "text": "لا مش عايز",
+        "expected": false,
+        "got": false,
+        "source": "RULE",
+        "confidence": 0.8999999999999999
+      },
+      {
+        "text": "خلاص بلاش",
+        "expected": false,
+        "got": false,
+        "source": "LLM_VALIDATED",
+        "confidence": 0.7
+      },
+      {
+        "text": "mashy tamam",
+        "expected": true,
+        "got": true,
+        "source": "LLM_VALIDATED",
+        "confidence": 0.62
+      },
+      {
+        "text": "la2 msh 3ayez",
+        "expected": false,
+        "got": null,
+        "source": "UNKNOWN",
+        "confidence": 0.0
+      },
+      {
+        "text": "yes please go ahead",
+        "expected": true,
+        "got": true,
+        "source": "RULE",
+        "confidence": 0.7999999999999999
+      },
+      {
+        "text": "no, cancel that",
+        "expected": false,
+        "got": false,
+        "source": "RULE",
+        "confidence": 0.8999999999999999
+      },
+      {
+        "text": "هو ده بكام؟",
+        "expected": null,
+        "got": null,
+        "source": "UNKNOWN",
+        "confidence": 0.0
+      },
+      {
+        "text": "ممكن تعيد تاني؟",
+        "expected": null,
+        "got": null,
+        "source": "UNKNOWN",
+        "confidence": 0.0
+      }
+    ],
+    "fallback_hits": 2,
+    "rules_decided": 7,
+    "unknown_after_fallback": 3,
+    "contradictions": 0
+  },
+  "core_session": {
+    "case_id": "callback_confirmed_spoken_ar",
+    "passed": true,
+    "primary_outcome": "callback_requested",
+    "failed_graders": [],
+    "confirmation_decisions": [
+      {
+        "ts_ms": 335,
+        "kind": "interpret_confirmation",
+        "source": "LLM_VALIDATED",
+        "value": true,
+        "confidence": 1.0
+      }
+    ],
+    "fallback_hits": 1,
+    "confirmation_granted": true,
+    "callback_executed": true,
+    "error": null
+  },
+  "summary": {
+    "cases": 18,
+    "matches": 16,
+    "mismatches": 2,
+    "contradictions": 0,
+    "abstentions": 2,
+    "core_session_passed": true,
+    "provider_calls": 23,
+    "latency_ms": {
+      "p50": 202,
+      "p95": 292,
+      "max": 337
+    },
+    "last_usage": {
+      "input_tokens": 414,
+      "output_tokens": 67
+    }
+  }
+}

@@ -1,0 +1,89 @@
+{
+ "kind": "typesafe-live-ws-e2e",
+ "produced_at": "2026-09-23T13:01:54.551748+00:00",
+ "base": "http://localhost:8000",
+ "activity": "act_csat_survey@1.0.0",
+ "composition": "comp_mock_s2s_typesafe_v1",
+ "script": "callback",
+ "key_fingerprint": "…5a53",
+ "credential_source": "ephemeral_ui",
+ "phrases": [
+  {
+   "id": "yes_ar_eg",
+   "text": "خلاص يا عم اتفقنا كده",
+   "session_id": "ses_2c1139ccc7344f67",
+   "confirmation_decision": {
+    "ts_ms": 4781,
+    "kind": "interpret_confirmation",
+    "source": "LLM_VALIDATED",
+    "value": true,
+    "confidence": 1.0
+   },
+   "tool_events": [
+    "tool.confirmation_requested",
+    "tool.confirmation_granted",
+    "tool.execution_completed"
+   ],
+   "outcome": null,
+   "checks": {
+    "source": true,
+    "value": true,
+    "tool_event": true,
+    "executed": true
+   },
+   "passed": true
+  },
+  {
+   "id": "no_ar_eg",
+   "text": "لا يا عم بلاش سيبها",
+   "session_id": "ses_b5e645cd39e14625",
+   "confirmation_decision": {
+    "ts_ms": 4520,
+    "kind": "interpret_confirmation",
+    "source": "RULE",
+    "value": false,
+    "confidence": 0.7999999999999999
+   },
+   "tool_events": [
+    "tool.confirmation_requested",
+    "tool.confirmation_denied"
+   ],
+   "outcome": null,
+   "checks": {
+    "source": true,
+    "value": true,
+    "tool_event": true,
+    "executed": true
+   },
+   "passed": true
+  },
+  {
+   "id": "ambiguous_ar_eg",
+   "text": "هو ده هيكون امتى بالظبط؟",
+   "session_id": "ses_f3780f2ebf604d40",
+   "confirmation_decision": {
+    "ts_ms": 4699,
+    "kind": "interpret_confirmation",
+    "source": "UNKNOWN",
+    "value": null,
+    "confidence": 0.0
+   },
+   "tool_events": [
+    "tool.confirmation_requested"
+   ],
+   "outcome": null,
+   "checks": {
+    "source": true,
+    "value": true,
+    "tool_event": true,
+    "executed": true
+   },
+   "passed": true
+  }
+ ],
+ "summary": {
+  "passed": true,
+  "n": 3,
+  "n_passed": 3
+ }
+}
