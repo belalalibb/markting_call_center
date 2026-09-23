@@ -512,3 +512,105 @@ def test_acc020_seeded_violation_blocks_simulation_and_activation(client: TestCl
     # the summary surfaces the failed report so the Config Center can show it
     s = client.get(f"/api/activities/{key}").json()
     assert s["simulation"]["passed"] is False and s["simulation"]["findings"] >= 1
+
+
+# ------------------------------------------------------------- outbound seam (P5)
+
+
+def _open_contact(client: TestClient, ref: str) -> None:
+    """Consent given, nothing else set → the only remaining hook is the contact window (fixed via store)."""
+    r = client.put(f"/api/contacts/{ref}", json={"consent": True})
+    assert r.status_code == 200 and r.json()["consent"] is True
+
+
+def _no_window(client: TestClient, key: str) -> None:
+    """Tests must not depend on wall-clock: remove the contact window on the stored Blueprint copy."""
+    store: RuntimeStore = client.app.state.store  # type: ignore[attr-defined]
+    hooks = store.get_activity(key).blueprint.policies.contact_policy_hooks
+    assert hooks is not None
+    hooks.contact_window = None
+
+
+def test_outbound_refused_without_consent_is_recorded_no_dial(client: TestClient) -> None:
+    from starlette.websockets import WebSocketDisconnect
+
+    key = _key(client, "act_csat_survey")  # direction: outbound
+    _no_window(client, key)
+    chk = client.get(f"/api/activities/{key}/contact-check/c_unknown").json()
+    assert chk["allowed"] is False and "no_consent" in chk["refusals"]
+    with pytest.raises(WebSocketDisconnect) as ei, client.websocket_connect(f"/ws/outbound/{key}/c_unknown") as ws:
+        ws.receive_text()
+    assert ei.value.code == 4403 and "no_consent" in (ei.value.reason or "")
+    attempts = client.get("/api/outbound/attempts").json()
+    assert len(attempts) == 1
+    a = attempts[0]
+    assert a["contact_decision"]["allowed"] is False and a["call_id"] is None and a["session_id"] is None
+    assert client.get("/api/sessions").json() == []  # no session was ever created
+    assert client.get("/api/contacts/c_unknown").json()["attempts"] == 0  # refusals do not consume attempts
+
+
+def test_outbound_opt_out_and_suppression_refuse(client: TestClient) -> None:
+    key = _key(client, "act_csat_survey")
+    _no_window(client, key)
+    client.put("/api/contacts/c_opt", json={"consent": True, "opted_out": True})
+    assert client.get(f"/api/activities/{key}/contact-check/c_opt").json()["refusals"] == ["opted_out"]
+    client.put("/api/contacts/c_sup", json={"consent": True, "tags": ["sup_default"]})
+    assert client.get(f"/api/activities/{key}/contact-check/c_sup").json()["refusals"] == ["suppressed"]
+
+
+def test_outbound_answered_runs_same_core_session_and_counts_attempt(client: TestClient) -> None:
+    key = _key(client, "act_csat_survey")
+    _no_window(client, key)
+    _open_contact(client, "c_ok")
+    with client.websocket_connect(f"/ws/outbound/{key}/c_ok") as ws:
+        first = json.loads(ws.receive_text())
+        assert first["schema"] == "qevion.transport.v1" and first["type"] in {"ready", "state"}
+        ws.send_text(json.dumps({"type": "hello"}))
+        ws.send_text(json.dumps({"type": "audio_commit"}))  # answered → agent opens per opening guidance
+        got: set[str] = set()
+        for _ in range(60):
+            m = ws.receive()
+            if m.get("bytes"):
+                got.add("<audio>")
+            elif m.get("text"):
+                got.add(json.loads(m["text"])["type"])
+            if "audio_end" in got:
+                break
+        assert {"audio_start", "<audio>"} <= got, got
+        ws.send_text(json.dumps({"type": "bye"}))
+    attempts = client.get("/api/outbound/attempts").json()
+    assert len(attempts) == 1 and attempts[0]["call_state"] == "answered" and attempts[0]["session_id"]
+    sess = client.get(f"/api/sessions/{attempts[0]['session_id']}").json()
+    assert sess["outbound_attempt_id"] == attempts[0]["attempt_id"] and sess["running"] is False
+    assert sess["events"] and sess["events"][0]["type"] == "session.created"
+    assert client.get("/api/contacts/c_ok").json()["attempts"] == 1
+    # attempt limit (2 in Activity C) → third attempt is refused with attempt_limit_reached
+    store: RuntimeStore = client.app.state.store  # type: ignore[attr-defined]
+    store.contact_state("c_ok").attempts = 2
+    assert "attempt_limit_reached" in client.get(f"/api/activities/{key}/contact-check/c_ok").json()["refusals"]
+
+
+def test_outbound_no_answer_closes_4480_and_records_attempt(client: TestClient) -> None:
+    from starlette.websockets import WebSocketDisconnect
+    from qevion.adapters.telephony.simulated import SimCallState
+
+    key = _key(client, "act_csat_survey")
+    _no_window(client, key)
+    _open_contact(client, "c_busy")
+    store: RuntimeStore = client.app.state.store  # type: ignore[attr-defined]
+    store.telephony.script["c_busy"] = SimCallState.NO_ANSWER
+    with pytest.raises(WebSocketDisconnect) as ei, client.websocket_connect(f"/ws/outbound/{key}/c_busy") as ws:
+        ws.receive_text()
+    assert ei.value.code == 4480
+    a = client.get("/api/outbound/attempts").json()[-1]
+    assert a["call_state"] == "no_answer" and a["session_id"] is None and a["call_id"]
+    assert client.get("/api/contacts/c_busy").json()["attempts"] == 1  # a dial counts even when unanswered
+
+
+def test_outbound_on_inbound_activity_is_rejected(client: TestClient) -> None:
+    from starlette.websockets import WebSocketDisconnect
+
+    key = _key(client, "act_order_intake")  # inbound
+    with pytest.raises(WebSocketDisconnect) as ei, client.websocket_connect(f"/ws/outbound/{key}/c_x") as ws:
+        ws.receive_text()
+    assert ei.value.code == 4400
