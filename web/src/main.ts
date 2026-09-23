@@ -26,19 +26,42 @@ async function route(): Promise<void> {
   }
 }
 
-async function health(): Promise<void> {
+/** Header pill. Runtime default composition is only shown while *no* session is connected; once the console
+ *  connects, the pill mirrors the actual session (`ready` payload: composition/channel/provider) so the header
+ *  can never disagree with the live status line. */
+let liveHeader: { composition: string; channel: string; provider: string; hb?: string } | null = null;
+let runtimeSummary: { composition: string; activities: number; sessions_live: number } | null = null;
+
+function renderHealth(): void {
   const el = document.getElementById("health")!;
-  try {
-    const hres = (await api.health()) as { composition: string; activities: number; sessions_live: number };
-    clear(el);
-    el.replaceWith(pill(`ok · ${hres.composition} · ${hres.activities} activities · ${hres.sessions_live} live`, "ok"));
-    document.querySelector("#top .pill")!.id = "health";
-  } catch {
-    clear(el);
-    el.replaceWith(pill("runtime unreachable", "bad"));
-    document.querySelector("#top .pill")!.id = "health";
+  let next: HTMLElement;
+  if (liveHeader) {
+    next = pill(
+      `live · ${liveHeader.composition} · ${liveHeader.channel} · ${liveHeader.provider}${liveHeader.hb ? ` · ♥ ${liveHeader.hb}` : ""}`,
+      "ok",
+    );
+  } else if (runtimeSummary) {
+    next = pill(`ok · default ${runtimeSummary.composition} · ${runtimeSummary.activities} activities · ${runtimeSummary.sessions_live} live`, "ok");
+  } else {
+    next = pill("runtime unreachable", "bad");
   }
+  next.id = "health";
+  el.replaceWith(next);
 }
+
+async function health(): Promise<void> {
+  try {
+    runtimeSummary = (await api.health()) as { composition: string; activities: number; sessions_live: number };
+  } catch {
+    runtimeSummary = null;
+  }
+  renderHealth();
+}
+
+window.addEventListener("qevion:live", (e) => {
+  liveHeader = (e as CustomEvent<typeof liveHeader>).detail;
+  renderHealth();
+});
 
 window.addEventListener("hashchange", () => void route());
 void route();

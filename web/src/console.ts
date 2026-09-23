@@ -203,11 +203,13 @@ function chatCard(activities: ActivitySummary[], compositions: CompositionSummar
     const channel = voice ? "browser_voice" : "text";
     ws = new WebSocket(wsUrl(sel.value, channel, compSel.value));
     ws.binaryType = "arraybuffer";
-    ws.onopen = () => { setStatus(`connected · ${channel}`, "ok"); add("sys", `connected → ${sel.value} via ${compSel.value} (${channel})`); send({ type: "hello" }); };
+    let heartbeats = 0;
+    ws.onopen = () => { setStatus(`connecting · ${channel}`, "ok"); add("sys", `connected → ${sel.value} via ${compSel.value === "pinned" ? "pinned composition" : compSel.value} (${channel}) — waiting for session ready…`); send({ type: "hello" }); };
     ws.onclose = (e) => {
-      setStatus("disconnected", "muted");
-      add("sys", `closed (${e.code}${e.reason ? ": " + e.reason : ""})`);
+      setStatus(`disconnected (${e.code})`, e.code === 1000 ? "muted" : "bad");
+      add("sys", `closed (${e.code}${e.reason ? ": " + e.reason : ""})${e.code === 1011 ? " — keepalive/protocol failure, see Sessions card close_code" : ""}`);
       voice?.stopPlayout("socket_closed");
+      window.dispatchEvent(new CustomEvent("qevion:live", { detail: null }));
       void sessionsRedraw();
     };
     ws.onerror = () => { setStatus("error", "bad"); add("sys", "socket error"); };
@@ -223,7 +225,23 @@ function chatCard(activities: ActivitySummary[], compositions: CompositionSummar
       currentSid = m.session_id;
       eventsPush(m);
       switch (m.type) {
-        case "ready": add("sys", `session ready (${String(m.payload["composition_id"] ?? compSel.value)})`); break;
+        case "ready": {
+          // Actual session facts from the runtime (not the selector): composition / channel / provider / credential.
+          const comp = String(m.payload["composition_id"] ?? compSel.value);
+          const ch = String(m.payload["channel"] ?? channel);
+          const prov = `${String(m.payload["s2s_provider"] ?? "?")}:${String(m.payload["s2s_model"] ?? "?")}`;
+          const cred = String(m.payload["credential_source"] ?? "none");
+          setStatus(`live · ${comp} · ${ch}`, "ok");
+          add("sys", `session ready — composition ${comp} · ${ch} · s2s ${prov} · credential ${cred}`);
+          window.dispatchEvent(new CustomEvent("qevion:live", { detail: { composition: comp, channel: ch, provider: prov } }));
+          break;
+        }
+        case "ping":
+          // Application heartbeat (QV-INT): answer immediately; the runtime closes stale transports itself.
+          heartbeats += 1;
+          send({ type: "pong" });
+          voiceStatus.textContent = voice ? `${voiceStatus.textContent.replace(/ · ♥.*$/, "")} · ♥ ${heartbeats}` : voiceStatus.textContent;
+          break;
         case "transcript": add(m.payload["role"] === "user" ? "user" : "agent", m.text ?? ""); break;
         case "audio_start":
           lastResponseId = m.response_id ?? null;
@@ -322,11 +340,19 @@ function sessionsCard(): HTMLElement {
     box.append(h("button", { onClick: () => void sessionsRedraw() }, "Refresh"));
     try {
       const rows = await api.sessions();
-      box.append(table(["session", "activity", "running", "dialog", "activity state", "events", "handoffs", "outcome"], rows.map((s) => [
-        h("code", {}, String(s.session_id).slice(0, 14)), String(s.activity_key), s.running ? pill("live", "ok") : pill("ended", "muted"),
-        String(s.dialog_state ?? ""), String(s.activity_state ?? ""), String(s.events), s.handoffs ? pill(String(s.handoffs), "warn") : "0",
-        s.outcome ? pill(String((s.outcome as { primary?: string }).primary ?? "?"), "info") : "—",
-      ])));
+      box.append(table(["session", "activity", "composition", "channel", "running", "dialog", "activity state", "events", "close", "♥ hb", "outcome"], rows.map((s) => {
+        const hb = (s["heartbeat"] ?? {}) as { sent?: number; last_rtt_ms?: number | null; dropped_audio_frames?: number };
+        const code = s["close_code"] as number | null | undefined;
+        return [
+          h("code", {}, String(s.session_id).slice(0, 14)), String(s.activity_key),
+          h("code", {}, String(s.composition_id ?? "")), String(s["channel"] ?? ""),
+          s.running ? pill("live", "ok") : pill("ended", "muted"),
+          String(s.dialog_state ?? ""), String(s.activity_state ?? ""), String(s.events),
+          code === null || code === undefined ? "—" : pill(`${code}${s["close_reason"] ? " " + String(s["close_reason"]) : ""}`, code === 1000 ? "muted" : "bad"),
+          hb.sent ? `${hb.sent}${hb.last_rtt_ms !== null && hb.last_rtt_ms !== undefined ? ` (${hb.last_rtt_ms} ms)` : ""}${hb.dropped_audio_frames ? ` · dropped ${hb.dropped_audio_frames}` : ""}` : "—",
+          s.outcome ? pill(String((s.outcome as { primary?: string }).primary ?? "?"), "info") : "—",
+        ];
+      })));
       if (currentSid) {
         const d = (await api.session(currentSid)) as { outcome?: unknown };
         if (d.outcome) box.append(h("h3", {}, "Outcome of current session"), pre(d.outcome));
