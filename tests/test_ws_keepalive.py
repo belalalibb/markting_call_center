@@ -152,11 +152,12 @@ def test_transport_inbound_queue_is_bounded_and_never_drops_control_messages() -
     for i in range(INBOUND_QUEUE_MAX + 50):
         t.push(bytes([i % 256]) * 2)
     t.push(ClientMessage.model_validate({"type": "text", "text": "hello"}))
-    assert t.dropped_audio_frames == 50
-    assert t._q.qsize() == INBOUND_QUEUE_MAX + 1  # noqa: SLF001
+    # 50 audio overflows + 1 eviction to make room for the control message (queue never exceeds the bound)
+    assert t.dropped_audio_frames == 51
+    assert t._q.qsize() == INBOUND_QUEUE_MAX  # noqa: SLF001
     items: list[Any] = []
     while not t._q.empty():  # noqa: SLF001
         items.append(t._q.get_nowait())  # noqa: SLF001
     assert isinstance(items[-1], ClientMessage) and items[-1].text == "hello"
-    assert items[0] == bytes([50]) * 2  # the first 50 (oldest) audio frames were the ones dropped
+    assert items[0] == bytes([51]) * 2  # the oldest audio frames were the ones dropped
     assert not t.stale
