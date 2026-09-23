@@ -1,6 +1,6 @@
 {
  "base": "http://localhost:8000",
- "token_configured": false,
+ "token_configured": true,
  "no_token": {
   "POST /api/admin/test-key": 401,
   "DELETE /api/admin/test-key": 401,
@@ -11,9 +11,9 @@
   "GET /api/health": 200
  },
  "with_token": {
-  "GET /api/sessions": 401,
-  "GET /api/admin/credentials/openai": 401,
-  "WS /ws/sessions": 403
+  "GET /api/sessions": 200,
+  "GET /api/admin/credentials/openai": 200,
+  "WS /ws/sessions": 1000
  },
  "cors_foreign_origin_allowed": null,
  "checks": {
@@ -21,8 +21,8 @@
   "reads_refused": true,
   "ws_refused": true,
   "health_open": true,
-  "token_grants_access": false,
+  "token_grants_access": true,
   "cors_not_wildcard": true
  },
- "passed": false
+ "passed": true
 }
