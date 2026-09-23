@@ -24,14 +24,21 @@ from typing import Any
 
 import yaml
 
+from qevion.adapters.decision.rules import RulesDecisionAdapter
+from qevion.adapters.providers.mocks import MockS2SAdapter
+from qevion.adapters.turn.energy import EnergyTurnAdapter
 from qevion.contracts.activity import ActivityBlueprint, ReadinessState
-from qevion.contracts.composition import MappingResult
+from qevion.contracts.common import Channel
+from qevion.contracts.composition import CapabilityRegistry, Composition, MappingResult
 from qevion.contracts.copilot import BlueprintProposal, DiscoveryStatus, QuestionKind
 from qevion.contracts.knowledge import Contradiction, GapClass, KnowledgeGap
 from qevion.contracts.policy import ProposedBy
+from qevion.contracts.tenant import LocalePack, VoiceProfile
+from qevion.contracts.tool import ToolDeclaration
 from qevion.control.capabilities import CapabilityMapper, build_registry
 from qevion.control.preflight import PreflightContext
 from qevion.copilot.session import ConfigSession
+from qevion.core.platform_tools import platform_declarations
 from qevion.eval.report import Attribution, CaseReport, GraderOutcome
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -143,23 +150,66 @@ def _plant_knowledge(s: ConfigSession, gaps: int, conflicts: int) -> None:
     )
 
 
-def _mapper_without(tool_id: str | None) -> CapabilityMapper:
-    from qevion.core.platform_tools import platform_declarations  # copilot may import core
+def _load_dir(path: Path, model: type[Any], key: str) -> dict[str, Any]:
+    out: dict[str, Any] = {}
+    if path.is_dir():
+        for f in sorted(path.glob("*.yaml")):
+            obj = model.model_validate(yaml.safe_load(f.read_text()))
+            out[getattr(obj, key)] = obj
+    return out
 
-    decls = dict(platform_declarations())
-    if tool_id:
-        decls.pop(tool_id, None)
-    return CapabilityMapper(build_registry([], tool_declarations=decls))
+
+@dataclass
+class EvalEnvironment:
+    """The same platform primitives the runtime hands to Preflight: mock composition, registry, packs, voices.
+    Built from config/ only (no business data). `missing_tool_id` removes one platform tool to plant a gap."""
+
+    registry: CapabilityRegistry
+    composition: Composition
+    locale_packs: dict[str, LocalePack]
+    voice_profiles: dict[str, VoiceProfile]
+    tool_declarations: dict[str, ToolDeclaration]
+
+    @classmethod
+    def build(cls, missing_tool_id: str | None = None) -> EvalEnvironment:
+        decls = dict(platform_declarations())
+        if missing_tool_id:
+            decls.pop(missing_tool_id, None)
+        comps = _load_dir(ROOT / "config/compositions", Composition, "composition_id")
+        packs = _load_dir(ROOT / "config/locale_packs", LocalePack, "locale_pack_id")
+        voices = _load_dir(ROOT / "config/voice_profiles", VoiceProfile, "voice_profile_id")
+        registry = build_registry(
+            [MockS2SAdapter([]), EnergyTurnAdapter(), RulesDecisionAdapter()],
+            tool_declarations=decls,
+            locale_packs=packs,
+            voice_profiles=voices,
+            channels=[Channel.TEXT, Channel.BROWSER_VOICE],
+        )
+        return cls(registry, comps["comp_mock_s2s_v1"], packs, voices, decls)
+
+    def preflight_ctx(self) -> PreflightContext:
+        return PreflightContext(
+            registry=self.registry,
+            composition=self.composition,
+            tool_declarations=self.tool_declarations,
+            locale_packs=self.locale_packs,
+            voice_profiles=self.voice_profiles,
+            strict_capabilities=False,
+        )
+
+    def mapper(self) -> CapabilityMapper:
+        return CapabilityMapper(self.registry, self.composition)
 
 
 def drive(case: CopilotEvalCase, *, max_rounds: int = 25) -> CopilotRun:
     p = case.persona
+    env = EvalEnvironment.build(p.missing_tool_id)
     session = ConfigSession(
         tenant_id="eval",
         activity_id=f"act_{case.case_id}",
         name=case.case_id,
-        preflight_ctx=PreflightContext(strict_capabilities=False),
-        mapper=_mapper_without(p.missing_tool_id),
+        preflight_ctx=env.preflight_ctx(),
+        mapper=env.mapper(),
     )
     if p.fixture:
         raw = _fixture(p.fixture)
@@ -189,10 +239,10 @@ def drive(case: CopilotEvalCase, *, max_rounds: int = 25) -> CopilotRun:
                 asked.append(q.target_path)
                 if q.blocking and q.target_path in answered:
                     unnecessary.append(q.target_path)
-                if q.kind is QuestionKind.DATA_CONFLICT:
+                if q.target_path.startswith("knowledge.contradictions."):
                     session.answer(q.question_id, "keep_first", operator_id=OPERATOR)
                     progressed = True
-                elif q.kind is QuestionKind.BLOCKING_GAP:
+                elif q.target_path.startswith("knowledge.gaps."):
                     session.answer(q.question_id, "operator supplied value", operator_id=OPERATOR)
                     progressed = True
                 elif q.target_path in p.answers:
@@ -202,9 +252,7 @@ def drive(case: CopilotEvalCase, *, max_rounds: int = 25) -> CopilotRun:
                 elif not q.blocking:
                     session.defer(q.question_id)
                     progressed = True
-                elif p.kind is OperatorPersonaKind.MISSING_TOOL and q.target_path.startswith("tools"):
-                    # the operator acknowledges the integration gap; stays blocked by design
-                    session.defer(q.question_id) if not q.blocking else None
+                # MISSING_TOOL: blocking tools.* questions stay open by design (integration gap)
             if not progressed:
                 break
         proposals.append(session.propose())
@@ -317,7 +365,7 @@ def g_simulation_ready(run: CopilotRun) -> GraderOutcome:
         ReadinessState.READY_FOR_SIMULATION,
         ReadinessState.NEEDS_CONFIGURATION,
     )
-    why = [f.category for f in fin.preflight_findings if f.severity == "BLOCK"] if not ok else []
+    why = [f"{f.reason}@{f.path}" for f in fin.preflight_findings if f.severity == "BLOCK"] if not ok else []
     return _g("simulation_ready", ok, f"status={fin.status} readiness={fin.readiness_state} why={why}")
 
 

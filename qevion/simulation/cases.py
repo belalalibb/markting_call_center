@@ -23,18 +23,28 @@ def _record(name: str, value: object, text: str) -> CustomerTurn:
     )
 
 
-def _sample_value(field_type: str, i: int) -> object:
+def _sample_value(field_type: str, i: int, enum_values: list[str] | None = None) -> object:
+    """Type-correct sample derived from the FieldSpec only (never business vocabulary)."""
     match field_type:
         case "boolean":
             return "yes"
         case "integer" | "number":
             return min(5, i + 1)
+        case "list":
+            return [f"value {i + 1}"]
+        case "enum":
+            return enum_values[i % len(enum_values)] if enum_values else f"value {i + 1}"
         case _:
             return f"value {i + 1}"
 
 
+def _spec_value(bp: ActivityBlueprint, index: int, variant: int | None = None) -> object:
+    f = bp.data.required[index]
+    return _sample_value(str(f.type), variant if variant is not None else index, list(f.enum_values or []))
+
+
 def _field_turns(bp: ActivityBlueprint) -> list[CustomerTurn]:
-    return [_record(f.name, _sample_value(str(f.type), i), f"answer {i + 1}") for i, f in enumerate(bp.data.required)]
+    return [_record(f.name, _spec_value(bp, i), f"answer {i + 1}") for i, f in enumerate(bp.data.required)]
 
 
 def _submit(bp: ActivityBlueprint) -> list[CustomerTurn]:
@@ -156,7 +166,7 @@ def default_cases(bp: ActivityBlueprint) -> list[ScenarioCase]:
         ],
     )
     if req:
-        corrected = _record(req[0], _sample_value(str(bp.data.required[0].type), 3), "sorry, I meant something else")
+        corrected = _record(req[0], _spec_value(bp, 0, variant=3), "sorry, I meant something else")
         add(
             "corrector_changes_answer",
             PersonaKind.CORRECTOR,
