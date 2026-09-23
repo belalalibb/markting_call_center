@@ -189,6 +189,7 @@ class SessionCore:
         self._speech_onset_ms: int | None = None
         self._pending_confirm: dict[str, asyncio.Future[bool | None]] = {}
         self._playout_stopped = asyncio.Event()
+        self._close_task: asyncio.Future[InteractionRecord] | None = None
         self._closed = False
         self._instructions_fp: str | None = None
 
@@ -353,8 +354,17 @@ class SessionLifecycle(SessionCore):
         await self.activity_fire(ActivityTrigger.OPENED, "session started", authority="core")
 
     async def close(self, reason: str = "closed") -> InteractionRecord:
+        """Single-flight and cancellation-proof: the close sequence runs in its own task, so cancelling the pump
+        that triggered it (run() tears pumps down as soon as one finishes) cannot leave the session without a
+        record (found live in OPS 5.5 P2: `AssertionError` → provider_failure, outcome lost)."""
         if self.record is not None:
             return self.record
+        if self._close_task is None:
+            self._closed = True
+            self._close_task = asyncio.ensure_future(self._close(reason))
+        return await asyncio.shield(self._close_task)
+
+    async def _close(self, reason: str) -> InteractionRecord:
         self._closed = True
         self.facts.ended_at_ms = self.clock()
         for fut in self._pending_confirm.values():
@@ -1058,6 +1068,8 @@ class Session(SessionInterruption):
             for t in tasks:
                 t.cancel()
             await asyncio.gather(*tasks, return_exceptions=True)
+            if self._close_task is not None:
+                await self._close_task
         assert self.record is not None  # noqa: S101 — close() always sets the record
         return self.record
 
