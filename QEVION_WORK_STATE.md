@@ -4,8 +4,8 @@
 
 | Field | Value |
 |---|---|
-| Project phase | P2 — Knowledge + Blueprint + Preflight |
-| Current stage | **P2 COMPLETE** (CP-0005) → P3 Copilot + Web (CP-0006) |
+| Project phase | P3 — Copilot + Web |
+| Current stage | **P3 in progress** — copilot package done (182 tests, CI PASS @ 67880ed); next `qevion/runtime/` FastAPI + `web/` |
 | Current objective | P3: `qevion/copilot/` (dynamic discovery engine: next-question from Blueprint state + gaps + capability mapping; ASK_OWNER escape hatch; Blueprint proposals with Decision records; stop-asking rule) + `qevion/runtime/` FastAPI app (REST for tenants/activities/knowledge/preflight/readiness; WS session endpoint on mocks) + `web/` single TypeScript app with 3 modes: Config Center, Operator Console, Admin (in-memory ephemeral test-key UI for Chat & Calls) → CP-0006 |
 | Last verified checkpoint | CP-0005 (P2 Knowledge + Control) — `recovery/checkpoints/CP-0005.md`, tag `cp/CP-0005` |
 | Last known good Git SHA | see `recovery/checkpoints/index.jsonl` last line (CP-0001) |
@@ -31,12 +31,13 @@
 - **CP-0005 (P2):** `qevion/control/preflight.py` (13 deterministic checks, all 20 §11 reason codes, path + fix_hint, approved-Decision waiver, strict/lenient UNVERIFIED), `readiness.py` (table-driven lifecycle, `ActivationGates`, BFS legal path, edit invalidation, immutability), `capabilities.py` (registry aggregated from adapter self-declarations + platform facts; `RequirementMapping`); `qevion/knowledge/parsers.py` (csv/json/yaml/txt/md, locators, size cap, injection flags) + `pipeline.py` (normative 10-step pipeline: entities, facts w/ provenance, relationships, cross-source contradictions with priority resolution or pending+DATA_CONFLICT, ambiguity, 6 gap classes vs Activity needs, customer questions, operational requirements; `StructuredRetriever` approved-only). Tests: 150 total (+57) — **CI_LOCAL PASS**; evidence `evidence/P2/CP-0005/`; QV-ACC-011..013 accepted.
 
 ## In progress
-- CP-0005 record + tag + snapshot (this commit)
+- P3/CP-0006: `qevion/copilot/{discovery,composer,explainer,session}.py` DONE (31 tests). Next: `qevion/runtime/app.py` (REST + WS on mocks), then `web/`.
 
 ## Incidents
 - 2026-09-22 #1: sandbox reset lost ~1h of uncommitted P0 work. Classified: test/environment. Countermeasure: protocol §8.1 commit-immediately. Redone in small increments.
 - 2026-09-22 #2: two tool interruptions on large (>150-line) heredoc appends; §51–52 append lost once. Countermeasure: appends ≤ ~80 lines per commit, push immediately, verify with `grep -n "^## §"` before each append. No data lost after adoption.
 - 2026-09-22 #6: CI run 35777148614 failed (ruff import order in a test appended after the lint pass). Class: process. Fix: `scripts/ci_local.sh` + protocol §8.2a gate-before-push.
+- 2026-09-23 #10: sandbox reset #9 wiped venv + uncommitted `qevion/copilot/discovery.py` (Write succeeded, commit interrupted). Re-created from session summary in one step, committed before first test. Rule reaffirmed: commit new files before their first test run.
 - 2026-09-22 #8: sandbox resets #7/#8 (after fa2a6d0, after 38afdb9); one uncommitted file (capabilities.py, ~5 min) re-created; GitHub transient `commit_refs` push error once — retry succeeded.
 - 2026-09-22 #7: sandbox reset #6 after abcfbc6; resume < 3 min, zero loss.
 - 2026-09-22 #5: sandbox resets #3/#4/#5 between sessions; each resume < 3 min, zero rebuild (protocol holding).
@@ -55,4 +56,4 @@
 2. P4 → CP-0007 · P5 → CP-0008 · P6 → CP-0009
 
 ## Exact next action
-`checkpoint.sh CP-0005 P2 "Knowledge pipeline + Preflight + readiness + capability mapping"` → fill → commit → tag → snapshot; then P3 step 1: `qevion/copilot/discovery.py` (question generation from gaps + mapping + preflight findings, prioritization, stop rule) + tests.
+`qevion/runtime/app.py`: FastAPI app factory with in-memory stores — REST: `/api/tenants`, `/api/activities` (+versions, blueprint upload, preflight, readiness transitions, capability mapping), `/api/knowledge/upload` → IngestionReport, `/api/copilot/sessions` (next/answer/accept/defer/propose/explain), `/api/admin/test-key` (ephemeral in-memory), `/ws/sessions/{id}` bridging `core.session.Session` over mock composition. Commit file before first test; then `tests/test_runtime_api.py` (httpx TestClient); then `web/`.
