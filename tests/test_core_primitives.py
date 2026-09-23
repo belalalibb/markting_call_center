@@ -121,6 +121,23 @@ def test_dialog_machine_happy_path_and_barge_in() -> None:
     assert dm.state == DialogState.CLOSED and not dm.can("session_started")
 
 
+def test_dialog_machine_provider_chains_response_after_tool_from_listening() -> None:
+    """Real S2S providers speak again (or call another tool) right after a tool result without a new user turn."""
+    dm = DialogMachine()
+    dm.fire("session_started", 1)
+    dm.fire("text_received", 2)
+    dm.fire("tool_requested", 3)
+    dm.fire("tool_returned", 4)
+    dm.fire("nothing_to_say", 5)  # response.done of the tool-call response arrives while THINKING
+    assert dm.state == DialogState.LISTENING
+    dm.fire("response_started", 6)  # follow-up spoken response, no user turn in between
+    assert dm.state.value == "SPEAKING"
+    dm.fire("response_done", 7)
+    dm.fire("tool_requested", 8)  # or a chained second tool call straight from LISTENING
+    assert dm.state == DialogState.WAITING_TOOL
+    assert not dm.can("response_done")
+
+
 # ---------------------------------------------------------------- Activity machine (data-driven)
 
 

@@ -25,7 +25,17 @@ class Transition:
 D = DialogState
 _DIALOG: dict[DialogState, dict[str, DialogState]] = {
     D.IDLE: {"session_started": D.LISTENING, "assistant_opens": D.SPEAKING, "close": D.CLOSED},
-    D.LISTENING: {"end_of_turn": D.THINKING, "text_received": D.THINKING, "timeout": D.THINKING, "close": D.CLOSED},
+    D.LISTENING: {
+        "end_of_turn": D.THINKING,
+        "text_received": D.THINKING,
+        "timeout": D.THINKING,
+        # Real S2S providers continue speaking (or call another tool) right after a tool result, without a new
+        # user turn: `response.done` → tool_returned → THINKING → nothing_to_say → LISTENING, then the follow-up
+        # response arrives. Verified live on OpenAI Realtime GA 2026-09-23 (mock never chains responses).
+        "response_started": D.SPEAKING,
+        "tool_requested": D.WAITING_TOOL,
+        "close": D.CLOSED,
+    },
     D.THINKING: {
         "response_started": D.SPEAKING,
         "tool_requested": D.WAITING_TOOL,
