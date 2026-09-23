@@ -137,3 +137,35 @@ async def test_response_started_while_interrupted_is_cancelled_not_played() -> N
     assert "cancel:resp_late" in prov.log
     assert s.dialog.state is DialogState.INTERRUPTED  # the refused response did not move the dialog
     await _bye(tr, task)
+
+
+@pytest.mark.asyncio
+async def test_operator_transcripts_reach_client_but_never_the_event_log() -> None:
+    """F-13 + F-10: user/agent text goes to the connected console only; events carry digests; the provider
+    transcript is `user.transcript`, not a second `user.speech_committed`."""
+    s, tr, prov, task = await _session([MockScriptStep(text="أهلا بيك، تحب تطلب إيه؟", audio_ms=300)])
+    tr.client_sends(ClientMessage.model_validate({"type": "text", "text": "hello"}))
+    await asyncio.sleep(0.15)
+    await s.handle_provider_event(S2SEvent(type=S2SEventType.INPUT_TRANSCRIPT, text="عايز بيتزا", item_id="it1"))
+    transcripts = [m for m in tr.sent if m.type.value == "transcript"]
+    assert transcripts and transcripts[-1].text == "عايز بيتزا" and transcripts[-1].payload["role"] == "user"
+    ends = [m for m in tr.sent if m.type.value == "audio_end"]
+    assert ends and ends[0].text == "أهلا بيك، تحب تطلب إيه؟" and ends[0].payload["audio_ms"] == 300
+    dumped = " ".join(e.model_dump_json() for e in s.events)
+    assert "عايز بيتزا" not in dumped and "تحب تطلب" not in dumped  # QV-PRIV: digests only
+    assert [e.type for e in s.events].count("user.transcript") == 1
+    commits = [e for e in s.events if e.type == "user.speech_committed"]
+    assert all("transcript" not in e.payload for e in commits)
+    await _bye(tr, task)
+
+
+@pytest.mark.asyncio
+async def test_operator_transcripts_can_be_disabled() -> None:
+    s, tr, prov, task = await _session([MockScriptStep(text="secret reply", audio_ms=100)])
+    s.deps.operator_transcripts = False
+    tr.client_sends(ClientMessage.model_validate({"type": "text", "text": "hello"}))
+    await asyncio.sleep(0.15)
+    await s.handle_provider_event(S2SEvent(type=S2SEventType.INPUT_TRANSCRIPT, text="caller words"))
+    assert not [m for m in tr.sent if m.type.value == "transcript"]
+    assert all(m.text is None for m in tr.sent if m.type.value == "audio_end")
+    await _bye(tr, task)
