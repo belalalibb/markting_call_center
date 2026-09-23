@@ -33,7 +33,7 @@ class Row:
 
 def _full_draft() -> dict:
     return {
-        "objective": {"primary": {"kind": "collect_information", "description": "survey"}},
+        "objective": {"primary": {"kind": "run_survey", "description": "gather answers"}},
         "direction": "inbound",
         "channels": ["text"],
         "locale": {"locale": "ar-EG"},
@@ -97,9 +97,28 @@ def test_persuasive_objective_asks_for_objections() -> None:
 
 def test_gap_classes_map_to_kinds_and_blocking() -> None:
     gaps = [
-        KnowledgeGap(gap_id="g1", tenant_id="t", gap_class=GapClass.REQUIRED_FOR_EXECUTION, description="d1", question_for_operator="q1"),
-        KnowledgeGap(gap_id="g2", tenant_id="t", gap_class=GapClass.OPTIONAL_IMPROVEMENT, description="d2", question_for_operator="q2"),
-        KnowledgeGap(gap_id="g3", tenant_id="t", gap_class=GapClass.POLICY_RISK, description="d3", question_for_operator="q3", resolved=True),
+        KnowledgeGap(
+            gap_id="g1",
+            tenant_id="t",
+            gap_class=GapClass.REQUIRED_FOR_EXECUTION,
+            description="d1",
+            question_for_operator="q1",
+        ),
+        KnowledgeGap(
+            gap_id="g2",
+            tenant_id="t",
+            gap_class=GapClass.OPTIONAL_IMPROVEMENT,
+            description="d2",
+            question_for_operator="q2",
+        ),
+        KnowledgeGap(
+            gap_id="g3",
+            tenant_id="t",
+            gap_class=GapClass.POLICY_RISK,
+            description="d3",
+            question_for_operator="q3",
+            resolved=True,
+        ),
     ]
     qs = ENGINE.all_questions(DiscoveryInputs(draft=_full_draft(), gaps=gaps))
     by_path = {q.target_path: q for q in qs}
@@ -112,7 +131,14 @@ def test_gap_classes_map_to_kinds_and_blocking() -> None:
 def test_pending_contradiction_becomes_blocking_choice() -> None:
     cs = [
         Contradiction(contradiction_id="c1", tenant_id="t", fact_ids=["f1", "f2"], description="price differs"),
-        Contradiction(contradiction_id="c2", tenant_id="t", fact_ids=["f3", "f4"], description="x", resolution="operator_decided", winning_fact_id="f3"),
+        Contradiction(
+            contradiction_id="c2",
+            tenant_id="t",
+            fact_ids=["f3", "f4"],
+            description="x",
+            resolution="operator_decided",
+            winning_fact_id="f3",
+        ),
     ]
     qs = ENGINE.all_questions(DiscoveryInputs(draft=_full_draft(), contradictions=cs))
     assert len(qs) == 1
@@ -124,7 +150,12 @@ def test_pending_contradiction_becomes_blocking_choice() -> None:
 
 def test_preflight_findings_classified() -> None:
     fs = [
-        PreflightFinding(reason=PreflightReason.UNAPPROVED_BUSINESS_DECISION, path="completion.success_rules[0]", message="m", fix_hint="approve it"),
+        PreflightFinding(
+            reason=PreflightReason.UNAPPROVED_BUSINESS_DECISION,
+            path="completion.success_rules[0]",
+            message="m",
+            fix_hint="approve it",
+        ),
         PreflightFinding(reason=PreflightReason.VOICE_UNAVAILABLE, path="locale.voice_profile_ref", message="m"),
         PreflightFinding(reason=PreflightReason.INCOMPLETE_FIELD_DEFINITION, path="data.required[0]", message="m"),
         PreflightFinding(reason=PreflightReason.INVALID_CONFIG, path="evaluation", message="m", severity="WARN"),
@@ -147,7 +178,9 @@ def test_mapping_rows_produce_capability_questions() -> None:
         Row("text", "channel:text", "SUPPORTED", MappingResult.SUPPORTED),
     ]
     qs = {q.target_path: q for q in ENGINE.all_questions(DiscoveryInputs(draft=_full_draft(), mapping=rows))}
-    assert qs["capabilities.tool:lookup"].kind is QuestionKind.CAPABILITY_GAP and qs["capabilities.tool:lookup"].blocking
+    assert (
+        qs["capabilities.tool:lookup"].kind is QuestionKind.CAPABILITY_GAP and qs["capabilities.tool:lookup"].blocking
+    )
     assert "new_integration_required" in qs["capabilities.tool:lookup"].options
     assert qs["capabilities.knowledge:menu"].answer_type is AnswerType.UPLOAD
     assert qs["handoff_rules"].kind is QuestionKind.BUSINESS_DECISION
@@ -161,7 +194,15 @@ def test_mapping_rows_produce_capability_questions() -> None:
 
 def test_ranking_is_deterministic_and_band_ordered() -> None:
     inp = DiscoveryInputs(
-        gaps=[KnowledgeGap(gap_id="g", tenant_id="t", gap_class=GapClass.IMPORTANT_FOR_QUALITY, description="d", question_for_operator="q")],
+        gaps=[
+            KnowledgeGap(
+                gap_id="g",
+                tenant_id="t",
+                gap_class=GapClass.IMPORTANT_FOR_QUALITY,
+                description="d",
+                question_for_operator="q",
+            )
+        ],
         contradictions=[Contradiction(contradiction_id="c", tenant_id="t", fact_ids=["a", "b"], description="x")],
     )
     a = ENGINE.all_questions(inp)
@@ -188,8 +229,20 @@ def test_prioritizer_blocking_beats_non_blocking_in_same_band() -> None:
         DiscoveryInputs(
             draft=_full_draft(),
             gaps=[
-                KnowledgeGap(gap_id="opt", tenant_id="t", gap_class=GapClass.OPTIONAL_IMPROVEMENT, description="d", question_for_operator="q"),
-                KnowledgeGap(gap_id="req", tenant_id="t", gap_class=GapClass.REQUIRED_FOR_EXECUTION, description="d", question_for_operator="q"),
+                KnowledgeGap(
+                    gap_id="opt",
+                    tenant_id="t",
+                    gap_class=GapClass.OPTIONAL_IMPROVEMENT,
+                    description="d",
+                    question_for_operator="q",
+                ),
+                KnowledgeGap(
+                    gap_id="req",
+                    tenant_id="t",
+                    gap_class=GapClass.REQUIRED_FOR_EXECUTION,
+                    description="d",
+                    question_for_operator="q",
+                ),
             ],
         )
     )
@@ -209,7 +262,9 @@ def test_question_id_is_stable_across_processes() -> None:
 
 def test_business_decisions_never_carry_free_text_defaults() -> None:
     inp = DiscoveryInputs(
-        preflight=[PreflightFinding(reason=PreflightReason.UNAPPROVED_BUSINESS_DECISION, path="completion.x", message="m")],
+        preflight=[
+            PreflightFinding(reason=PreflightReason.UNAPPROVED_BUSINESS_DECISION, path="completion.x", message="m")
+        ],
         mapping=[Row("refund", "human", "UNSUPPORTED", MappingResult.REQUIRES_HUMAN)],
     )
     for q in ENGINE.all_questions(inp):
@@ -254,7 +309,15 @@ def test_limit_and_stop_rule() -> None:
     remaining = ENGINE.all_questions(
         DiscoveryInputs(
             draft=d,
-            gaps=[KnowledgeGap(gap_id="o", tenant_id="t", gap_class=GapClass.OPTIONAL_IMPROVEMENT, description="d", question_for_operator="q")],
+            gaps=[
+                KnowledgeGap(
+                    gap_id="o",
+                    tenant_id="t",
+                    gap_class=GapClass.OPTIONAL_IMPROVEMENT,
+                    description="d",
+                    question_for_operator="q",
+                )
+            ],
         )
     )
     assert remaining and discovery_complete(remaining)  # only optional left → discovery complete
