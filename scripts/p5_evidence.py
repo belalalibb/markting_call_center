@@ -34,7 +34,9 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def _bp() -> ActivityBlueprint:
-    return ActivityBlueprint.model_validate(yaml.safe_load((ROOT / "config/examples/activity_c_survey.yaml").read_text()))
+    return ActivityBlueprint.model_validate(
+        yaml.safe_load((ROOT / "config/examples/activity_c_survey.yaml").read_text())
+    )
 
 
 def _violating_case() -> ScenarioCase:
