@@ -181,9 +181,16 @@ async def test_prompt_client_ack_is_not_forced_during_audio_barge_in() -> None:
     rid = next(m.response_id for m in tr.sent if m.type.value == "audio_start")
     tr.client_sends(ClientMessage.model_validate({"type": "playout_started", "response_id": rid}))
     await asyncio.sleep(0.05)
-    for _ in range(20):  # speech frames immediately followed by the client's prompt ack
+    async def client_acks_stop() -> None:  # a real console answers stop_playout within a few ms
+        while "stop_playout" not in _sent_types(tr):
+            await asyncio.sleep(0.002)
+        tr.client_sends(ClientMessage.model_validate({"type": "playout_stopped", "response_id": rid}))
+
+    acker = asyncio.create_task(client_acks_stop())
+    for _ in range(30):  # speech keeps streaming while the agent is being stopped
         tr.client_sends(_tone())
-    tr.client_sends(ClientMessage.model_validate({"type": "playout_stopped", "response_id": rid}))
+        await asyncio.sleep(0.005)
+    await acker
     for _ in range(100):
         if s.interruptions:
             break
