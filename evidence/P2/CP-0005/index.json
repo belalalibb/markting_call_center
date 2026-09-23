@@ -1,0 +1,41 @@
+{
+  "checkpoint": "CP-0005",
+  "items": [
+    {
+      "path": "evidence/P2/CP-0005/junit.xml",
+      "sha256": "628c04abd5a89f6c1b2224721e6febbbe14d68a3c7b2c40070076d4de19005e8",
+      "kind": "pytest-junit",
+      "produced_by": "scripts/ci_local.sh (150 tests, 0 failures)",
+      "produced_at": "2026-09-23T00:08:51.161249+00:00",
+      "criterion_ids": [
+        "QV-ACC-011",
+        "QV-ACC-012",
+        "QV-ACC-013",
+        "QV-PRE-001",
+        "QV-PRE-002",
+        "QV-PRE-003",
+        "QV-LIFE-001",
+        "QV-LIFE-002",
+        "QV-LIFE-004",
+        "QV-CAP-002",
+        "QV-CAP-003",
+        "QV-CAP-004",
+        "QV-KNOW-004",
+        "QV-KNOW-005",
+        "QV-KNOW-006",
+        "QV-KNOW-009",
+        "QV-KNOW-010"
+      ]
+    },
+    {
+      "path": "evidence/P2/CP-0005/licenses.json",
+      "sha256": "bc75a088128a4d0706051942edc2030ba8080149f38ff718c332a00e401eedbe",
+      "kind": "ci-report",
+      "produced_by": "pip-licenses + license_gate.py",
+      "produced_at": "2026-09-23T00:08:51.161249+00:00",
+      "criterion_ids": [
+        "QV-LIC-002"
+      ]
+    }
+  ]
+}
