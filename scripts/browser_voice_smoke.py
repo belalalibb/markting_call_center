@@ -162,7 +162,9 @@ async def main() -> int:
                 spoken_turns += 1
                 second_turn_sent = True
         if soak_close is None:
-            await page.get_by_role("button", name="Hang up").first.click()  # live-session card (outbound card has one too)
+            await page.get_by_role(
+                "button", name="Hang up"
+            ).first.click()  # live-session card (outbound card has one too)
             for _ in range(12):
                 await page.wait_for_timeout(500)
                 await poll()
