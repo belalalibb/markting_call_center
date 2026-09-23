@@ -1,0 +1,68 @@
+{
+  "checkpoint": "CP-0006",
+  "items": [
+    {
+      "path": "evidence/P3/CP-0006/junit.xml",
+      "sha256": "c1f018c79972e0031e5e1d1507dcd927c5f8543f0235407b5a03e0ce6846a601",
+      "kind": "pytest-junit",
+      "produced_by": "scripts/ci_local.sh (196 tests, 0 failures)",
+      "produced_at": "2026-09-23T02:15:25.747086+00:00",
+      "criterion_ids": [
+        "QV-ACC-015",
+        "QV-COP-001",
+        "QV-COP-003",
+        "QV-COP-004",
+        "QV-COP-005",
+        "QV-COP-006",
+        "QV-COP-007",
+        "QV-COP-011",
+        "QV-COP-015",
+        "QV-EVT-001"
+      ]
+    },
+    {
+      "path": "evidence/P3/CP-0006/licenses.json",
+      "sha256": "7d6f76d47bdaeec3ace30f91ef3ff536e2d76ed3505b37cb24870ef17ff6d1fe",
+      "kind": "pip-licenses",
+      "produced_by": "scripts/ci_local.sh \u2192 scripts/license_gate.py",
+      "produced_at": "2026-09-23T02:15:25.747086+00:00",
+      "criterion_ids": [
+        "QV-LIC-001"
+      ]
+    },
+    {
+      "path": "evidence/P3/CP-0006/acc014_provenance_diff.json",
+      "sha256": "9f06c6a4d79f37297cbc136a7fad9cf2b5cb08bdba238afd4f4b251166b621e1",
+      "kind": "diff-report",
+      "produced_by": "ad-hoc script over ConfigSession (see file docstring)",
+      "produced_at": "2026-09-23T02:15:25.747086+00:00",
+      "criterion_ids": [
+        "QV-ACC-014",
+        "QV-COP-006",
+        "QV-COP-007"
+      ]
+    },
+    {
+      "path": "evidence/P3/CP-0006/acc016_memory_only_key.json",
+      "sha256": "b286bf2ea1a3d85301e5f8c88dc9e82ea0b61a32bd29705529e5daeadcd685af",
+      "kind": "grep-report",
+      "produced_by": "ad-hoc script + Playwright console capture",
+      "produced_at": "2026-09-23T02:15:25.747086+00:00",
+      "criterion_ids": [
+        "QV-ACC-016",
+        "QV-CRED-001"
+      ]
+    },
+    {
+      "path": "evidence/P3/CP-0006/e2e_preview.json",
+      "sha256": "e2793fe383257b672710909e9b571ddad9144bde8c2e43f0582d61aebf7e39b7",
+      "kind": "e2e-run",
+      "produced_by": "httpx+websockets against public sandbox URL",
+      "produced_at": "2026-09-23T02:15:25.747086+00:00",
+      "criterion_ids": [
+        "QV-ACC-016",
+        "QV-ACC-015"
+      ]
+    }
+  ]
+}

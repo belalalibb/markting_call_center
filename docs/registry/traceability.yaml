@@ -83,9 +83,9 @@ acceptance:
   QV-ACC-011: { phase: P2,   status: accepted, evidence: [evidence/P2/CP-0005/junit.xml, evidence/P2/CP-0005/index.json] }
   QV-ACC-012: { phase: P2,   status: accepted, evidence: [evidence/P2/CP-0005/junit.xml, evidence/P2/CP-0005/index.json] }
   QV-ACC-013: { phase: P2,   status: accepted, evidence: [evidence/P2/CP-0005/junit.xml, evidence/P2/CP-0005/index.json] }
-  QV-ACC-014: { phase: P3,   status: planned, evidence: [] }
-  QV-ACC-015: { phase: P3,   status: planned, evidence: [] }
-  QV-ACC-016: { phase: P3,   status: planned, evidence: [] }
+  QV-ACC-014: { phase: P3,   status: accepted, evidence: [evidence/P3/CP-0006/acc014_provenance_diff.json, evidence/P3/CP-0006/index.json] }
+  QV-ACC-015: { phase: P3,   status: accepted, evidence: [evidence/P3/CP-0006/junit.xml, evidence/P3/CP-0006/e2e_preview.json] }
+  QV-ACC-016: { phase: P3,   status: accepted, evidence: [evidence/P3/CP-0006/acc016_memory_only_key.json, evidence/P3/CP-0006/e2e_preview.json] }
   QV-ACC-017: { phase: P4,   status: planned, evidence: [] }
   QV-ACC-018: { phase: P4,   status: planned, evidence: [] }
   QV-ACC-019: { phase: P4,   status: planned, evidence: [] }

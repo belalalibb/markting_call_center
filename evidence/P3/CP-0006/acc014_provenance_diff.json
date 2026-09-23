@@ -1,0 +1,480 @@
+{
+ "criterion": "QV-ACC-014",
+ "session_log": [
+  [
+   "answer",
+   "channels"
+  ],
+  [
+   "answer",
+   "knowledge.sources"
+  ],
+  [
+   "answer",
+   "policies.unknown_question_policy.default"
+  ],
+  [
+   "answer",
+   "objective.primary"
+  ],
+  [
+   "answer",
+   "direction"
+  ],
+  [
+   "answer",
+   "policies.opt_out"
+  ],
+  [
+   "answer",
+   "data.required"
+  ],
+  [
+   "answer",
+   "outcome_schema.primary"
+  ],
+  [
+   "answer",
+   "completion.success_rules"
+  ],
+  [
+   "defer",
+   "coverage.objections"
+  ],
+  [
+   "answer",
+   "locale"
+  ]
+ ],
+ "draft_valid": true,
+ "status": "review",
+ "total_leaves": 66,
+ "unexplained": [],
+ "business_values_not_from_operator": [],
+ "pass": true,
+ "rows": [
+  {
+   "path": "schema",
+   "value": "qevion.activity.v1",
+   "origin": "structural_scaffold_or_schema_default",
+   "business": false
+  },
+  {
+   "path": "identity.tenant_id",
+   "value": "t",
+   "origin": "structural_scaffold_or_schema_default",
+   "business": false
+  },
+  {
+   "path": "identity.activity_id",
+   "value": "a",
+   "origin": "structural_scaffold_or_schema_default",
+   "business": false
+  },
+  {
+   "path": "identity.name",
+   "value": "A",
+   "origin": "structural_scaffold_or_schema_default",
+   "business": false
+  },
+  {
+   "path": "identity.version",
+   "value": "0.1.0",
+   "origin": "structural_scaffold_or_schema_default",
+   "business": false
+  },
+  {
+   "path": "identity.status",
+   "value": "DRAFT",
+   "origin": "structural_scaffold_or_schema_default",
+   "business": false
+  },
+  {
+   "path": "direction",
+   "value": "inbound",
+   "origin": "operator_answer:direction",
+   "business": false
+  },
+  {
+   "path": "channels[0]",
+   "value": "text",
+   "origin": "operator_answer:channels",
+   "business": false
+  },
+  {
+   "path": "locale.language",
+   "value": "ar",
+   "origin": "operator_answer:locale",
+   "business": false
+  },
+  {
+   "path": "locale.locale",
+   "value": "ar-EG",
+   "origin": "operator_answer:locale",
+   "business": false
+  },
+  {
+   "path": "objective.primary.kind",
+   "value": "survey",
+   "origin": "operator_answer:objective.primary",
+   "business": true
+  },
+  {
+   "path": "objective.primary.description",
+   "value": "collect satisfaction",
+   "origin": "operator_answer:objective.primary",
+   "business": true
+  },
+  {
+   "path": "objective.optimization_bounds.truthfulness",
+   "value": "required",
+   "origin": "structural_scaffold_or_schema_default",
+   "business": true
+  },
+  {
+   "path": "objective.optimization_bounds.no_invented_urgency",
+   "value": true,
+   "origin": "structural_scaffold_or_schema_default",
+   "business": true
+  },
+  {
+   "path": "objective.optimization_bounds.respect_opt_out",
+   "value": true,
+   "origin": "structural_scaffold_or_schema_default",
+   "business": true
+  },
+  {
+   "path": "data.required[0].name",
+   "value": "rating",
+   "origin": "operator_answer:data.required",
+   "business": true
+  },
+  {
+   "path": "data.required[0].type",
+   "value": "string",
+   "origin": "operator_answer:data.required",
+   "business": true
+  },
+  {
+   "path": "data.required[0].provenance_required",
+   "value": "USER_STATED",
+   "origin": "operator_answer:data.required",
+   "business": true
+  },
+  {
+   "path": "data.required[0].sensitivity",
+   "value": "low",
+   "origin": "operator_answer:data.required",
+   "business": true
+  },
+  {
+   "path": "knowledge.sources[0].source_id",
+   "value": "faq_v1",
+   "origin": "operator_answer:knowledge.sources",
+   "business": false
+  },
+  {
+   "path": "knowledge.sources[0].kind",
+   "value": "file",
+   "origin": "operator_answer:knowledge.sources",
+   "business": false
+  },
+  {
+   "path": "knowledge.sources[0].priority",
+   "value": 100,
+   "origin": "operator_answer:knowledge.sources",
+   "business": false
+  },
+  {
+   "path": "knowledge.source_priority[0]",
+   "value": "live_api",
+   "origin": "structural_scaffold_or_schema_default",
+   "business": false
+  },
+  {
+   "path": "knowledge.source_priority[1]",
+   "value": "approved_structured",
+   "origin": "structural_scaffold_or_schema_default",
+   "business": false
+  },
+  {
+   "path": "knowledge.source_priority[2]",
+   "value": "approved_document",
+   "origin": "structural_scaffold_or_schema_default",
+   "business": false
+  },
+  {
+   "path": "knowledge.source_priority[3]",
+   "value": "historical",
+   "origin": "structural_scaffold_or_schema_default",
+   "business": false
+  },
+  {
+   "path": "knowledge.freshness.stale_behavior",
+   "value": "STATE_LIMITATION",
+   "origin": "structural_scaffold_or_schema_default",
+   "business": false
+  },
+  {
+   "path": "policies.schema",
+   "value": "qevion.policy.v1",
+   "origin": "structural_scaffold_or_schema_default",
+   "business": false
+  },
+  {
+   "path": "policies.clarification_policy",
+   "value": "always_when_ambiguous",
+   "origin": "structural_scaffold_or_schema_default",
+   "business": false
+  },
+  {
+   "path": "policies.unknown_question_policy.default",
+   "value": "STATE_LIMITATION",
+   "origin": "operator_answer:policies.unknown_question_policy.default",
+   "business": true
+  },
+  {
+   "path": "policies.uncertainty_policy.missing",
+   "value": "STATE_LIMITATION",
+   "origin": "structural_scaffold_or_schema_default",
+   "business": false
+  },
+  {
+   "path": "policies.uncertainty_policy.conflicting",
+   "value": "STATE_LIMITATION",
+   "origin": "structural_scaffold_or_schema_default",
+   "business": false
+  },
+  {
+   "path": "policies.uncertainty_policy.stale",
+   "value": "STATE_LIMITATION",
+   "origin": "structural_scaffold_or_schema_default",
+   "business": false
+  },
+  {
+   "path": "policies.uncertainty_policy.ambiguous",
+   "value": "ASK_CLARIFYING_QUESTION",
+   "origin": "structural_scaffold_or_schema_default",
+   "business": false
+  },
+  {
+   "path": "policies.opt_out.phrases_ref",
+   "value": "optout_default",
+   "origin": "operator_answer:policies.opt_out",
+   "business": true
+  },
+  {
+   "path": "policies.opt_out.action",
+   "value": "CLOSE_GRACEFULLY",
+   "origin": "operator_answer:policies.opt_out",
+   "business": true
+  },
+  {
+   "path": "completion.success_rules[0]",
+   "value": "all_required_collected",
+   "origin": "operator_answer:completion.success_rules",
+   "business": true
+  },
+  {
+   "path": "outcome_schema.primary[0]",
+   "value": "completed",
+   "origin": "operator_answer:outcome_schema.primary",
+   "business": true
+  },
+  {
+   "path": "outcome_schema.primary[1]",
+   "value": "not_completed",
+   "origin": "operator_answer:outcome_schema.primary",
+   "business": true
+  },
+  {
+   "path": "outcome_schema.next_actions[0]",
+   "value": "close",
+   "origin": "structural_scaffold_or_schema_default",
+   "business": true
+  },
+  {
+   "path": "activity_machine.table_ref",
+   "value": "generic_default_v1",
+   "origin": "structural_scaffold_or_schema_default",
+   "business": false
+  },
+  {
+   "path": "version_metadata.decisions[0].item_path",
+   "value": "policies.unknown_question_policy.default",
+   "origin": "structural_scaffold_or_schema_default",
+   "business": false
+  },
+  {
+   "path": "version_metadata.decisions[0].proposed_by",
+   "value": "operator",
+   "origin": "structural_scaffold_or_schema_default",
+   "business": false
+  },
+  {
+   "path": "version_metadata.decisions[0].approved_by",
+   "value": "op",
+   "origin": "structural_scaffold_or_schema_default",
+   "business": false
+  },
+  {
+   "path": "version_metadata.decisions[0].ts",
+   "value": "2026-09-23T02:14:52.040411Z",
+   "origin": "structural_scaffold_or_schema_default",
+   "business": false
+  },
+  {
+   "path": "version_metadata.decisions[1].item_path",
+   "value": "objective.primary",
+   "origin": "structural_scaffold_or_schema_default",
+   "business": false
+  },
+  {
+   "path": "version_metadata.decisions[1].proposed_by",
+   "value": "operator",
+   "origin": "structural_scaffold_or_schema_default",
+   "business": false
+  },
+  {
+   "path": "version_metadata.decisions[1].approved_by",
+   "value": "op",
+   "origin": "structural_scaffold_or_schema_default",
+   "business": false
+  },
+  {
+   "path": "version_metadata.decisions[1].ts",
+   "value": "2026-09-23T02:14:52.040556Z",
+   "origin": "structural_scaffold_or_schema_default",
+   "business": false
+  },
+  {
+   "path": "version_metadata.decisions[2].item_path",
+   "value": "policies.opt_out",
+   "origin": "structural_scaffold_or_schema_default",
+   "business": false
+  },
+  {
+   "path": "version_metadata.decisions[2].proposed_by",
+   "value": "operator",
+   "origin": "structural_scaffold_or_schema_default",
+   "business": false
+  },
+  {
+   "path": "version_metadata.decisions[2].approved_by",
+   "value": "op",
+   "origin": "structural_scaffold_or_schema_default",
+   "business": false
+  },
+  {
+   "path": "version_metadata.decisions[2].ts",
+   "value": "2026-09-23T02:14:52.040802Z",
+   "origin": "structural_scaffold_or_schema_default",
+   "business": false
+  },
+  {
+   "path": "version_metadata.decisions[3].item_path",
+   "value": "data.required",
+   "origin": "structural_scaffold_or_schema_default",
+   "business": false
+  },
+  {
+   "path": "version_metadata.decisions[3].proposed_by",
+   "value": "operator",
+   "origin": "structural_scaffold_or_schema_default",
+   "business": false
+  },
+  {
+   "path": "version_metadata.decisions[3].approved_by",
+   "value": "op",
+   "origin": "structural_scaffold_or_schema_default",
+   "business": false
+  },
+  {
+   "path": "version_metadata.decisions[3].ts",
+   "value": "2026-09-23T02:14:52.040906Z",
+   "origin": "structural_scaffold_or_schema_default",
+   "business": false
+  },
+  {
+   "path": "version_metadata.decisions[4].item_path",
+   "value": "outcome_schema.primary",
+   "origin": "structural_scaffold_or_schema_default",
+   "business": false
+  },
+  {
+   "path": "version_metadata.decisions[4].proposed_by",
+   "value": "operator",
+   "origin": "structural_scaffold_or_schema_default",
+   "business": false
+  },
+  {
+   "path": "version_metadata.decisions[4].approved_by",
+   "value": "op",
+   "origin": "structural_scaffold_or_schema_default",
+   "business": false
+  },
+  {
+   "path": "version_metadata.decisions[4].ts",
+   "value": "2026-09-23T02:14:52.041000Z",
+   "origin": "structural_scaffold_or_schema_default",
+   "business": false
+  },
+  {
+   "path": "version_metadata.decisions[5].item_path",
+   "value": "completion.success_rules",
+   "origin": "structural_scaffold_or_schema_default",
+   "business": false
+  },
+  {
+   "path": "version_metadata.decisions[5].proposed_by",
+   "value": "operator",
+   "origin": "structural_scaffold_or_schema_default",
+   "business": false
+  },
+  {
+   "path": "version_metadata.decisions[5].approved_by",
+   "value": "op",
+   "origin": "structural_scaffold_or_schema_default",
+   "business": false
+  },
+  {
+   "path": "version_metadata.decisions[5].ts",
+   "value": "2026-09-23T02:14:52.041080Z",
+   "origin": "structural_scaffold_or_schema_default",
+   "business": false
+  },
+  {
+   "path": "version_metadata.readiness.state",
+   "value": "DRAFT",
+   "origin": "structural_scaffold_or_schema_default",
+   "business": false
+  }
+ ],
+ "platform_invariant_defaults": [
+  {
+   "path": "objective.optimization_bounds.truthfulness",
+   "value": "required",
+   "origin": "structural_scaffold_or_schema_default",
+   "business": true
+  },
+  {
+   "path": "objective.optimization_bounds.no_invented_urgency",
+   "value": true,
+   "origin": "structural_scaffold_or_schema_default",
+   "business": true
+  },
+  {
+   "path": "objective.optimization_bounds.respect_opt_out",
+   "value": true,
+   "origin": "structural_scaffold_or_schema_default",
+   "business": true
+  },
+  {
+   "path": "outcome_schema.next_actions[0]",
+   "value": "close",
+   "origin": "structural_scaffold_or_schema_default",
+   "business": true
+  }
+ ],
+ "note": "platform_invariant_defaults are contract-level constants (truthfulness=required, no_invented_urgency, respect_opt_out, next_actions=[close]) fixed by qevion.activity.v1 — not facts about the business; they cannot be set by the Copilot."
+}

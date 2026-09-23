@@ -1,0 +1,23 @@
+{
+ "criterion": "QV-ACC-016",
+ "checks": [
+  {
+   "name": "ephemeral store is a dataclass field (dict) with TTL; no file/db writes in credentials.py",
+   "grep_open_or_write": "0"
+  },
+  {
+   "name": "runtime log free of credential patterns",
+   "log_lines": 69,
+   "pattern_hits": 0
+  },
+  {
+   "name": "API response/status never contain value",
+   "pytest": "tests/test_runtime_api.py::test_ephemeral_test_key_never_echoed (junit.xml)"
+  },
+  {
+   "name": "three modes reachable at sandbox URL",
+   "playwright": "#/config, #/console, #/admin loaded with 0 console errors; see e2e_preview.json base url"
+  }
+ ],
+ "pass": true
+}
