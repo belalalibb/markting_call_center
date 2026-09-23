@@ -1,0 +1,168 @@
+{
+ "kind": "browser-voice-smoke",
+ "produced_at": "2026-09-23T23:26:26.767440+00:00",
+ "base": "http://localhost:8000",
+ "activity": "act_order_intake@1.0.0",
+ "composition": "comp_s2s_openai_v1",
+ "key_injected_for": "openai",
+ "target_seconds": 60.0,
+ "survived_ms": 72707,
+ "header_samples": [
+  [
+   10807,
+   "live · comp_s2s_openai_v1 · browser_voice · openai_realtime:gpt-realtime"
+  ],
+  [
+   72515,
+   "ok · default comp_mock_s2s_v1 · 3 activities · 1 live"
+  ]
+ ],
+ "status_pills": [
+  "ok · default comp_mock_s2s_v1 · 3 activities · 1 live",
+  "disconnected (1000)",
+  "LISTENING",
+  "COLLECTING",
+  "turn_2",
+  "idle",
+  "302 ms",
+  "303 ms"
+ ],
+ "ready_line": "session ready — composition comp_s2s_openai_v1 · browser_voice · s2s openai_realtime:gpt-realtime · credential ephemeral_ui",
+ "chat": [
+  [
+   10798,
+   "connected → act_order_intake@1.0.0 via comp_s2s_openai_v1 (browser_voice) — waiting for session ready…"
+  ],
+  [
+   10798,
+   "session ready — composition comp_s2s_openai_v1 · browser_voice · s2s openai_realtime:gpt-realtime · credential ephemeral_ui"
+  ],
+  [
+   14016,
+   "…"
+  ],
+  [
+   14016,
+   "اشتركوا في القناة"
+  ],
+  [
+   15044,
+   "مساءالخير!أهلاًبحضرتك،معاكخدمةطلباتالتوصيل.منفضلكقوليليإيهالأصنافالليحاببتطلبها؟"
+  ],
+  [
+   21115,
+   "⏹ you interrupted — agent stopped"
+  ],
+  [
+   23164,
+   "تحتأمرك.منفضلكقوليليإيهالأصنافالليتحبيتطلبيها،وعددكلصنف.وأناهأكدمعاككلحاجة."
+  ],
+  [
+   72509,
+   "closed (1000: user_bye)"
+  ]
+ ],
+ "ws": {
+  "text_types": {
+   "state": 11,
+   "ready": 1,
+   "event": 126,
+   "audio_start": 2,
+   "transcript": 2,
+   "audio_end": 2,
+   "stop_playout": 1,
+   "ping": 6
+  },
+  "binary": 56,
+  "pings": 6,
+  "pongs_sent": 6,
+  "close": {
+   "code": 1000,
+   "reason": "user_bye",
+   "at": 1790205986513
+  }
+ },
+ "speaking_cycles": 2,
+ "spoken_user_turns": 2,
+ "close_during_soak": null,
+ "console_errors": [],
+ "sessions_after": [
+  {
+   "session_id": "ses_7617bdb8a2094e23",
+   "composition_id": "comp_s2s_openai_v1",
+   "channel": "browser_voice",
+   "credential_source": "ephemeral_ui",
+   "running": false,
+   "error": "AssertionError: ",
+   "close_code": 1000,
+   "close_reason": "provider_failure",
+   "heartbeat": {
+    "sent": 1,
+    "last_rtt_ms": 1.5,
+    "dropped_audio_frames": 0
+   }
+  },
+  {
+   "session_id": "ses_627fdeb723cc4a47",
+   "composition_id": "comp_s2s_openai_v1",
+   "channel": "browser_voice",
+   "credential_source": "ephemeral_ui",
+   "running": false,
+   "error": null,
+   "close_code": 1000,
+   "close_reason": "user_bye",
+   "heartbeat": {
+    "sent": 3,
+    "last_rtt_ms": 1.1,
+    "dropped_audio_frames": 0
+   }
+  },
+  {
+   "session_id": "ses_70d6665801554120",
+   "composition_id": "comp_s2s_openai_v1",
+   "channel": "browser_voice",
+   "credential_source": "ephemeral_ui",
+   "running": false,
+   "error": null,
+   "close_code": 1000,
+   "close_reason": "user_bye",
+   "heartbeat": {
+    "sent": 6,
+    "last_rtt_ms": 2.1,
+    "dropped_audio_frames": 0
+   }
+  }
+ ],
+ "core_health": {
+  "checks": {
+   "no_provider_error": true,
+   "no_illegal_dialog_transition": true,
+   "activity_never_blocked": true,
+   "outcome_not_technical_failure": true,
+   "session_started": true
+  },
+  "passed": true,
+  "outcome": "abandoned",
+  "provider_errors": [],
+  "illegal_transitions": [],
+  "event_count": 154
+ },
+ "checks": {
+  "mic_on": true,
+  "connected": true,
+  "session_ready": true,
+  "header_shows_actual_composition": true,
+  "speaking_then_listening": true,
+  "second_user_turn": true,
+  "heartbeat_answered": true,
+  "no_close_during_soak": true,
+  "final_close_1000": true,
+  "no_1011": true,
+  "core:no_provider_error": true,
+  "core:no_illegal_dialog_transition": true,
+  "core:activity_never_blocked": true,
+  "core:outcome_not_technical_failure": true,
+  "core:session_started": true
+ },
+ "passed": true
+}
