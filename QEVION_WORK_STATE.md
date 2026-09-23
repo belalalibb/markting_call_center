@@ -4,10 +4,10 @@
 
 | Field | Value |
 |---|---|
-| Project phase | P1 — Generic Core |
-| Current stage | **P1 COMPLETE** (CP-0004) → P2 Knowledge + Blueprint + Preflight (CP-0005) |
-| Current objective | P2: `qevion/knowledge/` ingestion pipeline (parse→normalize→entities→facts→relationships→gaps→contradictions→ambiguity→customer questions→operational requirements) with provenance; `qevion/control/` Blueprint validator, Preflight READY/BLOCKED with reason codes, readiness lifecycle, Capability Registry mapping, versioning/pinning → CP-0005 |
-| Last verified checkpoint | CP-0004 (P1 Generic Core) — `recovery/checkpoints/CP-0004.md`, tag `cp/CP-0004` |
+| Project phase | P2 — Knowledge + Blueprint + Preflight |
+| Current stage | **P2 COMPLETE** (CP-0005) → P3 Copilot + Web (CP-0006) |
+| Current objective | P3: `qevion/copilot/` (dynamic discovery engine: next-question from Blueprint state + gaps + capability mapping; ASK_OWNER escape hatch; Blueprint proposals with Decision records; stop-asking rule) + `qevion/runtime/` FastAPI app (REST for tenants/activities/knowledge/preflight/readiness; WS session endpoint on mocks) + `web/` single TypeScript app with 3 modes: Config Center, Operator Console, Admin (in-memory ephemeral test-key UI for Chat & Calls) → CP-0006 |
+| Last verified checkpoint | CP-0005 (P2 Knowledge + Control) — `recovery/checkpoints/CP-0005.md`, tag `cp/CP-0005` |
 | Last known good Git SHA | see `recovery/checkpoints/index.jsonl` last line (CP-0001) |
 | Approval | Operator approved full plan + decisions D1–D15 on 2026-09-22 (see `recovery/analysis/pre_approval_inspection_2026-09-22.md`) |
 
@@ -28,8 +28,10 @@
 
 - **CP-0004 (P1 Generic Core):** `qevion/core/` — `field_store.py` (provenance strength, corrections, execution readiness), `dialog_machine.py` (fixed), `activity_machine.py` (data-driven `generic_default_v1` + table validator), `context.py` (EntityFocusStack, PendingObjectives), `governance.py` (ClaimGovernor, ConfirmationInterpreter via decision port), `tool_pipeline.py` (11 steps, BudgetGuard, idempotency), `outcome_engine.py` (rules via decision port, generic primary precedence, InteractionRecord), `instruction_composer.py` (sectioned, fingerprinted), `platform_tools.py` (14 tool.v1 declarations), `session.py` (orchestrator; 7-step interruption with t0..t4; confirmation gate; authority model). Adapters: memory read-tool backends. Activities A (order intake) + B (appointment) YAML. Tests: 93 total incl. 12 end-to-end scenarios A/B/C on mocks — **CI_LOCAL PASS**; evidence `evidence/P1/CP-0004/`; QV-ACC-006..010 accepted.
 
+- **CP-0005 (P2):** `qevion/control/preflight.py` (13 deterministic checks, all 20 §11 reason codes, path + fix_hint, approved-Decision waiver, strict/lenient UNVERIFIED), `readiness.py` (table-driven lifecycle, `ActivationGates`, BFS legal path, edit invalidation, immutability), `capabilities.py` (registry aggregated from adapter self-declarations + platform facts; `RequirementMapping`); `qevion/knowledge/parsers.py` (csv/json/yaml/txt/md, locators, size cap, injection flags) + `pipeline.py` (normative 10-step pipeline: entities, facts w/ provenance, relationships, cross-source contradictions with priority resolution or pending+DATA_CONFLICT, ambiguity, 6 gap classes vs Activity needs, customer questions, operational requirements; `StructuredRetriever` approved-only). Tests: 150 total (+57) — **CI_LOCAL PASS**; evidence `evidence/P2/CP-0005/`; QV-ACC-011..013 accepted.
+
 ## In progress
-- **P2 (CP-0005 prep)** landed: `qevion/control/preflight.py` (13 checks, 20 reason codes; 31 tests), `readiness.py` (lifecycle machine, ActivationGates, BFS legal path; QV-ACC-013), `capabilities.py` (registry builder + RequirementMapping). CI_LOCAL PASS @ d08e6f2 (137 tests). Remaining: `qevion/knowledge/` ingestion pipeline + gap/contradiction classes (QV-ACC-012), Blueprint cross-field validator is covered by Preflight; version pinning/diff; evidence + CP-0005.
+- CP-0005 record + tag + snapshot (this commit)
 
 ## Incidents
 - 2026-09-22 #1: sandbox reset lost ~1h of uncommitted P0 work. Classified: test/environment. Countermeasure: protocol §8.1 commit-immediately. Redone in small increments.
@@ -49,8 +51,8 @@
 - Real-provider evidence (QV-ACC-022) requires operator-supplied test key (A5) — Admin ephemeral UI lands in P3.
 
 ## Pending (ordered)
-1. **P2 (CP-0005)**: `qevion/knowledge/` (models already in contracts/knowledge.py): parsers (txt/md/csv/yaml/json; pdf via optional dep), normalizer, entity/fact extraction (structured-first, deterministic; LLM port optional & never business truth), relationships, gap classifier (REQUIRED_FOR_EXECUTION/IMPORTANT_FOR_QUALITY/OPTIONAL_IMPROVEMENT/POLICY_RISK/DATA_CONFLICT/UNKNOWN), contradiction + ambiguity detection, customer-question mining, operational-requirements derivation; `qevion/control/`: Blueprint validator (cross-field), Preflight (reason codes §11), readiness lifecycle machine, Capability Registry + mapping (SUPPORTED_WITH_CONFIGURATION/REQUIRES_TOOL/…), version pinning/diff; tests + evidence.
-2. P3 → CP-0006 · P4 → CP-0007 · P5 → CP-0008 · P6 → CP-0009
+1. **P3 (CP-0006)**: `qevion/copilot/` discovery engine (no fixed questionnaire; prioritized questions from gaps/mapping/preflight; proposals carry `Decision{proposed_by: copilot, approved_by: None}`; LLM port optional for phrasing only) · `qevion/runtime/` FastAPI (tenants, activities/versions, knowledge upload→report, preflight, readiness transitions, capability mapping, sessions over WS with mock composition; CredentialResolver wired; ephemeral in-memory test key endpoint) · `web/` TypeScript app: Config Center (copilot chat + Blueprint review + gaps + preflight), Operator Console (live state/events/handoff queue), Admin (tenants, providers, ephemeral test key for Chat & Calls) · preview via sandbox service URL.
+2. P4 → CP-0007 · P5 → CP-0008 · P6 → CP-0009
 
 ## Exact next action
-`qevion/knowledge/pipeline.py`: parsers (csv/yaml/json/md/txt) → normalize → entities/facts with provenance+locator → contradictions (same subject/predicate, different value; priority resolution) → gaps (per Activity requirement/field) → customer-question mining; `tests/test_knowledge_pipeline.py` with seeded fixtures (QV-ACC-012) → ci_local → CP-0005.
+`checkpoint.sh CP-0005 P2 "Knowledge pipeline + Preflight + readiness + capability mapping"` → fill → commit → tag → snapshot; then P3 step 1: `qevion/copilot/discovery.py` (question generation from gaps + mapping + preflight findings, prioritization, stop rule) + tests.
