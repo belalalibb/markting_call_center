@@ -1,16 +1,16 @@
 {
  "summary": {
-  "traces": 3,
-  "turns_measured": 6,
+  "traces": 5,
+  "turns_measured": 9,
   "eot_to_first_audio_ms": {
-   "p50": 99,
-   "p95": 1993,
-   "max": 1993
+   "p50": 1392,
+   "p95": 2837,
+   "max": 2837
   },
-  "barge_ins": 6,
+  "barge_ins": 10,
   "barge_in_t1_t2_ms": {
    "p50": 2,
-   "p95": 3
+   "p95": 4
   },
   "barge_in_t1_t3_ms": {
    "p50": 4,
@@ -18,7 +18,7 @@
    "max": 6
   },
   "forced_stops": 0,
-  "cer_mean": 0.088,
+  "cer_mean": 0.084,
   "split_turns": 0
  },
  "rows": [
@@ -71,52 +71,6 @@
    ]
   },
   {
-   "trace": "evidence/P2/CP-0015/trace_bargein.json",
-   "mode": [
-    "--bargein"
-   ],
-   "facts": {
-    "composition_id": "comp_s2s_openai_v1",
-    "turn_detector": "silero",
-    "transcription_model": "gpt-4o-transcribe"
-   },
-   "health_passed": true,
-   "clips": 3,
-   "audio_commits": 3,
-   "eot_to_first_audio_ms": [],
-   "barge_in": [
-    {
-     "t1_t2": 2,
-     "t1_t3": 6,
-     "t1_t4": 7,
-     "forced": false
-    },
-    {
-     "t1_t2": 3,
-     "t1_t3": 5,
-     "t1_t4": 5,
-     "forced": false
-    }
-   ],
-   "cer": [
-    {
-     "clip": "u1_order",
-     "cer": 0.038,
-     "hyp": "السلام عليكم. عايز أطلب اتنين بيتزا مارغاريتا كبيرة وواحد بيبسي."
-    },
-    {
-     "clip": "u7_correction",
-     "cer": 0.0,
-     "hyp": "لأ استنى مش اتنين خليهم تلاتة بيتزا."
-    },
-    {
-     "clip": "u2_address",
-     "cer": 0.244,
-     "hyp": "العنوان: ٢٣ شارع التحرير الدقي الدور الخامس"
-    }
-   ]
-  },
-  {
    "trace": "evidence/P2/CP-0015/trace_late_bargein.json",
    "mode": [
     "--late-bargein"
@@ -163,6 +117,146 @@
      "clip": "u2_address",
      "cer": 0.244,
      "hyp": "العنوان 23 شارع التحرير، الدقي، الدور الخامس."
+    }
+   ]
+  },
+  {
+   "trace": "evidence/P2/CP-0015/trace_bargein_1.json",
+   "mode": [
+    "--bargein"
+   ],
+   "facts": {
+    "composition_id": "comp_s2s_openai_v1",
+    "turn_detector": "silero",
+    "transcription_model": "gpt-4o-transcribe"
+   },
+   "health_passed": true,
+   "clips": 3,
+   "audio_commits": 3,
+   "eot_to_first_audio_ms": [],
+   "barge_in": [
+    {
+     "t1_t2": 2,
+     "t1_t3": 4,
+     "t1_t4": 5,
+     "forced": false
+    },
+    {
+     "t1_t2": 4,
+     "t1_t3": 6,
+     "t1_t4": 6,
+     "forced": false
+    }
+   ],
+   "cer": [
+    {
+     "clip": "u1_order",
+     "cer": 0.0,
+     "hyp": "السلام عليكم. عايز أطلب اتنين بيتزا مارجريتا كبيرة وواحد بيبسي."
+    },
+    {
+     "clip": "u7_correction",
+     "cer": 0.0,
+     "hyp": "لأ استنى مش اتنين خليهم تلاتة بيتزا"
+    },
+    {
+     "clip": "u2_address",
+     "cer": 0.244,
+     "hyp": "العنوان: ٢٣ شارع التحرير، الدقي، الدور الخامس."
+    }
+   ]
+  },
+  {
+   "trace": "evidence/P2/CP-0015/trace_bargein_2.json",
+   "mode": [
+    "--bargein"
+   ],
+   "facts": {
+    "composition_id": "comp_s2s_openai_v1",
+    "turn_detector": "silero",
+    "transcription_model": "gpt-4o-transcribe"
+   },
+   "health_passed": true,
+   "clips": 3,
+   "audio_commits": 3,
+   "eot_to_first_audio_ms": [],
+   "barge_in": [
+    {
+     "t1_t2": 3,
+     "t1_t3": 5,
+     "t1_t4": 5,
+     "forced": false
+    },
+    {
+     "t1_t2": 2,
+     "t1_t3": 4,
+     "t1_t4": 5,
+     "forced": false
+    }
+   ],
+   "cer": [
+    {
+     "clip": "u1_order",
+     "cer": 0.0,
+     "hyp": "السلام عليكم. عايز أطلب اتنين بيتزا مارجريتا كبيرة وواحد بيبسي."
+    },
+    {
+     "clip": "u7_correction",
+     "cer": 0.0,
+     "hyp": "لأ استنى مش اتنين خليهم تلاتة بيتزا."
+    },
+    {
+     "clip": "u2_address",
+     "cer": 0.244,
+     "hyp": "العنوان: ٢٣ شارع التحرير، الدقي، الدور الخامس."
+    }
+   ]
+  },
+  {
+   "trace": "evidence/P2/CP-0015/trace_normal_whisper.json",
+   "mode": [],
+   "facts": {
+    "composition_id": "comp_s2s_openai_whisper_v1",
+    "turn_detector": "silero",
+    "transcription_model": "whisper-1"
+   },
+   "health_passed": true,
+   "clips": 3,
+   "audio_commits": 3,
+   "eot_to_first_audio_ms": [
+    89,
+    2837,
+    1392
+   ],
+   "barge_in": [
+    {
+     "t1_t2": 1,
+     "t1_t3": 3,
+     "t1_t4": 4,
+     "forced": false
+    },
+    {
+     "t1_t2": 4,
+     "t1_t3": 5,
+     "t1_t4": 6,
+     "forced": false
+    }
+   ],
+   "cer": [
+    {
+     "clip": "u1_order",
+     "cer": 0.019,
+     "hyp": "السلام عليكم عايز اطلب ابنين بيتزا مارجريتا كبيرة و واحد بيبسي"
+    },
+    {
+     "clip": "u2_address",
+     "cer": 0.244,
+     "hyp": "العنوان 23 شارع التحرير الدقي الدور الخامس"
+    },
+    {
+     "clip": "u3_yes",
+     "cer": 0.0,
+     "hyp": "أيوة، تمام كده، اتفقنا"
     }
    ]
   }

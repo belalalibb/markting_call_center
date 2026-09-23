@@ -1,0 +1,124 @@
+     0 session.created                         {"channel": "browser_voice"}
+   249 provider.session_created                {"provider": "openai_realtime", "model": "gpt-realtime"}
+   249 state.changed                           dialog:IDLE->LISTENING [session_started]
+   249 session.started                         {}
+   250 state.changed                           activity:OPENING->ENGAGED [opened]
+  2625 user.speech_started                     {"detector": "silero"}
+  8143 user.speech_committed            turn_1 {"turn_id": "turn_1", "speech_ms": 4340}
+  8143 state.changed                    turn_1 dialog:LISTENING->THINKING [end_of_turn]
+  8144 state.changed                    turn_1 activity:ENGAGED->COLLECTING [field_needed]
+  8232 assistant.response_started       turn_1 {"response_id": "resp_ERR9SWdzyaq0GWy3TmZyf"}
+  8233 state.changed                    turn_1 dialog:THINKING->SPEAKING [response_started]
+  8234 transport.playout_started        turn_1 {"response_id": "resp_ERR9SWdzyaq0GWy3TmZyf"}
+ 10043 user.transcript                  turn_1 {"text_len": 62, "text_sha256_12": "508c8825cafe"}
+ 11567 assistant.response_ended         turn_1 {"response_id": "resp_ERR9SWdzyaq0GWy3TmZyf", "audio_ms": 14400, "text_len": 145, "text_sha256_12": "5b98a1400d41"}
+ 11568 state.changed                    turn_1 dialog:SPEAKING->LISTENING [response_done]
+ 13351 user.speech_started              turn_1 {"detector": "silero"}
+ 13430 user.speech_started              turn_1 {"detector": "silero", "barge_in": true}
+ 13430 interruption.detected            turn_1 {"response_id": "resp_ERR9SWdzyaq0GWy3TmZyf", "audio_ms_sent": 14400, "after_generation": true}
+ 13430 assistant.response_cancelled     turn_1 {"response_id": "resp_ERR9SWdzyaq0GWy3TmZyf", "t2_ms": 13430}
+ 13432 assistant.response_truncated     turn_1 {"response_id": "resp_ERR9SWdzyaq0GWy3TmZyf", "audio_end_ms": 5195}
+ 13434 transport.playout_stopped        turn_1 {"response_id": "resp_ERR9SWdzyaq0GWy3TmZyf", "client_ts_ms": null}
+ 19270 user.speech_committed            turn_2 {"turn_id": "turn_2", "speech_ms": 4740}
+ 19270 state.changed                    turn_2 dialog:LISTENING->THINKING [end_of_turn]
+ 19271 state.changed                    turn_2 activity:COLLECTING->ENGAGED [user_engaged]
+ 19271 state.changed                    turn_2 activity:ENGAGED->COLLECTING [field_needed]
+ 19334 assistant.response_started       turn_2 {"response_id": "resp_ERR9dl37SK4MS5s0ymlkw"}
+ 19334 state.changed                    turn_2 dialog:THINKING->SPEAKING [response_started]
+ 19336 transport.playout_started        turn_2 {"response_id": "resp_ERR9dl37SK4MS5s0ymlkw"}
+ 19897 state.changed                    turn_2 dialog:SPEAKING->WAITING_TOOL [tool_requested]
+ 19897 tool.requested                   turn_2 {"call_id": "call_oaHP9wupJjHG3fxZ", "tool_id": "record_field", "step": "received"}
+ 19898 tool.execution_started           turn_2 {"call_id": "call_oaHP9wupJjHG3fxZ", "tool_id": "record_field"}
+ 19898 tool.execution_completed         turn_2 {"call_id": "call_oaHP9wupJjHG3fxZ", "tool_id": "record_field", "provenance": "USER_STATED", "latency_ms": 0}
+ 19899 decision.made                    turn_2 {"kind": "validate_field", "field": "address", "source": "RULE", "ok": true}
+ 19899 field.recorded                   turn_2 {"name": "address", "provenance": "USER_STATED"}
+ 19899 state.changed                    turn_2 activity:COLLECTING->COLLECTING [field_needed]
+ 19900 state.changed                    turn_2 dialog:WAITING_TOOL->THINKING [tool_returned]
+ 19901 assistant.response_ended         turn_2 {"response_id": "resp_ERR9dl37SK4MS5s0ymlkw", "audio_ms": 0, "text_len": 0, "text_sha256_12": "e3b0c44298fc"}
+ 19901 state.changed                    turn_2 dialog:THINKING->LISTENING [nothing_to_say]
+ 19968 assistant.response_started       turn_2 {"response_id": "resp_ERR9eXo3zNq8oL0TgXIkA"}
+ 19968 state.changed                    turn_2 dialog:LISTENING->SPEAKING [response_started]
+ 19970 transport.playout_started        turn_2 {"response_id": "resp_ERR9eXo3zNq8oL0TgXIkA"}
+ 20339 user.transcript                  turn_2 {"text_len": 42, "text_sha256_12": "44a635f9b249"}
+ 20446 state.changed                    turn_2 dialog:SPEAKING->WAITING_TOOL [tool_requested]
+ 20447 tool.requested                   turn_2 {"call_id": "call_sI4a8hspbd1Xvyer", "tool_id": "verify_field", "step": "received"}
+ 20447 tool.execution_started           turn_2 {"call_id": "call_sI4a8hspbd1Xvyer", "tool_id": "verify_field"}
+ 20447 tool.execution_completed         turn_2 {"call_id": "call_sI4a8hspbd1Xvyer", "tool_id": "verify_field", "provenance": "TOOL_VERIFIED", "latency_ms": 0}
+ 20448 field.verified                   turn_2 {"name": "address", "call_id": "call_sI4a8hspbd1Xvyer"}
+ 20448 state.changed                    turn_2 dialog:WAITING_TOOL->THINKING [tool_returned]
+ 20452 assistant.response_ended         turn_2 {"response_id": "resp_ERR9eXo3zNq8oL0TgXIkA", "audio_ms": 0, "text_len": 0, "text_sha256_12": "e3b0c44298fc"}
+ 20453 state.changed                    turn_2 dialog:THINKING->LISTENING [nothing_to_say]
+ 20518 assistant.response_started       turn_2 {"response_id": "resp_ERR9eAIwcX3wob8DOwt0N"}
+ 20518 state.changed                    turn_2 dialog:LISTENING->SPEAKING [response_started]
+ 20520 transport.playout_started        turn_2 {"response_id": "resp_ERR9eAIwcX3wob8DOwt0N"}
+ 21245 state.changed                    turn_2 dialog:SPEAKING->WAITING_TOOL [tool_requested]
+ 21245 tool.requested                   turn_2 {"call_id": "call_jnm9eP4HlgKApGvG", "tool_id": "record_field", "step": "received"}
+ 21245 tool.execution_started           turn_2 {"call_id": "call_jnm9eP4HlgKApGvG", "tool_id": "record_field"}
+ 21245 tool.execution_completed         turn_2 {"call_id": "call_jnm9eP4HlgKApGvG", "tool_id": "record_field", "provenance": "USER_STATED", "latency_ms": 0}
+ 21246 decision.made                    turn_2 {"kind": "validate_field", "field": "items", "source": "RULE", "ok": true}
+ 21246 field.recorded                   turn_2 {"name": "items", "provenance": "USER_STATED"}
+ 21246 state.changed                    turn_2 activity:COLLECTING->COLLECTING [field_needed]
+ 21247 state.changed                    turn_2 dialog:WAITING_TOOL->THINKING [tool_returned]
+ 21249 assistant.response_ended         turn_2 {"response_id": "resp_ERR9eAIwcX3wob8DOwt0N", "audio_ms": 0, "text_len": 0, "text_sha256_12": "e3b0c44298fc"}
+ 21250 state.changed                    turn_2 dialog:THINKING->LISTENING [nothing_to_say]
+ 21332 assistant.response_started       turn_2 {"response_id": "resp_ERR9f5cBv9pv4rhS2qmFX"}
+ 21332 state.changed                    turn_2 dialog:LISTENING->SPEAKING [response_started]
+ 21336 transport.playout_started        turn_2 {"response_id": "resp_ERR9f5cBv9pv4rhS2qmFX"}
+ 22031 state.changed                    turn_2 dialog:SPEAKING->WAITING_TOOL [tool_requested]
+ 22031 tool.requested                   turn_2 {"call_id": "call_vVuPXqgwaVM1jyqq", "tool_id": "verify_field", "step": "received"}
+ 22031 tool.execution_started           turn_2 {"call_id": "call_vVuPXqgwaVM1jyqq", "tool_id": "verify_field"}
+ 22032 tool.execution_completed         turn_2 {"call_id": "call_vVuPXqgwaVM1jyqq", "tool_id": "verify_field", "provenance": "TOOL_VERIFIED", "latency_ms": 0}
+ 22032 field.verified                   turn_2 {"name": "items", "call_id": "call_vVuPXqgwaVM1jyqq"}
+ 22032 state.changed                    turn_2 dialog:WAITING_TOOL->THINKING [tool_returned]
+ 22036 assistant.response_ended         turn_2 {"response_id": "resp_ERR9f5cBv9pv4rhS2qmFX", "audio_ms": 0, "text_len": 0, "text_sha256_12": "e3b0c44298fc"}
+ 22036 state.changed                    turn_2 dialog:THINKING->LISTENING [nothing_to_say]
+ 22107 assistant.response_started       turn_2 {"response_id": "resp_ERR9gqUGJUqv1E0j7fPS5"}
+ 22107 state.changed                    turn_2 dialog:LISTENING->SPEAKING [response_started]
+ 22109 transport.playout_started        turn_2 {"response_id": "resp_ERR9gqUGJUqv1E0j7fPS5"}
+ 24032 assistant.response_ended         turn_2 {"response_id": "resp_ERR9gqUGJUqv1E0j7fPS5", "audio_ms": 8000, "text_len": 77, "text_sha256_12": "64e85db17a28"}
+ 24033 state.changed                    turn_2 dialog:SPEAKING->LISTENING [response_done]
+ 25800 user.speech_started              turn_2 {"detector": "silero"}
+ 25881 user.speech_started              turn_2 {"detector": "silero", "barge_in": true}
+ 25882 interruption.detected            turn_2 {"response_id": "resp_ERR9gqUGJUqv1E0j7fPS5", "audio_ms_sent": 8000, "after_generation": true}
+ 25883 assistant.response_cancelled     turn_2 {"response_id": "resp_ERR9gqUGJUqv1E0j7fPS5", "t2_ms": 25883}
+ 25885 assistant.response_truncated     turn_2 {"response_id": "resp_ERR9gqUGJUqv1E0j7fPS5", "audio_end_ms": 3770}
+ 25886 transport.playout_stopped        turn_2 {"response_id": "resp_ERR9gqUGJUqv1E0j7fPS5", "client_ts_ms": null}
+ 28681 user.speech_committed            turn_3 {"turn_id": "turn_3", "speech_ms": 1900}
+ 28681 state.changed                    turn_3 dialog:LISTENING->THINKING [end_of_turn]
+ 28681 state.changed                    turn_3 activity:COLLECTING->ENGAGED [user_engaged]
+ 28681 state.changed                    turn_3 activity:ENGAGED->COLLECTING [field_needed]
+ 28744 assistant.response_started       turn_3 {"response_id": "resp_ERR9nz3s9CuhdckLDXDy1"}
+ 28744 state.changed                    turn_3 dialog:THINKING->SPEAKING [response_started]
+ 28746 transport.playout_started        turn_3 {"response_id": "resp_ERR9nz3s9CuhdckLDXDy1"}
+ 29316 state.changed                    turn_3 dialog:SPEAKING->WAITING_TOOL [tool_requested]
+ 29317 tool.requested                   turn_3 {"call_id": "call_2M4RLocrMHxuqL08", "tool_id": "record_field", "step": "received"}
+ 29317 tool.execution_started           turn_3 {"call_id": "call_2M4RLocrMHxuqL08", "tool_id": "record_field"}
+ 29318 tool.execution_completed         turn_3 {"call_id": "call_2M4RLocrMHxuqL08", "tool_id": "record_field", "provenance": "USER_STATED", "latency_ms": 0}
+ 29318 decision.made                    turn_3 {"kind": "validate_field", "field": "quantity", "source": "RULE", "ok": true}
+ 29318 field.recorded                   turn_3 {"name": "quantity", "provenance": "USER_STATED"}
+ 29318 state.changed                    turn_3 activity:COLLECTING->COLLECTING [field_needed]
+ 29319 state.changed                    turn_3 dialog:WAITING_TOOL->THINKING [tool_returned]
+ 29320 assistant.response_ended         turn_3 {"response_id": "resp_ERR9nz3s9CuhdckLDXDy1", "audio_ms": 0, "text_len": 0, "text_sha256_12": "e3b0c44298fc"}
+ 29321 state.changed                    turn_3 dialog:THINKING->LISTENING [nothing_to_say]
+ 29326 user.transcript                  turn_3 {"text_len": 22, "text_sha256_12": "e8a8abe8ce35"}
+ 29390 assistant.response_started       turn_3 {"response_id": "resp_ERR9nGTTnqBDGnq1WAUDG"}
+ 29390 state.changed                    turn_3 dialog:LISTENING->SPEAKING [response_started]
+ 29392 transport.playout_started        turn_3 {"response_id": "resp_ERR9nGTTnqBDGnq1WAUDG"}
+ 30015 state.changed                    turn_3 dialog:SPEAKING->WAITING_TOOL [tool_requested]
+ 30016 tool.requested                   turn_3 {"call_id": "call_F0FWwiX63Si08Xob", "tool_id": "compute_quote", "step": "received"}
+ 30016 tool.execution_started           turn_3 {"call_id": "call_F0FWwiX63Si08Xob", "tool_id": "compute_quote"}
+ 30016 tool.execution_unknown           turn_3 {"call_id": "call_F0FWwiX63Si08Xob", "tool_id": "compute_quote"}
+ 30017 state.changed                    turn_3 dialog:WAITING_TOOL->THINKING [tool_failed]
+ 30019 assistant.response_ended         turn_3 {"response_id": "resp_ERR9nGTTnqBDGnq1WAUDG", "audio_ms": 0, "text_len": 0, "text_sha256_12": "e3b0c44298fc"}
+ 30020 state.changed                    turn_3 dialog:THINKING->LISTENING [nothing_to_say]
+ 30073 assistant.response_started       turn_3 {"response_id": "resp_ERR9ohjXkDrQaTngzNnYk"}
+ 30073 state.changed                    turn_3 dialog:LISTENING->SPEAKING [response_started]
+ 30075 transport.playout_started        turn_3 {"response_id": "resp_ERR9ohjXkDrQaTngzNnYk"}
+ 32045 assistant.response_ended         turn_3 {"response_id": "resp_ERR9ohjXkDrQaTngzNnYk", "audio_ms": 8050, "text_len": 79, "text_sha256_12": "a2646ca74d34"}
+ 32046 state.changed                    turn_3 dialog:SPEAKING->LISTENING [response_done]
+ 36317 state.changed                    turn_3 dialog:LISTENING->CLOSED [close]
+ 36318 state.changed                    turn_3 activity:COLLECTING->ABANDONED [user_left]
+ 38358 provider.session_closed          turn_3 {}
+ 38359 outcome.produced                 turn_3 {"primary": "abandoned", "secondary": []}
+ 38359 interaction_record.produced      turn_3 {"ref": "memory://record/rec_110e4810df8a4121"}
+ 38359 session.ended                    turn_3 {"reason": "user_bye", "turns": 3}
