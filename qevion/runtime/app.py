@@ -18,6 +18,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, ValidationError
 
 from qevion.contracts.activity import ActivityBlueprint, ReadinessState
+from qevion.contracts.simulation import ActivationThresholds
 from qevion.contracts.common import Channel, new_id
 from qevion.contracts.tenant import Tenant
 from qevion.contracts.transport import ClientMessage, ServerMessage, ServerMessageType
@@ -83,6 +84,15 @@ class TransitionBody(BaseModel):
     actor: str = "operator"
 
 
+class ActorBody(BaseModel):
+    actor: str = "operator"
+
+
+class SimulateBody(BaseModel):
+    actor: str = "operator"
+    thresholds: ActivationThresholds | None = None
+
+
 class TestKeyBody(BaseModel):
     provider: str
     value: str
@@ -139,6 +149,17 @@ def create_app(store: RuntimeStore | None = None) -> FastAPI:
             "direction": bp.direction.value,
             "channels": [c.value for c in bp.channels],
             "readiness": rec.readiness.state.value,
+            "simulation": None
+            if rec.simulation is None
+            else {
+                "report_id": rec.simulation.report_id,
+                "passed": rec.simulation.passed,
+                "safety_pass_rate": rec.simulation.safety_pass_rate,
+                "completion_pass_rate": rec.simulation.completion_pass_rate,
+                "cases": len(rec.simulation.results),
+                "findings": len(rec.simulation.findings),
+            },
+            "unapproved_decisions": len(bp.unapproved_decisions()),
             "preflight": None
             if pf is None
             else {"status": pf.status, "blocking": len(pf.blocking), "total": len(pf.findings)},
@@ -204,6 +225,49 @@ def create_app(store: RuntimeStore | None = None) -> FastAPI:
             raise HTTPException(404, str(e)) from e
         blocking = [r for r in rows if r.note != "optional" and r.action.value.startswith(("REQUIRES", "UNSUPPORTED"))]
         return {"key": key, "rows": [r.as_dict() for r in rows], "blocking": len(blocking)}
+
+    @app.post("/api/activities/{key}/simulate")
+    async def simulate(key: str, body: SimulateBody | None = None) -> dict[str, Any]:
+        """Run the persona set on the same Core (mock composition); report drives readiness (QV-SIM)."""
+        body = body or SimulateBody()
+        try:
+            rec = await store.run_simulation(key, thresholds=body.thresholds, actor=body.actor)
+        except KeyError as e:
+            raise HTTPException(404, str(e)) from e
+        rep = rec.simulation
+        assert rep is not None  # noqa: S101 — run_simulation always stores a report
+        return {**_summary(key), "report": rep.model_dump(mode="json", by_alias=True)}
+
+    @app.get("/api/activities/{key}/simulation")
+    async def simulation(key: str) -> dict[str, Any]:
+        try:
+            rec = store.get_activity(key)
+        except KeyError as e:
+            raise HTTPException(404, str(e)) from e
+        return {
+            "key": key,
+            "report": None if rec.simulation is None else rec.simulation.model_dump(mode="json", by_alias=True),
+        }
+
+    @app.get("/api/activities/{key}/gates")
+    async def gates(key: str) -> dict[str, Any]:
+        try:
+            g = store.activation_gates(key)
+        except KeyError as e:
+            raise HTTPException(404, str(e)) from e
+        return {"key": key, "unmet": g.unmet(), "readiness": store.get_activity(key).readiness.state.value}
+
+    @app.post("/api/activities/{key}/activate")
+    async def activate(key: str, body: ActorBody | None = None) -> dict[str, Any]:
+        """QV-LIFE-002: 409 with the unmet gates unless everything is proven."""
+        actor = (body or ActorBody()).actor
+        try:
+            change = store.activate(key, actor=actor)
+        except KeyError as e:
+            raise HTTPException(404, str(e)) from e
+        except IllegalReadinessTransitionError as e:
+            raise HTTPException(409, {"reason": str(e), "unmet": store.activation_gates(key).unmet()}) from e
+        return {**_summary(key), "change": change.payload()}
 
     @app.post("/api/activities/{key}/transition")
     async def transition(key: str, body: TransitionBody) -> dict[str, Any]:

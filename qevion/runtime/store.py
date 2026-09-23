@@ -31,14 +31,22 @@ from qevion.contracts.control import PreflightResult
 from qevion.contracts.event import Event
 from qevion.contracts.knowledge import KnowledgeSource, SourceKind
 from qevion.contracts.provider import ProviderRole, S2SSessionConfig
+from qevion.contracts.simulation import ActivationThresholds, ScenarioCase, SimulationReport
 from qevion.contracts.tenant import LocalePack, Tenant, VoiceProfile
 from qevion.contracts.transport import ServerMessage, ServerMessageType
 from qevion.control.capabilities import CapabilityMapper, RequirementMapping, build_registry
 from qevion.control.preflight import Preflight, PreflightContext
-from qevion.control.readiness import IllegalReadinessTransitionError, ReadinessChange, ReadinessMachine
+from qevion.control.readiness import (
+    ActivationGates,
+    IllegalReadinessTransitionError,
+    ReadinessChange,
+    ReadinessMachine,
+)
 from qevion.core.platform_tools import declarations_for_blueprint_permissions, platform_declarations
 from qevion.core.session import Session, SessionDeps
 from qevion.knowledge.pipeline import IngestionReport, KnowledgePipeline, KnowledgeStore
+from qevion.simulation.cases import default_cases
+from qevion.simulation.runner import ScenarioRunner, SimulationDeps
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -48,6 +56,8 @@ class ActivityRecord:
     blueprint: ActivityBlueprint
     readiness: ReadinessMachine
     preflight: PreflightResult | None = None
+    simulation: SimulationReport | None = None
+    preflight_ref: str | None = None
     mapping: list[RequirementMapping] = field(default_factory=list)
     changes: list[ReadinessChange] = field(default_factory=list)
     notes: list[str] = field(default_factory=list)
@@ -151,6 +161,7 @@ class RuntimeStore:
         result = Preflight(self.preflight_ctx(rec.blueprint, strict=strict)).run(rec.blueprint)
         rec.preflight = result
         ref = f"preflight:{hashlib.sha256(result.model_dump_json().encode()).hexdigest()[:12]}"
+        rec.preflight_ref = ref
         try:
             change = rec.readiness.apply_preflight(result, ref=ref, actor=actor)
         except IllegalReadinessTransitionError as e:
@@ -165,6 +176,55 @@ class RuntimeStore:
         rec = self.get_activity(key)
         rec.mapping = CapabilityMapper(self.registry, self.composition).map_requirements(rec.blueprint)
         return rec.mapping
+
+    # -------------------------------------------------------------- simulation + activation (P5)
+    async def run_simulation(
+        self,
+        key: str,
+        *,
+        cases: list[ScenarioCase] | None = None,
+        thresholds: ActivationThresholds | None = None,
+        actor: str = "api",
+    ) -> ActivityRecord:
+        """QV-SIM: same Core on the mock composition; report drives READY_FOR_ACTIVATION / SIMULATION_FAILED."""
+        rec = self.get_activity(key)
+        bp = rec.blueprint
+        runner = ScenarioRunner(bp, SimulationDeps(composition_id=self.default_composition_id))
+        report = await runner.run(cases or default_cases(bp), thresholds=thresholds)
+        rec.simulation = report
+        ref = f"simulation:{report.report_id}"
+        try:
+            change = rec.readiness.apply_simulation(report.passed, ref=ref, actor=actor)
+        except IllegalReadinessTransitionError as e:
+            rec.notes.append(f"simulation_not_applied: {e}")
+            change = None
+        if change is not None:
+            rec.changes.append(change)
+        return rec
+
+    def activation_gates(self, key: str) -> ActivationGates:
+        rec = self.get_activity(key)
+        bp = rec.blueprint
+        return ActivationGates(
+            schema_valid=True,  # a stored ActivityBlueprint already passed contract validation
+            preflight=rec.preflight,
+            simulation_passed=None if rec.simulation is None else rec.simulation.passed,
+            all_decisions_approved=not bp.unapproved_decisions(),
+            version_frozen=rec.readiness.state.value in ("READY_FOR_ACTIVATION", "ACTIVE", "SUSPENDED"),
+        )
+
+    def activate(self, key: str, *, actor: str) -> ReadinessChange:
+        """QV-LIFE-002: refuses unless every gate is satisfied; the refusal names the unmet gates."""
+        rec = self.get_activity(key)
+        gates = self.activation_gates(key)
+        change = rec.readiness.activate(
+            gates,
+            actor=actor,
+            preflight_ref=rec.preflight_ref or "",
+            simulation_ref=f"simulation:{rec.simulation.report_id}" if rec.simulation else "",
+        )
+        rec.changes.append(change)
+        return change
 
     def transition(self, key: str, dst: ReadinessState, *, reason: str, actor: str) -> ReadinessChange:
         rec = self.get_activity(key)
