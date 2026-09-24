@@ -436,11 +436,25 @@ def create_app(store: RuntimeStore | None = None) -> FastAPI:
                     **c.model_dump(mode="json", by_alias=True),
                     "default": c.composition_id == store.default_composition_id,
                     "credential_source": cred.source.value if cred else "none",
+                    # F-14: a mock composition is a simulation — it needs no key, so "no credential" is not an issue
+                    "simulated": bool(s2s and s2s.adapter == "mock"),
+                    "needs_credential": bool(s2s and s2s.adapter != "mock"),
+                    "ready": bool(s2s and (s2s.adapter == "mock" or (cred and cred.source.value != "none"))),
                     "decision_adapter": dec.adapter if dec else None,
                     "decision_credential_source": dec_cred.source.value if dec_cred else None,
                 }
             )
         return out
+
+    @app.get("/api/credential-vendors")
+    async def credential_vendors() -> list[str]:
+        """F-14: only vendors that a registered adapter actually consumes (Admin must not offer dead options)."""
+        vendors = {"typesafe"}
+        for c in store.compositions.values():
+            for b in c.bindings:
+                if b.role.value == "s2s" and b.adapter != "mock":
+                    vendors.add(b.adapter.split("_")[0])
+        return sorted(vendors)
 
     @app.get("/api/registry")
     async def registry() -> dict[str, Any]:
