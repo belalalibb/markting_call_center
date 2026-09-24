@@ -54,7 +54,13 @@ async def _feed(sock: _Sock, *msgs: dict[str, Any]) -> None:
 
 
 def _call(cid: str) -> dict[str, Any]:
-    return {"type": "response.function_call_arguments.done", "response_id": "r1", "call_id": cid, "name": "record_field", "arguments": "{}"}
+    return {
+        "type": "response.function_call_arguments.done",
+        "response_id": "r1",
+        "call_id": cid,
+        "name": "record_field",
+        "arguments": "{}",
+    }
 
 
 @pytest.mark.asyncio
