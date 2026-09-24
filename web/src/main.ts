@@ -111,7 +111,8 @@ function renderHealth(): void {
       "ok",
     );
   } else if (runtimeSummary) {
-    next = pill(`ok · default ${runtimeSummary.composition} · ${runtimeSummary.activities} activities · ${runtimeSummary.sessions_live} live`, "ok");
+    const sim = runtimeSummary.composition.includes("mock") ? " (simulated)" : "";
+    next = pill(`ok · default ${runtimeSummary.composition}${sim} · ${runtimeSummary.activities} activities · ${runtimeSummary.sessions_live} live`, "ok");
   } else {
     next = pill("runtime unreachable", "bad");
   }
