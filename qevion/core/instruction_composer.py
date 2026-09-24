@@ -160,6 +160,29 @@ class InstructionComposer:
             ]
         )
 
+    def _parallel_tools(self) -> str:
+        """Latency option B: independent calls in ONE response (one provider cycle) instead of a chain. Tools that
+        need confirmation, escalate, or depend on a previous result are barriers and are called alone."""
+        if "parallel_tools" not in self.options or not (self.blueprint.tools.required or self.blueprint.tools.optional):
+            return ""
+        tb = self.blueprint.tools
+        barriers = sorted(
+            tid
+            for tid, perm in tb.permissions.items()
+            if perm.confirmation == "confirm_before_execute"
+            or (self.tool_declarations.get(tid) is not None and self.tool_declarations[tid].impact.value != "read")
+            and tid != "record_field"
+        )
+        lines = [
+            "When several tool calls are independent (none needs another's result), make them ALL in the same "
+            "response instead of one after another — e.g. one record_field call per detail the user just gave, "
+            "plus any lookup that does not depend on them.",
+            "Only call tools one after another when a later call needs an earlier call's result.",
+        ]
+        if barriers:
+            lines.append("Always call these alone, never together with other tools: " + ", ".join(barriers) + ".")
+        return "\n".join(lines)
+
     def _truth(self) -> str:
         p = self.blueprint.policies
         lines = ["Truthfulness rules:"]
@@ -242,6 +265,7 @@ class InstructionComposer:
             "data": self._data(),
             "tools": self._tools(),
             "tool_ack": self._tool_ack(),
+            "parallel_tools": self._parallel_tools(),
             "truth": self._truth(),
             "coverage": self._coverage(),
             "disclosures": self._disclosures(),

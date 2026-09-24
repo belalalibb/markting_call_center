@@ -451,7 +451,11 @@ class RuntimeStore:
                 model=s2s_b.model or "mock-1",
                 voice=voice,
                 language_hint=bp.locale.locale,
-                extra={k: v for k, v in s2s_b.config.items() if k in ("transcription_model",)},
+                extra={
+                    **{k: v for k, v in s2s_b.config.items() if k in ("transcription_model",)},
+                    # option B: provider adapter continues once per batch of independent calls
+                    **({"parallel_tools": True} if "parallel_tools" in _instruction_options(s2s_b.config) else {}),
+                },
                 tools=[
                     d.model_dump(mode="json")
                     for d in declarations_for_blueprint_permissions(bp.tools.permissions).values()
@@ -528,6 +532,8 @@ def _instruction_options(config: dict[str, Any]) -> frozenset[str]:
     opts = set()
     if _flag(config, "tool_ack", "QEVION_TOOL_ACK"):
         opts.add("tool_ack")
+    if _flag(config, "parallel_tools", "QEVION_PARALLEL_TOOLS"):
+        opts.add("parallel_tools")
     return frozenset(opts)
 
 
