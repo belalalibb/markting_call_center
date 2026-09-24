@@ -5,7 +5,7 @@
 | Field | Value |
 |---|---|
 | Project phase | P5 — Simulation + Activation + Outbound |
-| Current stage | **OPS 5.5 remediation program** (approved 2026-09-23, run end-to-end without re-approval): P0 CP-0013 ✅, P1 CP-0014 ✅, P2 CP-0015 ✅, P3 → CP-0016 (in progress), P4 → CP-0017 |
+| Current stage | **OPS 5.5 remediation program** (approved 2026-09-23, run end-to-end without re-approval): P0 CP-0013 ✅, P1 CP-0014 ✅, P2 CP-0015 ✅, P3 CP-0016 ✅, P4 → CP-0017 (next), P4 → CP-0017 |
 | Current objective | Execute `docs/audit/OPS55_AUDIT_2026-09-23.md` plan: P2 transcription model option + F-09 Silero honesty + corpus harness + latency table; P3 F-08 tenant scoping + F-12 bounded logs; P4 UX (Normal/Advanced, mobile nav, first-run, actionable errors, admin provider list, F-14, F-15 docs) |
 | Last verified checkpoint | CP-0015 (OPS 5.5 P2: transcription option, real Silero, barge-in ack + close fixes, latency table) — tag `cp/CP-0015` |
 | Last known good Git SHA | see `recovery/checkpoints/index.jsonl` last line (CP-0014) |
@@ -77,7 +77,7 @@
 2. Post-P6 backlog: bounded-LLM simulated customer, CRM/DNC adapter seam, Silero ONNX model fetch, real-provider latency table.
 
 ## Exact next action
-P3 (CP-0016): F-08 tenant scoping of `/api/events` + `/api/sessions` (+ tests), F-12 bounded `event_log`/`sessions` pruning. Then P4 (CP-0017). After a reset: `bash scripts/fetch_models.sh` + `pip install -e '.[dev,vad]' playwright`. Server: `env -u OPENAI_API_KEY -u QEVION_ADMIN_TOKEN .venv/bin/python -m qevion.main`.
+P4 (CP-0017): Normal/Advanced UI, mobile nav, first-run banner, actionable errors, Admin provider list (web/src/admin.ts ~l.40 → only adapters), mock/default clarity, F-14, F-15 docs (traceability QV-ACC-022). After a reset: `bash scripts/fetch_models.sh` + `pip install -e '.[dev,vad]' playwright`. Server: `env -u OPENAI_API_KEY -u QEVION_ADMIN_TOKEN .venv/bin/python -m qevion.main`.
 
 Previous: CP-0012 checkpoint (record + tag + snapshot) for the keepalive fix; then backlog: live barge-in probe on OpenAI (ACC-017/018 real-provider timings), Arabizi negatives into rules lexicon, bounded-LLM simulated customer. Server: `env -u OPENAI_API_KEY .venv/bin/python -m qevion.main`; inject keys via `POST /api/admin/test-key`.
 
