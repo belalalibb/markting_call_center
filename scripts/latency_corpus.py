@@ -145,6 +145,8 @@ async def run_session(plan: list[str], clips: dict[str, bytes], lastv: dict[str,
                         continue
                     m = json.loads(raw)
                     ty = m["type"]
+                    if ty != "ping":
+                        st["last_msg"] = t
                     st["sid"] = st["sid"] or m.get("session_id")
                     if ty == "ping":
                         await ws.send(json.dumps({"type": "pong"}))
@@ -152,7 +154,20 @@ async def run_session(plan: list[str], clips: dict[str, bytes], lastv: dict[str,
                         marks.append((t, "client:ready", ""))
                     elif ty == "audio_start":
                         st["rid"] = m.get("response_id")
+                        st["open"] = st.get("open", 0) + 1
                         await ws.send(json.dumps({"type": "playout_started", "response_id": st["rid"]}))
+                    elif ty == "audio_end":
+                        st["open"] = max(0, st.get("open", 0) - 1)
+                        pl = m.get("payload") or {}
+                        marks.append((t, "client:audio_end", m.get("response_id") or ""))
+                        st.setdefault("spoken", []).append(
+                            {
+                                "t": t,
+                                "rid": m.get("response_id"),
+                                "audio_ms": pl.get("audio_ms", 0),
+                                "text": m.get("text"),
+                            }
+                        )
                     elif ty == "stop_playout":
                         await ws.send(json.dumps({"type": "playout_stopped", "response_id": m.get("response_id")}))
             except websockets.exceptions.ConnectionClosed:
@@ -182,19 +197,23 @@ async def run_session(plan: list[str], clips: dict[str, bytes], lastv: dict[str,
                 await asyncio.sleep(max(0.0, nxt - time.monotonic()))
             # keep the mic "open" with silence (like a real client) until the agent has spoken and the audio it
             # sent has had time to play out, then a short human pause
+            # Turn is over when every started response has ended AND the server has been quiet for 2.5 s
+            # (an acknowledgement followed by silent tool cycles must not end the wait early). Then let the audio
+            # the client received finish "playing" (bytes → ms), like a listening user.
             first_seen = len(st["first_bin"])
+            bytes0 = sum(st["bytes"].values())
             waited = 0.0
-            while waited < 20.0:
+            while waited < 30.0:
                 await silence_for(0.2)
                 waited += 0.2
-                if len(st["first_bin"]) > first_seen and now_ms() - st["last_bin"] > 1500:
-                    rid = st["rid"] or ""
-                    play_ms = st["bytes"].get(rid, 0) / 48.0  # 24 kHz pcm16 mono
-                    first_t = next((m[0] for m in reversed(marks) if m[1] == "client:first_audio_frame"), now_ms())
-                    remain = first_t + play_ms - now_ms()
+                quiet = now_ms() - max(st["last_bin"], st.get("last_msg", 0)) > 2500
+                if len(st["first_bin"]) > first_seen and st.get("open", 0) == 0 and quiet:
+                    play_ms = (sum(st["bytes"].values()) - bytes0) / 48.0  # 24 kHz pcm16 mono
+                    firsts = [m[0] for m in marks if m[1] == "client:first_audio_frame" and m[0] >= t_start]
+                    remain = (firsts[0] if firsts else now_ms()) + play_ms - now_ms()
                     if remain > 0:
-                        await silence_for(min(remain / 1000, 15))
-                    await ws.send(json.dumps({"type": "playout_stopped", "response_id": rid}))
+                        await silence_for(min(remain / 1000, 20))
+                    await ws.send(json.dumps({"type": "playout_stopped", "response_id": st["rid"] or ""}))
                     break
             turns.append({"clip": name, "t_clip_start": t_start, "t1": t1, "t_clip_end": now_ms()})
             await silence_for(0.8)
@@ -215,6 +234,8 @@ async def run_session(plan: list[str], clips: dict[str, bytes], lastv: dict[str,
         "server_marks": srv["marks"],
         "error": detail.get("error"),
         "outcome": (detail.get("outcome") or {}).get("primary"),
+        "spoken": st.get("spoken", []),
+        "flags": {k: os.environ.get(k) for k in ("QEVION_TOOL_ACK", "QEVION_PARALLEL_TOOLS")},
     }
 
 
@@ -261,6 +282,9 @@ def analyse(sess: dict[str, Any]) -> list[dict[str, Any]]:
         t15 = subs[-1] if subs else None
         t16 = g("recv:response.created", t15) if t15 else None
         t17 = g("recv:first_audio_delta", t15) if t15 else None
+        t9_answer = g("client:first_audio_frame", t17) if t17 else t9
+        spoken = [x for x in sess.get("spoken", []) if tu["t_clip_start"] <= x["t"] < (until or 1e18)]
+        ack = [x for x in spoken if t15 is not None and x["t"] <= t15 and x.get("audio_ms")]
         dones = [m[0] for m in w if m[1] == "recv:response.done"]
         t18 = dones[-1] if dones else None
         decs = []
@@ -293,6 +317,10 @@ def analyse(sess: dict[str, Any]) -> list[dict[str, Any]]:
                 "T7_T8_qevion_forward": d(t7, t8),
                 "T8_T9_ws_delivery": d(t8, t9),
                 "T1_T9_user_to_first_audio_client": d(t1, t9),
+                "T1_T9a_user_to_answer_audio_client": d(t1, t9_answer),
+                "ack_spoken": bool(ack),
+                "ack_texts": [x.get("text") for x in ack],
+                "tool_cycles": sum(1 for m in w if m[1] == "sent:response.create") - 1,
                 "T12_T13_tool_dispatch": d(t12, t13),
                 "T13_T14_tool_exec": d(t13, t14),
                 "T15_T16_post_tool_created": d(t15, t16),
