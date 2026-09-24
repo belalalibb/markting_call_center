@@ -38,3 +38,4 @@ data/runtime/
 models/
 .cache_tts/
 .cache_setup.log
+.cache_*

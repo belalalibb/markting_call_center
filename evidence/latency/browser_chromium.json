@@ -1,0 +1,105 @@
+{
+ "browser": "chromium",
+ "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
+ "audio_context": {
+  "sampleRate": 44100,
+  "baseLatency": 0.01,
+  "outputLatency": 0
+ },
+ "responses": 4,
+ "summary": {
+  "T7_T8_server_forward": {
+   "n": 4,
+   "min": 1.1,
+   "p50": 1.2,
+   "p95": 1.2,
+   "max": 1.2,
+   "mean": 1.1,
+   "outliers": 0
+  },
+  "T8_T9_ws_to_browser": {
+   "n": 4,
+   "min": -0.0,
+   "p50": 0.5,
+   "p95": 0.6,
+   "max": 0.6,
+   "mean": 0.4,
+   "outliers": 0
+  },
+  "T9_T10_to_worklet": {
+   "n": 4,
+   "min": 0,
+   "p50": 0,
+   "p95": 0,
+   "max": 0,
+   "mean": 0,
+   "outliers": 0
+  },
+  "T10_T11_render": {
+   "n": 2,
+   "min": 34.6,
+   "p50": 34.6,
+   "p95": 37.8,
+   "max": 37.8,
+   "mean": 36.2,
+   "outliers": 0
+  },
+  "T11_device_output_est": {
+   "n": 2,
+   "min": 40.0,
+   "p50": 40.0,
+   "p95": 40.0,
+   "max": 40.0,
+   "mean": 40.0,
+   "outliers": 0
+  },
+  "T9_T11_browser_total_est": {
+   "n": 2,
+   "min": 74.7,
+   "p50": 74.7,
+   "p95": 77.8,
+   "max": 77.8,
+   "mean": 76.2,
+   "outliers": 0
+  }
+ },
+ "rows": [
+  {
+   "response_id": "resp_ERTcRqFX9gCn0oQoA5HHw",
+   "T7_T8_server_forward": 1.1,
+   "T8_T9_ws_to_browser": 0.6,
+   "T9_T10_to_worklet": 0,
+   "T10_T11_render": 34.6,
+   "T11_device_output_est": 40.0,
+   "T9_T11_browser_total_est": 74.7
+  },
+  {
+   "response_id": "resp_ERTcdcmlNbithCayMt52O",
+   "T7_T8_server_forward": 1.2,
+   "T8_T9_ws_to_browser": 0.5,
+   "T9_T10_to_worklet": 0,
+   "T10_T11_render": 37.8,
+   "T11_device_output_est": 40.0,
+   "T9_T11_browser_total_est": 77.8
+  },
+  {
+   "response_id": "resp_ERTcr0Gurwm2GeqxTXMk9",
+   "T7_T8_server_forward": 1.2,
+   "T8_T9_ws_to_browser": 0.4,
+   "T9_T10_to_worklet": 0,
+   "T10_T11_render": null,
+   "T11_device_output_est": null,
+   "T9_T11_browser_total_est": null
+  },
+  {
+   "response_id": "resp_ERTdGYIDBLCL65fOEEwsO",
+   "T7_T8_server_forward": 1.1,
+   "T8_T9_ws_to_browser": -0.0,
+   "T9_T10_to_worklet": 0,
+   "T10_T11_render": null,
+   "T11_device_output_est": null,
+   "T9_T11_browser_total_est": null
+  }
+ ],
+ "chat_tail": "connected → act_order_intake@1.0.0 via comp_s2s_openai_v1 (browser_voice) — waiting for session ready…\nsession ready — composition comp_s2s_openai_v1 · browser_voice · s2s openai_realtime:gpt-realtime · credential ephemeral_ui\nأهلاًبيك،معاكخدمةاستقبالالطلبات.خلينيأساعدكونجمعطلبكبالكامل.بالنسبةللتوصيل،أناماعنديشمعلومةمؤكدةحالياًعنالوقتبالضبط،لكنأولمانأكدعنوانالتوصيلونكملالطلب،ممكننعرفالوقتالتقديريمنخلالالنظام.ياريتتقوليالأولإيهالأصنافالليحاببتطلبها؟\nطب والتوصيل هياخد قد ايه؟\n⏹ you interrupted — agent stopped\nتمام،ممكنتقولليعاوزكاموجبةمنالتوسين؟عشانأقدرأضبطالطلببالظبط.\nأيوة تمام كده، اتفقنا.\nمحتاجبسعددمحدد،ممكننبدأمثلاًبواحدة،ولاحاببأكترمنكده؟\nيعني ممكن، مش عارف، شوف إنت.\nأيوة تمام كده، اتفقنا.\nللأسفمشلاقيالتوسينفيالقائمةالمعتمدةحالياً.ممكنتقولياسمتانيللوجبةأوالمنتجالليتقصده؟"
+}
