@@ -36,3 +36,5 @@ data/runtime/
 !evidence/**/junit.xml
 !evidence/**/licenses.json
 models/
+.cache_tts/
+.cache_setup.log
