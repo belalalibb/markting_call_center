@@ -336,7 +336,9 @@ async def test_interruption_seven_steps_with_watermarks_and_reconciled_context()
         await asyncio.sleep(0)
     assert session.dialog.state is DialogState.SPEAKING
     transport.client_sends(_text("wait, change that"))  # text during SPEAKING == barge-in (1 DETECT)
-    for _ in range(10):
+    for _ in range(40):  # inbound goes reader → inbox → processor, so wait on the condition, not a yield count
+        if transport.messages_of("stop_playout"):
+            break
         await asyncio.sleep(0)
     # client acknowledges playout stop (3) — before that the 300 ms force path would mark forced=True
     stop = transport.messages_of("stop_playout")
