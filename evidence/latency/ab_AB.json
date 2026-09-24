@@ -1,0 +1,36 @@
+{
+ "summary": {
+  "all": {},
+  "no_tool": {},
+  "one_tool": {},
+  "multi_tool": {},
+  "counts": {
+   "all": 0,
+   "no_tool": 0,
+   "one_tool": 0,
+   "multi_tool": 0
+  },
+  "fragmented_turns": 0,
+  "premature_eot_total": 0,
+  "failed_sessions": 4,
+  "decisions": {
+   "count": 0,
+   "by_source": {}
+  }
+ },
+ "rows": [],
+ "sessions": [
+  {
+   "error": "ConnectionClosedOK: received 1000 (OK) provider_failure; then sent 1000 (OK) provider_failure"
+  },
+  {
+   "error": "ConnectionClosedOK: received 1000 (OK) provider_failure; then sent 1000 (OK) provider_failure"
+  },
+  {
+   "error": "ConnectionClosedOK: received 1000 (OK) provider_failure; then sent 1000 (OK) provider_failure"
+  },
+  {
+   "error": "ConnectionClosedOK: received 1000 (OK) provider_failure; then sent 1000 (OK) provider_failure"
+  }
+ ]
+}
