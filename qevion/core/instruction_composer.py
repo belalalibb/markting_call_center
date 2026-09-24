@@ -81,6 +81,8 @@ class InstructionComposer:
     tool_declarations: dict[str, ToolDeclaration] = field(default_factory=dict)
     locale_pack: LocalePack | None = None
     voice_profile: VoiceProfile | None = None
+    # Runtime-selected, reversible instruction options (composition config / env), e.g. {"tool_ack"}.
+    options: frozenset[str] = frozenset()
 
     # ------------------------------------------------------------------ static sections
     def _role(self) -> str:
@@ -139,6 +141,24 @@ class InstructionComposer:
                 lines.append(f"- {r.tool_id}: {r.purpose or 'see declaration'} [{perm.impact}]")
         lines.append("Never claim an action succeeded unless the tool result says so. If a result is unknown, say so.")
         return "\n".join(lines)
+
+    def _tool_ack(self) -> str:
+        """Latency option A (2026-09-24 root-cause report): tool turns were silent for ~2 s while the model ran
+        2–3 function-call cycles. Let it speak a *content-free* acknowledgement first. It must carry no claim:
+        Core governance is unchanged, and the acknowledgement is constrained to be empty of facts."""
+        if "tool_ack" not in self.options or not (self.blueprint.tools.required or self.blueprint.tools.optional):
+            return ""
+        return "\n".join(
+            [
+                "When you need to call a tool before you can answer, first say ONE very short neutral acknowledgement "
+                "in the conversation language (2–4 words, the equivalent of 'one moment' or 'okay, let me check'), "
+                "then call the tool in the same response.",
+                "The acknowledgement must contain NO facts: no numbers, quantities, prices, names, addresses, "
+                "availability, times, and no statement that anything was recorded, confirmed, booked or succeeded. "
+                "Do not repeat back the user's details in it.",
+                "Give the real answer only after the tool results arrive.",
+            ]
+        )
 
     def _truth(self) -> str:
         p = self.blueprint.policies
@@ -221,6 +241,7 @@ class InstructionComposer:
             "language": self._language(),
             "data": self._data(),
             "tools": self._tools(),
+            "tool_ack": self._tool_ack(),
             "truth": self._truth(),
             "coverage": self._coverage(),
             "disclosures": self._disclosures(),
