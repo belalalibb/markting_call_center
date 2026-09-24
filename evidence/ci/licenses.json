@@ -55,11 +55,6 @@
     "Version": "25.12.19"
   },
   {
-    "License": "MIT AND PSF-2.0",
-    "Name": "greenlet",
-    "Version": "3.5.6"
-  },
-  {
     "License": "BSD License",
     "Name": "grimp",
     "Version": "3.17"
@@ -160,11 +155,6 @@
     "Version": "1.1.1"
   },
   {
-    "License": "Apache-2.0",
-    "Name": "playwright",
-    "Version": "1.63.0"
-  },
-  {
     "License": "MIT License",
     "Name": "pluggy",
     "Version": "1.6.0"
@@ -183,11 +173,6 @@
     "License": "MIT",
     "Name": "pydantic_core",
     "Version": "2.46.5"
-  },
-  {
-    "License": "MIT License",
-    "Name": "pyee",
-    "Version": "13.0.1"
   },
   {
     "License": "MIT",
