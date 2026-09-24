@@ -40,8 +40,9 @@ class QevionPlayout extends AudioWorkletProcessor {
     this.offset = 0;
     this.played = 0;
     this.underruns = 0;
+    this.idle = true;
     this.port.onmessage = (e) => {
-      if (e.data === 'flush') { this.queue = []; this.offset = 0; this.port.postMessage({ type: 'flushed', played: this.played }); return; }
+      if (e.data === 'flush') { this.queue = []; this.offset = 0; this.idle = true; this.port.postMessage({ type: 'flushed', played: this.played }); return; }
       this.queue.push(new Int16Array(e.data));
     };
   }
@@ -51,11 +52,14 @@ class QevionPlayout extends AudioWorkletProcessor {
     while (i < out.length) {
       if (this.queue.length === 0) {
         if (i === 0) this.underruns++;
+        this.idle = true;
         for (; i < out.length; i++) out[i] = 0;
         break;
       }
       const head = this.queue[0];
       const v = head[this.offset++];
+      // latency diagnostics: report the render time of the first audible sample after an idle queue
+      if (this.idle && v !== 0) { this.idle = false; this.port.postMessage({ type: 'first_sample', at: currentTime + i / sampleRate }); }
       out[i++] = v / 0x8000;
       this.played++;
       if (this.offset >= head.length) { this.queue.shift(); this.offset = 0; }

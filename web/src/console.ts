@@ -1,7 +1,7 @@
 // Operator Console: live text/voice session over WS (selectable composition), state, events, handoffs,
 // and the §31 interruption watermarks (t0..t4) per session.
 import { api, outboundWsUrl, wsUrl, type ActivitySummary, type CompositionSummary, type ContactState, type InterruptionRecord } from "./api";
-import { VoiceClient } from "./audio/client";
+import { VoiceClient, latencyMark } from "./audio/client";
 import { clear, errMsg, h, pill, pre, section, table, toast, toneFor } from "./ui";
 
 interface ServerMsg {
@@ -212,6 +212,7 @@ function chatCard(activities: ActivitySummary[], compositions: CompositionSummar
   const sendFrame = (frame: ArrayBuffer) => { if (ws && ws.readyState === WebSocket.OPEN) ws.send(frame); };
   let lastResponseId: string | null = null;
   let audioBytesIn = 0;
+  let firstRecv: string | null = null;
   const agentBubbles = new Map<string, HTMLElement>();
 
   const micOff = async () => {
@@ -260,6 +261,7 @@ function chatCard(activities: ActivitySummary[], compositions: CompositionSummar
     ws.onmessage = (ev) => {
       if (typeof ev.data !== "string") {
         const buf = ev.data as ArrayBuffer;
+        if (lastResponseId !== firstRecv) { firstRecv = lastResponseId; latencyMark("first_frame_ws_recv", lastResponseId); }
         audioBytesIn += buf.byteLength;
         if (voice) voice.enqueue(buf, lastResponseId);
         else if (audioBytesIn === buf.byteLength) add("sys", `◼ audio stream started (${buf.byteLength} bytes; mic off → not played)`);

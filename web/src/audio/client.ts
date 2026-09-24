@@ -21,6 +21,7 @@ export class VoiceClient {
   public bytesIn = 0;
   public playing = false;
   private currentResponse: string | null = null;
+  private firstPosted: string | null = null;
 
   constructor(
     private send: (frame: ArrayBuffer) => void,
@@ -39,6 +40,16 @@ export class VoiceClient {
     src.connect(this.capture);
     this.playout = new AudioWorkletNode(this.ctx, "qevion-playout", { numberOfInputs: 0, numberOfOutputs: 1, outputChannelCount: [1] });
     this.playout.port.onmessage = (e: MessageEvent<{ type: string; played: number; queued?: number; underruns?: number }>) => {
+      if (e.data.type === "first_sample" && this.ctx) {
+        // audio-clock time of the first non-zero rendered sample → wall clock, plus device output latency
+        const d = e.data as unknown as { at: number };
+        const ts = this.ctx.getOutputTimestamp();
+        const wallAtRender = (ts.performanceTime ?? performance.now()) + (d.at - (ts.contextTime ?? this.ctx.currentTime)) * 1000;
+        const outLat = ((this.ctx as AudioContext & { outputLatency?: number }).outputLatency ?? 0) * 1000;
+        latencyMark("first_sample_rendered", this.currentResponse, performance.timeOrigin + wallAtRender);
+        latencyMark("first_sample_audible_est", this.currentResponse, performance.timeOrigin + wallAtRender + outLat + this.ctx.baseLatency * 1000);
+        return;
+      }
       if (e.data.type === "tick") {
         const played_ms = (e.data.played / (this.ctx?.sampleRate ?? TARGET_RATE)) * 1000;
         const queued_ms = ((e.data.queued ?? 0) / (this.ctx?.sampleRate ?? TARGET_RATE)) * 1000;
@@ -95,6 +106,7 @@ export class VoiceClient {
     }
     const copy = frame.slice(0);
     this.playout.port.postMessage(copy, [copy]);
+    if (this.firstPosted !== responseId) { this.firstPosted = responseId; latencyMark("first_frame_to_worklet", responseId); }
   }
 
   /** Interruption step 2 (§31): drop everything queued locally within one render quantum. */
@@ -122,4 +134,11 @@ export class VoiceClient {
     this.playout = null;
     this.ev.onStatus?.("mic off");
   }
+}
+
+/** Latency diagnostics (observation only): epoch-ms marks readable by test harnesses as window.__qevionLatency. */
+export function latencyMark(kind: string, ref: string | null, epochMs = Date.now()): void {
+  const w = window as unknown as { __qevionLatency?: [number, string, string][] };
+  (w.__qevionLatency ??= []).push([epochMs, kind, ref ?? ""]);
+  if (w.__qevionLatency.length > 5000) w.__qevionLatency.splice(0, 1000);
 }
