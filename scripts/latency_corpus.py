@@ -233,7 +233,7 @@ def analyse(sess: dict[str, Any]) -> list[dict[str, Any]]:
         t1 = tu["t1"]
         until = turns[i + 1]["t_clip_start"] if i + 1 < len(turns) else None
         w = [m for m in allm if m[0] >= tu["t_clip_start"] and (until is None or m[0] < until)]
-        g = lambda k, after=tu["t_clip_start"]: first_after(w, k, after)  # noqa: E731
+        g = lambda k, after=tu["t_clip_start"], w=w: first_after(w, k, after)  # noqa: E731
         t3 = g("core:end_of_turn")
         eots = [m for m in w if m[1] == "core:end_of_turn"]
         t4 = g("sent:input_audio_buffer.commit", t3 or 0)
