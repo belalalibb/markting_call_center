@@ -16,6 +16,7 @@ from __future__ import annotations
 import asyncio
 import json
 import os
+import pathlib
 import sys
 import time
 from datetime import UTC, datetime
@@ -62,6 +63,33 @@ WS_SHIM = """
 # shorter than the turn plane's min_speech_ms (correctly classified as noise), so the smoke speaks deterministically.
 # While the scripted utterance plays, the real capture path is muted (binary sends from the worklet are dropped) so
 # the turn plane sees one contiguous utterance instead of tone frames interleaved with fake-mic silence/beeps.
+# With real Silero (CP-0015) a pure tone is correctly rejected as non-speech, so when synthetic speech clips are
+# available (voice_trace_live.py caches OpenAI TTS PCM in $TMP/qevion_tts) the smoke streams real speech instead.
+SPEECH_JS = """
+(async (b64) => {
+  const ws = window.__qevion_last_ws; if (!ws || ws.readyState !== 1) return false;
+  const raw = Uint8Array.from(atob(b64), c => c.charCodeAt(0)); const bytes = 960;
+  window.__qevion_mute_capture = true;
+  try {
+    for (let i = 0; i + bytes <= raw.length; i += bytes) {
+      ws.__qevion_raw_send(raw.slice(i, i + bytes).buffer);
+      await new Promise(r => setTimeout(r, 20));
+    }
+    for (let k = 0; k < 50; k++) { ws.__qevion_raw_send(new Int16Array(480).buffer); await new Promise(r => setTimeout(r, 20)); }
+  } finally { window.__qevion_mute_capture = false; }
+  return true;
+})
+"""
+
+
+def _speech_clip(name: str) -> str | None:
+    import base64
+    import tempfile
+
+    d = pathlib.Path(os.environ.get("QEVION_TTS_CACHE", tempfile.gettempdir())) / "qevion_tts" / f"{name}.pcm"
+    return base64.b64encode(d.read_bytes()).decode() if d.is_file() else None
+
+
 SPEAK_JS = """
 (async (ms) => {
   const ws = window.__qevion_last_ws; if (!ws || ws.readyState !== 1) return false;
@@ -170,7 +198,8 @@ async def main() -> int:
             audio_ends = int(tt_now.get("audio_end", 0))
             # first spoken user turn once the session is ready and the agent finished its opening (or after 8 s)
             if ready_seen and not spoke_first and (audio_ends >= 1 or now() > 8000):
-                await page.evaluate(f"({SPEAK_JS})(1400)")
+                clip = _speech_clip("u1_order")
+                await page.evaluate(f"({SPEECH_JS})", clip) if clip else await page.evaluate(f"({SPEAK_JS})(1400)")
                 spoke_first = True
                 spoken_turns += 1
                 audio_ends_at_first = audio_ends
@@ -180,7 +209,8 @@ async def main() -> int:
             # at least 3 s have passed since that answer ended
             first_cycle_done = spoke_first and audio_ends >= 1
             if first_cycle_done and not second_turn_sent and first_answer_ms and now() - first_answer_ms >= 3000:
-                await page.evaluate(f"({SPEAK_JS})(1200)")
+                clip = _speech_clip("u2_address")
+                await page.evaluate(f"({SPEECH_JS})", clip) if clip else await page.evaluate(f"({SPEAK_JS})(1200)")
                 spoken_turns += 1
                 second_turn_sent = True
         if soak_close is None:
