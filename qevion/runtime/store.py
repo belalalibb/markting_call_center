@@ -115,6 +115,7 @@ class LiveSession:
     close_code: int | None = None  # WS close code observed by the server pump (1000 = clean; 1011 = keepalive)
     close_reason: str = ""
     heartbeat: dict[str, Any] = field(default_factory=dict)  # sent / last_rtt_ms / dropped_audio_frames
+    tenant_id: str = ""
 
 
 class RuntimeStore:
@@ -132,7 +133,13 @@ class RuntimeStore:
         self.reports: dict[str, IngestionReport] = {}
         self.credentials = EnvAdminEphemeralResolver()
         self.sessions: dict[str, LiveSession] = {}
+        # F-12: bounded in-memory telemetry. `event_log` is a ring buffer addressed by an absolute offset
+        # (`event_log_base` = number of events already dropped) so `/api/events?since=` stays monotonic.
         self.event_log: list[Event] = []
+        self.event_log_base = 0
+        self.max_events = int(os.environ.get("QEVION_MAX_EVENTS", "50000"))
+        self.max_sessions = int(os.environ.get("QEVION_MAX_SESSIONS", "200"))
+        self.max_session_events = int(os.environ.get("QEVION_MAX_SESSION_EVENTS", "5000"))
         self.compositions: dict[str, Composition] = _load_dir(
             ROOT / "config/compositions", Composition, "composition_id"
         )
@@ -375,10 +382,13 @@ class RuntimeStore:
         rec = self.get_activity(activity_key)
         bp = rec.blueprint
         live = LiveSession(session_id=session_id, activity_key=activity_key, session=None)  # type: ignore[arg-type]
+        live.tenant_id = bp.identity.tenant_id
 
         async def sink(ev: Event) -> None:
             live.events.append(ev)
-            self.event_log.append(ev)
+            if len(live.events) > self.max_session_events:
+                del live.events[: len(live.events) - self.max_session_events]
+            self.log_event(ev)
             if ev.type in FORWARDED_EVENT_TYPES:
                 # Filtered mirror to the client (ServerMessageType.EVENT): operator-facing telemetry only,
                 # never transcripts/audio/secrets (QV-EVT-003). Transport failures must not break the session.
@@ -459,7 +469,42 @@ class RuntimeStore:
         # cannot look up its own session (found live 2026-09-23: WS id != /api/sessions id).
         live.session = Session(deps, session_id=session_id)
         self.sessions[session_id] = live
+        self.prune_sessions()
         return live
+
+    def log_event(self, ev: Event) -> None:
+        self.event_log.append(ev)
+        over = len(self.event_log) - self.max_events
+        if over > 0:
+            del self.event_log[:over]
+            self.event_log_base += over
+
+    def events_since(self, since: int, limit: int, tenant_id: str | None = None) -> list[Event]:
+        """Absolute-offset read of the ring buffer; `tenant_id` filters (F-08)."""
+        start = max(0, since - self.event_log_base)
+        if tenant_id is None:
+            return self.event_log[start : start + limit]
+        out: list[Event] = []
+        for ev in self.event_log[start:]:
+            if ev.tenant_id == tenant_id:
+                out.append(ev)
+                if len(out) >= limit:
+                    break
+        return out
+
+    def prune_sessions(self) -> None:
+        """F-12: keep at most `max_sessions`; only finished sessions are evicted (oldest first), never live ones."""
+        excess = len(self.sessions) - self.max_sessions
+        if excess <= 0:
+            return
+        for sid in list(self.sessions):
+            if excess <= 0:
+                break
+            s = self.sessions[sid]
+            finished = s.session is not None and s.session.record is not None and (s.task is None or s.task.done())
+            if finished:
+                del self.sessions[sid]
+                excess -= 1
 
 
 def _load_dir(path: Path, model: type[Any], key: str) -> dict[str, Any]:

@@ -54,7 +54,7 @@ def build(store: RuntimeStore | None = None, *, seed_examples: bool = True, web_
         return store.put_activity(bp).key
 
     def _sink(ev: Event) -> None:
-        store.event_log.append(ev)
+        store.log_event(ev)
 
     mount(app, CopilotContext(_preflight_ctx, _mapper, _knowledge, _publish, _sink))
 

@@ -261,6 +261,7 @@ def create_app(store: RuntimeStore | None = None) -> FastAPI:
             "tenants": len(store.tenants),
             "activities": len(store.activities),
             "sessions_live": sum(1 for s in store.sessions.values() if s.task and not s.task.done()),
+            "limits": {"events": store.max_events, "sessions": store.max_sessions},
             # F-09: whether Silero really runs or the honest energy fallback is used
             "silero_model_available": bool(getattr(store.turn_adapters.get("silero"), "model_available", False)),
         }
@@ -520,20 +521,39 @@ def create_app(store: RuntimeStore | None = None) -> FastAPI:
         return {"cleared": store.credentials.clear_ephemeral(provider, tenant_id)}
 
     # ---------------------------------------------------------------- sessions
+    def _scope_tenant(request: Request) -> str | None:
+        # set by OperatorAuthMiddleware: None = operator (all tenants), else the tenant token's tenant (F-08)
+        return getattr(request.state, "qevion_tenant", None)
+
     @app.get("/api/sessions")
-    async def sessions() -> list[dict[str, Any]]:
-        return [_live(s) for s in store.sessions.values()]
+    async def sessions(request: Request, tenant: str | None = None) -> list[dict[str, Any]]:
+        scoped = _scope_tenant(request)
+        want = scoped if scoped is not None else tenant
+        return [_live(s) for s in store.sessions.values() if want is None or s.tenant_id == want]
 
     @app.get("/api/sessions/{sid}")
-    async def session_detail(sid: str) -> dict[str, Any]:
+    async def session_detail(sid: str, request: Request) -> dict[str, Any]:
         s = store.sessions.get(sid)
-        if s is None:
-            raise HTTPException(404, sid)
+        scoped = _scope_tenant(request)
+        if s is None or (scoped is not None and s.tenant_id != scoped):
+            raise HTTPException(404, sid)  # never confirm another tenant's session exists
         return {**_live(s), "events": [e.model_dump(mode="json", by_alias=True) for e in s.events[-200:]]}
 
     @app.get("/api/events")
-    async def events(since: int = 0, limit: int = 200) -> list[dict[str, Any]]:
-        return [e.model_dump(mode="json", by_alias=True) for e in store.event_log[since : since + limit]]
+    async def events(
+        request: Request, since: int = 0, limit: int = 200, session_id: str | None = None, tenant: str | None = None
+    ) -> list[dict[str, Any]]:
+        scoped = _scope_tenant(request)
+        want = scoped if scoped is not None else tenant
+        limit = max(1, min(limit, 100000))
+        if session_id is not None:
+            s = store.sessions.get(session_id)
+            if s is None or (want is not None and s.tenant_id != want):
+                return []
+            evs = s.events[:limit]
+        else:
+            evs = store.events_since(since, limit, want)
+        return [e.model_dump(mode="json", by_alias=True) for e in evs]
 
     @app.websocket("/ws/sessions/{activity_key}")
     async def ws_session(
@@ -738,6 +758,7 @@ def _live(s: LiveSession) -> dict[str, Any]:
     rec = s.session.record
     return {
         "session_id": s.session_id,
+        "tenant_id": s.tenant_id,
         "activity_key": s.activity_key,
         "running": bool(s.task and not s.task.done()),
         "dialog_state": s.session.dialog.state.value,

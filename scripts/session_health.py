@@ -14,7 +14,7 @@ from urllib import request
 
 
 def fetch_events(base: str, session_id: str, headers: dict[str, str] | None = None) -> list[dict[str, Any]]:
-    req = request.Request(base.rstrip("/") + "/api/events?since=0&limit=100000", headers=headers or {})
+    req = request.Request(base.rstrip("/") + f"/api/events?session_id={session_id}&limit=100000", headers=headers or {})
     with request.urlopen(req, timeout=15) as r:  # noqa: S310 - operator-run against own server
         evs = json.loads(r.read().decode())
     return [e for e in evs if e.get("session_id") == session_id]
