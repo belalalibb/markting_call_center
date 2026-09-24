@@ -32,7 +32,7 @@ REPEAT = int(sys.argv[sys.argv.index("--repeat") + 1]) if "--repeat" in sys.argv
 URL = "wss://api.openai.com/v1/realtime?model=gpt-realtime"
 
 
-def qevion_session_update() -> dict[str, Any]:
+async def qevion_session_update() -> dict[str, Any]:
     """Build the exact provider config QEVION would send for act_order_intake on comp_s2s_openai_v1."""
     from qevion.adapters.transports.memory import MemoryTransportSession
     from qevion.contracts.common import Channel
@@ -66,7 +66,7 @@ def qevion_session_update() -> dict[str, Any]:
             return None
 
     rs = OpenAIRealtimeSession(sess.deps.s2s_config, _S())  # type: ignore[arg-type]
-    asyncio.run(rs.update_instructions(composed.text))
+    await rs.update_instructions(composed.text)
     return next(m for m in cap if m["type"] == "session.update")
 
 
@@ -153,7 +153,7 @@ async def main() -> int:
     names = sorted({n for p in SESSIONS for n in p})
     clips = {n: tts(n) for n in names}
     lastv = {n: last_voiced_frame(clips[n]) for n in names}
-    upd = qevion_session_update()
+    upd = await qevion_session_update()
     upd_nt = json.loads(json.dumps(upd))
     upd_nt["session"]["tools"] = []
     rows: list[dict[str, Any]] = []
