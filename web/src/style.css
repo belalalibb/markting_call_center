@@ -97,3 +97,5 @@ button.ghost { background: transparent; font-size: 12px; padding: 4px 10px; }
   .row { flex-wrap: wrap; }
   .row > select, .row > input { min-width: 0; flex: 1 1 100%; }
 }
+.table-wrap { max-width: 100%; overflow-x: auto; }
+pre, .code { max-width: 100%; overflow-x: auto; }

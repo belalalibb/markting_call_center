@@ -45,11 +45,16 @@ export function section(title: string, ...children: (Node | string | null | unde
 }
 
 export function table(headers: string[], rows: (Node | string)[][]): HTMLElement {
+  // wrapped so wide tables scroll inside their card instead of widening the page (P4 mobile)
   return h(
-    "table",
-    {},
-    h("thead", {}, h("tr", {}, ...headers.map((x) => h("th", {}, x)))),
-    h("tbody", {}, ...rows.map((r) => h("tr", {}, ...r.map((c) => h("td", {}, c))))),
+    "div",
+    { class: "table-wrap" },
+    h(
+      "table",
+      {},
+      h("thead", {}, h("tr", {}, ...headers.map((x) => h("th", {}, x)))),
+      h("tbody", {}, ...rows.map((r) => h("tr", {}, ...r.map((c) => h("td", {}, c))))),
+    ),
   );
 }
 

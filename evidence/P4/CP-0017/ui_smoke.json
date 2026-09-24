@@ -1,0 +1,17 @@
+{
+ "checks": {
+  "first_run_banner": true,
+  "normal_hides_telemetry": true,
+  "advanced_shows_telemetry": true,
+  "label_simulated": true,
+  "label_key_missing": true,
+  "no_key_error_actionable": true,
+  "first_run_dismissed": true,
+  "admin_vendors_real_only": true,
+  "mobile_header_not_overlapping": true,
+  "mobile_no_horizontal_overflow": false,
+  "no_console_errors": true
+ },
+ "passed": false,
+ "console_errors": []
+}
