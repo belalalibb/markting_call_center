@@ -9,6 +9,11 @@ BR="$(git rev-parse --abbrev-ref HEAD)"
 if [ "$BR" != "latency-ab-experiment" ]; then
   echo "REFUSED: run only on branch latency-ab-experiment (current: $BR)" >&2; exit 3
 fi
+# Safety gate: dependency / barrier / missing-result tests must pass on this exact build before any live run.
+if ! .venv/bin/python -m pytest -q tests/test_latency_b_dependency_safety.py tests/test_latency_option_b.py \
+     tests/test_latency_option_a.py >/dev/null 2>&1; then
+  echo "REFUSED: offline A/B safety tests fail on this build" >&2; exit 5
+fi
 WIN="${1:-w$(date -u +%Y%m%dT%H%M)}"
 DIR="evidence/latency/ab/$WIN"
 mkdir -p "$DIR"
