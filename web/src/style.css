@@ -80,3 +80,20 @@ tr[data-key] { cursor: pointer; }
 /* F-13 transcripts: pending agent bubble, interrupted bubble */
 .msg.agent.pending { opacity: 0.6; font-style: italic; }
 .msg.agent.cut { text-decoration: line-through; opacity: 0.7; }
+
+/* P4: Normal/Advanced view */
+body.normal .advanced { display: none !important; }
+button.ghost { background: transparent; font-size: 12px; padding: 4px 10px; }
+.banner.info { border-color: var(--accent); }
+.msg.sys.bad { color: var(--bad); }
+.msg.sys.bad a { color: var(--accent); }
+/* P4: mobile — header wraps instead of overlapping; nav scrolls horizontally; single-column cards */
+@media (max-width: 720px) {
+  #top { flex-wrap: wrap; gap: 8px 12px; padding: 8px 12px; position: static; }
+  #top nav { order: 3; width: 100%; display: flex; overflow-x: auto; white-space: nowrap; gap: 4px; }
+  nav a { margin-right: 12px; }
+  #health { margin-left: 0; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  main { padding: 10px; grid-template-columns: 1fr; }
+  .row { flex-wrap: wrap; }
+  .row > select, .row > input { min-width: 0; flex: 1 1 100%; }
+}

@@ -28,7 +28,16 @@ export async function renderConsole(root: HTMLElement): Promise<void> {
     api.activities().catch(() => [] as ActivitySummary[]),
     api.compositions().catch(() => [] as CompositionSummary[]),
   ]);
-  root.append(chatCard(activities, compositions), stateCard(), outboundCard(activities), interruptionsCard(), sessionsCard(), eventsCard());
+  // P4: Normal mode = what an operator needs to run a call; Advanced adds engineering telemetry.
+  const adv = (el: HTMLElement) => { el.classList.add("advanced"); return el; };
+  root.append(
+    chatCard(activities, compositions),
+    sessionsCard(),
+    adv(stateCard()),
+    adv(outboundCard(activities)),
+    adv(interruptionsCard()),
+    adv(eventsCard()),
+  );
 }
 
 // ------------------------------------------------------- outbound dial (QV-OUT-DIR / QV-TEL seam)

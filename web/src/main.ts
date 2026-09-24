@@ -31,6 +31,37 @@ function renderLogin(root: HTMLElement): void {
     h("div", { class: "row" }, input, h("button", { class: "primary", onClick: () => void submit() }, "Sign in"))));
 }
 
+/** P4 Normal/Advanced: advanced-only elements carry `.advanced` and are hidden by `body.normal`. */
+const UI_MODE_KEY = "qevion.uiMode";
+function applyUiMode(mode: "normal" | "advanced"): void {
+  document.body.classList.toggle("normal", mode === "normal");
+  localStorage.setItem(UI_MODE_KEY, mode);
+  const btn = document.getElementById("uimode");
+  if (btn) btn.textContent = mode === "normal" ? "Normal view" : "Advanced view";
+}
+function initUiMode(): void {
+  const btn = h("button", { id: "uimode", class: "ghost", title: "Normal hides engineering telemetry" }, "");
+  btn.addEventListener("click", () => applyUiMode(document.body.classList.contains("normal") ? "advanced" : "normal"));
+  document.getElementById("health")?.before(btn);
+  applyUiMode((localStorage.getItem(UI_MODE_KEY) as "normal" | "advanced" | null) ?? "normal");
+}
+
+/** P4 first-run: tells a new operator the 3 steps, and whether a real provider key is present yet. */
+async function firstRunBanner(): Promise<HTMLElement | null> {
+  if (localStorage.getItem("qevion.firstRunDone") === "1") return null;
+  let comps: { simulated?: boolean; ready?: boolean }[] = [];
+  try { comps = await api.compositions(); } catch { return null; }
+  const realReady = comps.some((c) => !c.simulated && c.ready);
+  const b = h("div", { class: "banner info", id: "firstrun" },
+    h("strong", {}, "Getting started: "),
+    "1) Config Center — pick or create an activity. ",
+    "2) ", realReady ? "A real provider key is present. " : h("a", { href: "#/admin" }, "Admin → paste your OpenAI key"),
+    realReady ? "" : " (until then, only the simulated mock composition works). ",
+    "3) Operator Console — choose a composition, Connect, then Mic. ",
+    h("button", { class: "ghost", onClick: () => { localStorage.setItem("qevion.firstRunDone", "1"); b.remove(); } }, "Dismiss"));
+  return b;
+}
+
 function devModeBanner(): HTMLElement {
   return h("div", { class: "banner warn" },
     "Development mode: no operator token is set, so anyone who can reach this URL can use it (and your provider key). ",
@@ -51,6 +82,10 @@ async function route(): Promise<void> {
     const b = devModeBanner();
     b.id = "devbanner";
     document.getElementById("top")?.after(b);
+  }
+  if (!document.getElementById("firstrun")) {
+    const fr = await firstRunBanner();
+    if (fr) (document.getElementById("devbanner") ?? document.getElementById("top"))?.after(fr);
   }
   root.append(h("p", { class: "muted" }, "loading…"));
   try {
@@ -100,6 +135,7 @@ window.addEventListener("qevion:live", (e) => {
 
 window.addEventListener("qevion:unauthorized", () => renderLogin(document.getElementById("app")!));
 window.addEventListener("hashchange", () => void route());
+initUiMode();
 void route();
 void health();
 setInterval(() => void health(), 10_000);
