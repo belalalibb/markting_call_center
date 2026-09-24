@@ -1,0 +1,129 @@
+{
+ "kind": "browser-voice-smoke",
+ "produced_at": "2026-09-24T00:38:46.493427+00:00",
+ "base": "http://localhost:8000",
+ "activity": "act_order_intake@1.0.0",
+ "composition": "comp_s2s_openai_v1",
+ "key_injected_for": "openai",
+ "target_seconds": 60.0,
+ "survived_ms": 66482,
+ "header_samples": [
+  [
+   4644,
+   "live · comp_s2s_openai_v1 · browser_voice · openai_realtime:gpt-realtime"
+  ],
+  [
+   66339,
+   "ok · default comp_mock_s2s_v1 (simulated) · 3 activities · 1 live"
+  ]
+ ],
+ "status_pills": [
+  "ok · default comp_mock_s2s_v1 (simulated) · 3 activities · 1 live",
+  "disconnected (1000)",
+  "ended",
+  "1000 user_bye",
+  "abandoned",
+  "ended",
+  "1000 user_bye",
+  "abandoned"
+ ],
+ "ready_line": "session ready — composition comp_s2s_openai_v1 · browser_voice · s2s openai_realtime:gpt-realtime · credential ephemeral_ui",
+ "chat": [
+  [
+   4634,
+   "connected → act_order_intake@1.0.0 via comp_s2s_openai_v1 (browser_voice) — waiting for session ready…"
+  ],
+  [
+   4634,
+   "session ready — composition comp_s2s_openai_v1 · browser_voice · s2s openai_realtime:gpt-realtime · credential ephemeral_ui"
+  ],
+  [
+   66332,
+   "closed (1000: user_bye)"
+  ]
+ ],
+ "ws": {
+  "text_types": {
+   "state": 2,
+   "ready": 1,
+   "ping": 6,
+   "event": 2
+  },
+  "binary": 0,
+  "pings": 6,
+  "pongs_sent": 6,
+  "close": {
+   "code": 1000,
+   "reason": "user_bye",
+   "at": 1790210326295
+  }
+ },
+ "speaking_cycles": 0,
+ "spoken_user_turns": 1,
+ "close_during_soak": null,
+ "console_errors": [],
+ "sessions_after": [
+  {
+   "session_id": "ses_3da8414f385e4553",
+   "composition_id": "comp_s2s_openai_v1",
+   "channel": "browser_voice",
+   "credential_source": "ephemeral_ui",
+   "running": false,
+   "error": null,
+   "close_code": 1000,
+   "close_reason": "user_bye",
+   "heartbeat": {
+    "sent": 3,
+    "last_rtt_ms": 2.7,
+    "dropped_audio_frames": 0
+   }
+  },
+  {
+   "session_id": "ses_fdb382dd994445cc",
+   "composition_id": "comp_s2s_openai_v1",
+   "channel": "browser_voice",
+   "credential_source": "ephemeral_ui",
+   "running": false,
+   "error": null,
+   "close_code": 1000,
+   "close_reason": "user_bye",
+   "heartbeat": {
+    "sent": 6,
+    "last_rtt_ms": 4.8,
+    "dropped_audio_frames": 0
+   }
+  }
+ ],
+ "core_health": {
+  "checks": {
+   "no_provider_error": true,
+   "no_illegal_dialog_transition": true,
+   "activity_never_blocked": true,
+   "outcome_not_technical_failure": true,
+   "session_started": true
+  },
+  "passed": true,
+  "outcome": "abandoned",
+  "provider_errors": [],
+  "illegal_transitions": [],
+  "event_count": 11
+ },
+ "checks": {
+  "mic_on": true,
+  "connected": true,
+  "session_ready": true,
+  "header_shows_actual_composition": true,
+  "speaking_then_listening": false,
+  "second_user_turn": false,
+  "heartbeat_answered": true,
+  "no_close_during_soak": true,
+  "final_close_1000": true,
+  "no_1011": true,
+  "core:no_provider_error": true,
+  "core:no_illegal_dialog_transition": true,
+  "core:activity_never_blocked": true,
+  "core:outcome_not_technical_failure": true,
+  "core:session_started": true
+ },
+ "passed": false
+}
