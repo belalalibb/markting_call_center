@@ -1,0 +1,582 @@
+{
+ "all": {
+  "n": 33,
+  "T1_T3_endpoint": {
+   "n": 33,
+   "min": 482.1,
+   "p50": 504.1,
+   "p95": 543.6,
+   "max": 544.2,
+   "mean": 513.9,
+   "outliers": 0
+  },
+  "T3_T4_commit": {
+   "n": 33,
+   "min": 1.2,
+   "p50": 1.9,
+   "p95": 2.8,
+   "max": 6.7,
+   "mean": 2.1,
+   "outliers": 5
+  },
+  "T4_T5_provider_ack": {
+   "n": 33,
+   "min": 50.1,
+   "p50": 60.4,
+   "p95": 71.5,
+   "max": 76.4,
+   "mean": 60.4,
+   "outliers": 1
+  },
+  "T4_T6_response_created": {
+   "n": 33,
+   "min": 56.0,
+   "p50": 67.5,
+   "p95": 77.5,
+   "max": 82.3,
+   "mean": 68.4,
+   "outliers": 0
+  },
+  "T6_T7_first_audio": {
+   "n": 33,
+   "min": 245.5,
+   "p50": 613.5,
+   "p95": 2561.7,
+   "max": 3121.5,
+   "mean": 1074.2,
+   "outliers": 0
+  },
+  "T4_T7_provider_ttfa": {
+   "n": 33,
+   "min": 312.8,
+   "p50": 676.0,
+   "p95": 2633.1,
+   "max": 3187.0,
+   "mean": 1142.7,
+   "outliers": 0
+  },
+  "T7_T8_qevion_forward": {
+   "n": 33,
+   "min": 0.6,
+   "p50": 1.1,
+   "p95": 1.5,
+   "max": 1.6,
+   "mean": 1.2,
+   "outliers": 0
+  },
+  "T8_T9_ws_delivery": {
+   "n": 33,
+   "min": 0.3,
+   "p50": 0.5,
+   "p95": 0.7,
+   "max": 0.8,
+   "mean": 0.6,
+   "outliers": 1
+  },
+  "T1_T9_user_to_first_audio_client": {
+   "n": 33,
+   "min": 817.5,
+   "p50": 1191.5,
+   "p95": 3180.0,
+   "max": 3672.8,
+   "mean": 1660.3,
+   "outliers": 0
+  },
+  "T13_T14_tool_exec": {
+   "n": 13,
+   "min": 0.5,
+   "p50": 1.0,
+   "p95": 1.2,
+   "max": 1.4,
+   "mean": 1.0,
+   "outliers": 0
+  },
+  "T15_T17_post_tool_ttfa": {
+   "n": 13,
+   "min": 266.2,
+   "p50": 471.3,
+   "p95": 532.2,
+   "max": 697.4,
+   "mean": 453.9,
+   "outliers": 0
+  },
+  "T3_T18_turn_total": {
+   "n": 33,
+   "min": 1876.0,
+   "p50": 3522.5,
+   "p95": 5551.9,
+   "max": 5849.2,
+   "mean": 3412.5,
+   "outliers": 0
+  }
+ },
+ "no_tool": {
+  "n": 20,
+  "T1_T3_endpoint": {
+   "n": 20,
+   "min": 501.0,
+   "p50": 503.2,
+   "p95": 543.0,
+   "max": 543.6,
+   "mean": 510.7,
+   "outliers": 0
+  },
+  "T3_T4_commit": {
+   "n": 20,
+   "min": 1.2,
+   "p50": 1.9,
+   "p95": 2.7,
+   "max": 2.9,
+   "mean": 2.0,
+   "outliers": 3
+  },
+  "T4_T5_provider_ack": {
+   "n": 20,
+   "min": 50.1,
+   "p50": 60.7,
+   "p95": 73.7,
+   "max": 76.4,
+   "mean": 61.7,
+   "outliers": 1
+  },
+  "T4_T6_response_created": {
+   "n": 20,
+   "min": 56.0,
+   "p50": 68.9,
+   "p95": 79.9,
+   "max": 82.3,
+   "mean": 69.2,
+   "outliers": 0
+  },
+  "T6_T7_first_audio": {
+   "n": 20,
+   "min": 245.5,
+   "p50": 441.3,
+   "p95": 704.9,
+   "max": 790.8,
+   "mean": 460.3,
+   "outliers": 0
+  },
+  "T4_T7_provider_ttfa": {
+   "n": 20,
+   "min": 312.8,
+   "p50": 504.8,
+   "p95": 761.0,
+   "max": 861.8,
+   "mean": 529.6,
+   "outliers": 0
+  },
+  "T7_T8_qevion_forward": {
+   "n": 20,
+   "min": 0.6,
+   "p50": 1.1,
+   "p95": 1.5,
+   "max": 1.6,
+   "mean": 1.1,
+   "outliers": 2
+  },
+  "T8_T9_ws_delivery": {
+   "n": 20,
+   "min": 0.3,
+   "p50": 0.6,
+   "p95": 0.7,
+   "max": 0.7,
+   "mean": 0.5,
+   "outliers": 0
+  },
+  "T1_T9_user_to_first_audio_client": {
+   "n": 20,
+   "min": 817.5,
+   "p50": 1010.9,
+   "p95": 1307.6,
+   "max": 1388.8,
+   "mean": 1043.9,
+   "outliers": 0
+  },
+  "T13_T14_tool_exec": {
+   "n": 0
+  },
+  "T15_T17_post_tool_ttfa": {
+   "n": 0
+  },
+  "T3_T18_turn_total": {
+   "n": 20,
+   "min": 1876.0,
+   "p50": 2587.5,
+   "p95": 4570.5,
+   "max": 4623.2,
+   "mean": 2757.7,
+   "outliers": 0
+  }
+ },
+ "tool": {
+  "n": 13,
+  "T1_T3_endpoint": {
+   "n": 13,
+   "min": 482.1,
+   "p50": 522.8,
+   "p95": 543.6,
+   "max": 544.2,
+   "mean": 518.8,
+   "outliers": 0
+  },
+  "T3_T4_commit": {
+   "n": 13,
+   "min": 1.2,
+   "p50": 1.8,
+   "p95": 2.8,
+   "max": 6.7,
+   "mean": 2.2,
+   "outliers": 2
+  },
+  "T4_T5_provider_ack": {
+   "n": 13,
+   "min": 52.8,
+   "p50": 59.1,
+   "p95": 64.2,
+   "max": 67.2,
+   "mean": 58.5,
+   "outliers": 0
+  },
+  "T4_T6_response_created": {
+   "n": 13,
+   "min": 58.6,
+   "p50": 67.2,
+   "p95": 72.2,
+   "max": 75.6,
+   "mean": 67.2,
+   "outliers": 0
+  },
+  "T6_T7_first_audio": {
+   "n": 13,
+   "min": 464.4,
+   "p50": 2005.4,
+   "p95": 2616.5,
+   "max": 3121.5,
+   "mean": 2018.7,
+   "outliers": 0
+  },
+  "T4_T7_provider_ttfa": {
+   "n": 13,
+   "min": 524.3,
+   "p50": 2081.0,
+   "p95": 2688.7,
+   "max": 3187.0,
+   "mean": 2085.9,
+   "outliers": 0
+  },
+  "T7_T8_qevion_forward": {
+   "n": 13,
+   "min": 0.8,
+   "p50": 1.2,
+   "p95": 1.4,
+   "max": 1.6,
+   "mean": 1.2,
+   "outliers": 0
+  },
+  "T8_T9_ws_delivery": {
+   "n": 13,
+   "min": 0.5,
+   "p50": 0.5,
+   "p95": 0.7,
+   "max": 0.8,
+   "mean": 0.6,
+   "outliers": 1
+  },
+  "T1_T9_user_to_first_audio_client": {
+   "n": 13,
+   "min": 1028.8,
+   "p50": 2614.0,
+   "p95": 3215.5,
+   "max": 3672.8,
+   "mean": 2608.7,
+   "outliers": 0
+  },
+  "T13_T14_tool_exec": {
+   "n": 13,
+   "min": 0.5,
+   "p50": 1.0,
+   "p95": 1.2,
+   "max": 1.4,
+   "mean": 1.0,
+   "outliers": 0
+  },
+  "T15_T17_post_tool_ttfa": {
+   "n": 13,
+   "min": 266.2,
+   "p50": 471.3,
+   "p95": 532.2,
+   "max": 697.4,
+   "mean": 453.9,
+   "outliers": 0
+  },
+  "T3_T18_turn_total": {
+   "n": 13,
+   "min": 3465.8,
+   "p50": 4257.8,
+   "p95": 5561.0,
+   "max": 5849.2,
+   "mean": 4420.0,
+   "outliers": 0
+  }
+ },
+ "tool_2": {
+  "n": 8,
+  "T1_T3_endpoint": {
+   "n": 8,
+   "min": 500.9,
+   "p50": 524.3,
+   "p95": 544.2,
+   "max": 544.2,
+   "mean": 520.9,
+   "outliers": 0
+  },
+  "T3_T4_commit": {
+   "n": 8,
+   "min": 1.7,
+   "p50": 1.8,
+   "p95": 2.0,
+   "max": 2.0,
+   "mean": 1.8,
+   "outliers": 0
+  },
+  "T4_T5_provider_ack": {
+   "n": 8,
+   "min": 52.8,
+   "p50": 56.1,
+   "p95": 63.8,
+   "max": 63.8,
+   "mean": 56.7,
+   "outliers": 0
+  },
+  "T4_T6_response_created": {
+   "n": 8,
+   "min": 58.6,
+   "p50": 66.4,
+   "p95": 71.7,
+   "max": 71.7,
+   "mean": 64.6,
+   "outliers": 0
+  },
+  "T6_T7_first_audio": {
+   "n": 8,
+   "min": 464.4,
+   "p50": 1854.5,
+   "p95": 2231.2,
+   "max": 2231.2,
+   "mean": 1694.5,
+   "outliers": 1
+  },
+  "T4_T7_provider_ttfa": {
+   "n": 8,
+   "min": 524.3,
+   "p50": 1922.0,
+   "p95": 2289.8,
+   "max": 2289.8,
+   "mean": 1759.1,
+   "outliers": 1
+  },
+  "T7_T8_qevion_forward": {
+   "n": 8,
+   "min": 1.1,
+   "p50": 1.2,
+   "p95": 1.3,
+   "max": 1.3,
+   "mean": 1.2,
+   "outliers": 0
+  },
+  "T8_T9_ws_delivery": {
+   "n": 8,
+   "min": 0.5,
+   "p50": 0.6,
+   "p95": 0.7,
+   "max": 0.7,
+   "mean": 0.6,
+   "outliers": 0
+  },
+  "T1_T9_user_to_first_audio_client": {
+   "n": 8,
+   "min": 1028.8,
+   "p50": 2449.7,
+   "p95": 2837.6,
+   "max": 2837.6,
+   "mean": 2283.5,
+   "outliers": 1
+  },
+  "T13_T14_tool_exec": {
+   "n": 8,
+   "min": 0.5,
+   "p50": 1.0,
+   "p95": 1.2,
+   "max": 1.2,
+   "mean": 0.9,
+   "outliers": 0
+  },
+  "T15_T17_post_tool_ttfa": {
+   "n": 8,
+   "min": 315.7,
+   "p50": 494.9,
+   "p95": 697.4,
+   "max": 697.4,
+   "mean": 475.2,
+   "outliers": 1
+  },
+  "T3_T18_turn_total": {
+   "n": 8,
+   "min": 3465.8,
+   "p50": 4086.1,
+   "p95": 5561.0,
+   "max": 5561.0,
+   "mean": 4115.8,
+   "outliers": 1
+  }
+ },
+ "tool_3": {
+  "n": 5,
+  "T1_T3_endpoint": {
+   "n": 5,
+   "min": 482.1,
+   "p50": 522.8,
+   "p95": 543.6,
+   "max": 543.6,
+   "mean": 515.5,
+   "outliers": 0
+  },
+  "T3_T4_commit": {
+   "n": 5,
+   "min": 1.2,
+   "p50": 2.2,
+   "p95": 6.7,
+   "max": 6.7,
+   "mean": 2.9,
+   "outliers": 1
+  },
+  "T4_T5_provider_ack": {
+   "n": 5,
+   "min": 53.2,
+   "p50": 61.3,
+   "p95": 67.2,
+   "max": 67.2,
+   "mean": 61.3,
+   "outliers": 0
+  },
+  "T4_T6_response_created": {
+   "n": 5,
+   "min": 65.6,
+   "p50": 72.1,
+   "p95": 75.6,
+   "max": 75.6,
+   "mean": 71.4,
+   "outliers": 1
+  },
+  "T6_T7_first_audio": {
+   "n": 5,
+   "min": 2005.4,
+   "p50": 2561.7,
+   "p95": 3121.5,
+   "max": 3121.5,
+   "mean": 2537.5,
+   "outliers": 1
+  },
+  "T4_T7_provider_ttfa": {
+   "n": 5,
+   "min": 2081.0,
+   "p50": 2633.1,
+   "p95": 3187.0,
+   "max": 3187.0,
+   "mean": 2608.8,
+   "outliers": 1
+  },
+  "T7_T8_qevion_forward": {
+   "n": 5,
+   "min": 0.8,
+   "p50": 1.3,
+   "p95": 1.6,
+   "max": 1.6,
+   "mean": 1.2,
+   "outliers": 0
+  },
+  "T8_T9_ws_delivery": {
+   "n": 5,
+   "min": 0.5,
+   "p50": 0.5,
+   "p95": 0.8,
+   "max": 0.8,
+   "mean": 0.6,
+   "outliers": 1
+  },
+  "T1_T9_user_to_first_audio_client": {
+   "n": 5,
+   "min": 2614.0,
+   "p50": 3180.0,
+   "p95": 3672.8,
+   "max": 3672.8,
+   "mean": 3129.1,
+   "outliers": 1
+  },
+  "T13_T14_tool_exec": {
+   "n": 5,
+   "min": 0.8,
+   "p50": 1.0,
+   "p95": 1.4,
+   "max": 1.4,
+   "mean": 1.1,
+   "outliers": 0
+  },
+  "T15_T17_post_tool_ttfa": {
+   "n": 5,
+   "min": 266.2,
+   "p50": 433.7,
+   "p95": 532.2,
+   "max": 532.2,
+   "mean": 420.0,
+   "outliers": 0
+  },
+  "T3_T18_turn_total": {
+   "n": 5,
+   "min": 4143.4,
+   "p50": 4554.2,
+   "p95": 5849.2,
+   "max": 5849.2,
+   "mean": 4906.8,
+   "outliers": 0
+  }
+ },
+ "fragmented": {
+  "turns": 11,
+  "of": 33,
+  "cancelled_responses": 12
+ },
+ "frag_vs_clean_no_tool_T1T9": {
+  "frag": {
+   "n": 7,
+   "min": 817.5,
+   "p50": 1010.9,
+   "p95": 1307.6,
+   "max": 1307.6,
+   "mean": 1041.6,
+   "outliers": 0
+  },
+  "clean": {
+   "n": 13,
+   "min": 849.1,
+   "p50": 1007.9,
+   "p95": 1254.6,
+   "max": 1388.8,
+   "mean": 1045.1,
+   "outliers": 1
+  }
+ },
+ "decisions": {
+  "n": 316,
+  "min": 0.0,
+  "p50": 0.0,
+  "p95": 0.1,
+  "max": 0.4,
+  "mean": 0.0,
+  "outliers": 2
+ },
+ "decision_sources": [
+  "RULE"
+ ]
+}

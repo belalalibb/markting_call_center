@@ -77,7 +77,9 @@
 2. Post-P6 backlog: bounded-LLM simulated customer, CRM/DNC adapter seam, Silero ONNX model fetch, real-provider latency table.
 
 ## Exact next action
-OPS 5.5 remediation complete (CP-0013..CP-0017). Await operator review. Suggested next: human-microphone field test on a real device, RTL/Arabic UI pass, durable event sink, rotate credentials shared in chat.
+Latency root-cause investigation DONE (`docs/audit/LATENCY_ROOT_CAUSE_2026-09-24.md`): NO CONFIRMED QEVION DEFECT; provider tool-cycle bottleneck on tool turns; endpoint 500 ms = UX opportunity. Awaiting operator decision on proposals A (speak-before-tools) / B (batched tool calls). Opt-in instrumentation: `QEVION_LATENCY_TRACE=1`.
+
+Previous: OPS 5.5 remediation complete (CP-0013..CP-0017). Await operator review. Suggested next: human-microphone field test on a real device, RTL/Arabic UI pass, durable event sink, rotate credentials shared in chat.
 
 Previous: CP-0012 checkpoint (record + tag + snapshot) for the keepalive fix; then backlog: live barge-in probe on OpenAI (ACC-017/018 real-provider timings), Arabizi negatives into rules lexicon, bounded-LLM simulated customer. Server: `env -u OPENAI_API_KEY .venv/bin/python -m qevion.main`; inject keys via `POST /api/admin/test-key`.
 
