@@ -161,6 +161,7 @@ class OpenAIRealtimeSession:
         self._done: set[str] = set()
         self._continued: set[str] = set()
         self._stall_tasks: list[asyncio.Future[None]] = []
+        self._pending_marked: set[str] = set()  # calls given an explicit `result_pending` output by the guard
 
     # ------------------------------------------------------------- lifecycle
     def start(self) -> None:
@@ -251,7 +252,8 @@ class OpenAIRealtimeSession:
                 "item": {"type": "function_call_output", "call_id": result.call_id, "output": json.dumps(output)},
             }
         )
-        if not self._batch:
+        if not self._batch or result.call_id in self._pending_marked:
+            # default path, or a late real result after the stall guard marked it pending → continue on it
             await self._send({"type": "response.create"})
             return
         self._answered.add(result.call_id)
@@ -353,12 +355,37 @@ class OpenAIRealtimeSession:
                 self._stall_tasks.append(asyncio.ensure_future(self._continue_partial(rid, BATCH_STALL_S)))
 
     async def _continue_partial(self, rid: str, after_s: float) -> None:
+        """Stall guard (hardened). Continuing with an unanswered call would leave the model with *no* output for it,
+        which it may silently treat as done. So every unanswered call first gets an explicit non-success output
+        (`status: result_pending`, `executed: false`) saying the action has NOT happened and must not be claimed.
+        The real result, when it arrives later, is still delivered (and triggers its own continuation)."""
         await asyncio.sleep(after_s)
         if rid in self._continued or self._closed:
             return
-        if self._calls.get(rid, set()) & self._answered:
-            self._continued.add(rid)
-            await self._send({"type": "response.create"})
+        calls = self._calls.get(rid, set())
+        missing = sorted(calls - self._answered)
+        if not (calls & self._answered):
+            return  # nothing answered either → no batching benefit; Core's own result path continues normally
+        for cid in missing:
+            self._pending_marked.add(cid)
+            await self._send(
+                {
+                    "type": "conversation.item.create",
+                    "item": {
+                        "type": "function_call_output",
+                        "call_id": cid,
+                        "output": json.dumps(
+                            {
+                                "status": "result_pending",
+                                "executed": False,
+                                "note": "NOT completed yet. Do not state or imply it succeeded; say it is pending.",
+                            }
+                        ),
+                    },
+                }
+            )
+        self._continued.add(rid)
+        await self._send({"type": "response.create"})
 
     def _trace_recv(self, msg: dict[str, Any]) -> None:
         t = str(msg.get("type", ""))
