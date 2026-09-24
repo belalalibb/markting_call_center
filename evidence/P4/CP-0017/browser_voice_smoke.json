@@ -1,6 +1,6 @@
 {
  "kind": "browser-voice-smoke",
- "produced_at": "2026-09-24T00:38:46.493427+00:00",
+ "produced_at": "2026-09-24T00:40:57.417870+00:00",
  "base": "http://localhost:8000",
  "activity": "act_order_intake@1.0.0",
  "composition": "comp_s2s_openai_v1",
@@ -9,11 +9,11 @@
  "survived_ms": 66482,
  "header_samples": [
   [
-   4644,
+   4478,
    "live · comp_s2s_openai_v1 · browser_voice · openai_realtime:gpt-realtime"
   ],
   [
-   66339,
+   66331,
    "ok · default comp_mock_s2s_v1 (simulated) · 3 activities · 1 live"
   ]
  ],
@@ -30,36 +30,68 @@
  "ready_line": "session ready — composition comp_s2s_openai_v1 · browser_voice · s2s openai_realtime:gpt-realtime · credential ephemeral_ui",
  "chat": [
   [
-   4634,
+   4469,
    "connected → act_order_intake@1.0.0 via comp_s2s_openai_v1 (browser_voice) — waiting for session ready…"
   ],
   [
-   4634,
+   4469,
    "session ready — composition comp_s2s_openai_v1 · browser_voice · s2s openai_realtime:gpt-realtime · credential ephemeral_ui"
   ],
   [
-   66332,
+   17323,
+   "…"
+  ],
+  [
+   17323,
+   "⏹ you interrupted — agent stopped"
+  ],
+  [
+   17323,
+   "السلام عليكم"
+  ],
+  [
+   17323,
+   "عايز أطلب اتنين بيتزا مارغريتا كبيرة وواحد بيبسي."
+  ],
+  [
+   19376,
+   "أناسمعتإنكعايزتطلب2بيتزامارجريتاكبيرةوواحدبيبسي.هنحتاجنتأكدمنالأسعار.ممكنكمانتقولّيرقمالتليفوناللييبدأبـصفرواحد؟"
+  ],
+  [
+   28275,
+   "العنوان ٢٣ شارع التحرير، الدقي، الدور الخامس."
+  ],
+  [
+   31354,
+   "تمتأكيدالعنوان:23شارعالتحرير،الدقي،الدورالخامس.دلوقتمحتاجينرقمالتليفون.ممكنتقولليالرقم11رقمويبدأبـ01؟"
+  ],
+  [
+   66326,
    "closed (1000: user_bye)"
   ]
  ],
  "ws": {
   "text_types": {
-   "state": 2,
+   "state": 35,
    "ready": 1,
+   "event": 24,
+   "audio_start": 7,
+   "stop_playout": 2,
+   "transcript": 3,
    "ping": 6,
-   "event": 2
+   "audio_end": 6
   },
-  "binary": 0,
+  "binary": 90,
   "pings": 6,
   "pongs_sent": 6,
   "close": {
    "code": 1000,
    "reason": "user_bye",
-   "at": 1790210326295
+   "at": 1790210457202
   }
  },
- "speaking_cycles": 0,
- "spoken_user_turns": 1,
+ "speaking_cycles": 6,
+ "spoken_user_turns": 2,
  "close_during_soak": null,
  "console_errors": [],
  "sessions_after": [
@@ -92,6 +124,21 @@
     "last_rtt_ms": 4.8,
     "dropped_audio_frames": 0
    }
+  },
+  {
+   "session_id": "ses_b052ac43b6e643a2",
+   "composition_id": "comp_s2s_openai_v1",
+   "channel": "browser_voice",
+   "credential_source": "ephemeral_ui",
+   "running": false,
+   "error": null,
+   "close_code": 1000,
+   "close_reason": "user_bye",
+   "heartbeat": {
+    "sent": 6,
+    "last_rtt_ms": 1.5,
+    "dropped_audio_frames": 0
+   }
   }
  ],
  "core_health": {
@@ -106,15 +153,15 @@
   "outcome": "abandoned",
   "provider_errors": [],
   "illegal_transitions": [],
-  "event_count": 11
+  "event_count": 99
  },
  "checks": {
   "mic_on": true,
   "connected": true,
   "session_ready": true,
   "header_shows_actual_composition": true,
-  "speaking_then_listening": false,
-  "second_user_turn": false,
+  "speaking_then_listening": true,
+  "second_user_turn": true,
   "heartbeat_answered": true,
   "no_close_during_soak": true,
   "final_close_1000": true,
@@ -125,5 +172,5 @@
   "core:outcome_not_technical_failure": true,
   "core:session_started": true
  },
- "passed": false
+ "passed": true
 }
