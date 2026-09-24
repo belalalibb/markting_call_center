@@ -111,6 +111,7 @@ _FATAL_ERROR_CODES = {
 
 
 DEFAULT_TRANSCRIPTION_MODEL = "whisper-1"
+BATCH_STALL_S = 1.5  # option B: continue a batch with the answered calls if one call never gets a result
 
 
 def _is_fatal(error_type: str, code: object) -> bool:
@@ -159,6 +160,7 @@ class OpenAIRealtimeSession:
         self._answered: set[str] = set()
         self._done: set[str] = set()
         self._continued: set[str] = set()
+        self._stall_tasks: list[asyncio.Future[None]] = []
 
     # ------------------------------------------------------------- lifecycle
     def start(self) -> None:
@@ -344,6 +346,17 @@ class OpenAIRealtimeSession:
             # results may already be in (Core answers in ~1 ms); the event reaches Core after this bookkeeping,
             # so results for calls in this response are normally sent *after* done → continuation happens there.
             await self._maybe_continue(rid)
+            if self._calls.get(rid):
+                # Safety net: a call that never gets a result (e.g. confirmation pending) must not stall the batch.
+                self._stall_tasks.append(asyncio.ensure_future(self._continue_partial(rid, BATCH_STALL_S)))
+
+    async def _continue_partial(self, rid: str, after_s: float) -> None:
+        await asyncio.sleep(after_s)
+        if rid in self._continued or self._closed:
+            return
+        if self._calls.get(rid, set()) & self._answered:
+            self._continued.add(rid)
+            await self._send({"type": "response.create"})
 
     def _trace_recv(self, msg: dict[str, Any]) -> None:
         t = str(msg.get("type", ""))
