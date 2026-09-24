@@ -40,6 +40,39 @@ def configured_token() -> str | None:
     return t or None
 
 
+def tenant_tokens() -> dict[str, str]:
+    """F-08: optional read-only tenant tokens `QEVION_TENANT_TOKENS="tenant_a:tokA,tenant_b:tokB"` → {token: tenant}.
+    A tenant token may only read its own tenant's sessions/events; everything else is 403."""
+    out: dict[str, str] = {}
+    for part in os.environ.get("QEVION_TENANT_TOKENS", "").split(","):
+        tenant, sep, tok = part.strip().partition(":")
+        if sep and tenant.strip() and len(tok.strip()) >= 16:
+            out[tok.strip()] = tenant.strip()
+    return out
+
+
+TENANT_READ_PREFIXES = ("/api/sessions", "/api/events")
+
+
+def presented_token(scope: Scope) -> str | None:
+    h = _headers(scope)
+    auth = h.get("authorization", "")
+    if auth.lower().startswith("bearer "):
+        return auth[7:].strip()
+    x = h.get("x-qevion-token")
+    return x.strip() if x else None
+
+
+def tenant_for(scope: Scope) -> str | None:
+    tok = presented_token(scope)
+    if not tok:
+        return None
+    for known, tenant in tenant_tokens().items():
+        if hmac.compare_digest(tok, known):
+            return tenant
+    return None
+
+
 def cookie_value(token: str) -> str:
     return hmac.new(token.encode(), b"qevion-session-v1", hashlib.sha256).hexdigest()
 
@@ -88,19 +121,32 @@ class OperatorAuthMiddleware:
             return
         token = configured_token()
         path = str(scope.get("path") or "")
+        scope.setdefault("state", {})["qevion_tenant"] = None  # None = operator (all tenants)
+        if needs_guard(path) and (tenant := tenant_for(scope)) is not None:
+            # F-08: tenant tokens are read-only and scoped; the route handlers filter by this tenant
+            if kind == "http" and scope.get("method") == "GET" and path.startswith(TENANT_READ_PREFIXES):
+                scope["state"]["qevion_tenant"] = tenant
+                await self.app(scope, receive, send)
+                return
+            await self._deny(kind, receive, send, 403, "forbidden: tenant token is read-only (sessions/events)")
+            return
         if token is None or not needs_guard(path) or request_is_authorized(scope, token):
             await self.app(scope, receive, send)
             return
+        await self._deny(kind, receive, send, 401, "unauthorized: operator token required (QEVION_ADMIN_TOKEN)")
+
+    @staticmethod
+    async def _deny(kind: str, receive: Receive, send: Send, status: int, detail: str) -> None:
         if kind == "websocket":
             # must accept the handshake message before closing with an app code
             await receive()
-            await send({"type": "websocket.close", "code": 4401, "reason": "unauthorized"})
+            await send({"type": "websocket.close", "code": 4000 + status, "reason": detail.split(":")[0]})
             return
-        body = b'{"detail":"unauthorized: operator token required (QEVION_ADMIN_TOKEN)"}'
+        body = ('{"detail":"' + detail + '"}').encode()
         await send(
             {
                 "type": "http.response.start",
-                "status": 401,
+                "status": status,
                 "headers": [(b"content-type", b"application/json"), (b"www-authenticate", b"Bearer")],
             }
         )
@@ -121,4 +167,6 @@ __all__ = [
     "cors_origins",
     "needs_guard",
     "request_is_authorized",
+    "tenant_for",
+    "tenant_tokens",
 ]
