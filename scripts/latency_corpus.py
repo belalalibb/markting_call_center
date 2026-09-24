@@ -226,6 +226,26 @@ async def run_session(plan: list[str], clips: dict[str, bytes], lastv: dict[str,
     sid = st["sid"]
     srv = http("GET", f"/api/sessions/{sid}/latency-trace")
     detail = http("GET", f"/api/sessions/{sid}")
+    evs = http("GET", f"/api/events?session_id={sid}&limit=100000")
+    keep = (
+        "field.recorded",
+        "field.corrected",
+        "tool.requested",
+        "tool.execution_completed",
+        "tool.execution_failed",
+        "tool.execution_unknown",
+        "tool.rejected",
+        "tool.confirmation_requested",
+        "state.changed",
+        "failure.classified",
+        "provider.error",
+        "outcome.produced",
+    )
+    core_events = [
+        {"seq": e["seq"], "type": e["type"], "turn_id": e.get("turn_id"), "payload": e["payload"]}
+        for e in evs
+        if e["type"] in keep
+    ]
     return {
         "session_id": sid,
         "t_ws_connect_start": t_open,
@@ -235,6 +255,7 @@ async def run_session(plan: list[str], clips: dict[str, bytes], lastv: dict[str,
         "error": detail.get("error"),
         "outcome": (detail.get("outcome") or {}).get("primary"),
         "spoken": st.get("spoken", []),
+        "core_events": core_events,
         "flags": {k: os.environ.get(k) for k in ("QEVION_TOOL_ACK", "QEVION_PARALLEL_TOOLS")},
     }
 
