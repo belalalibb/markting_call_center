@@ -37,7 +37,9 @@ function testKeyCard(): HTMLElement {
   const card = section("Ephemeral test key (Chat & Calls)", box);
   const draw = async () => {
     clear(box);
-    const provider = h("select", {}, ...["openai", "mock", "deepgram", "elevenlabs"].map((p) => h("option", { value: p }, p)));
+    // F-14: only vendors a registered adapter consumes (was a hard-coded list incl. deepgram/elevenlabs/mock)
+    const vendors = await api.credentialVendors().catch(() => ["openai", "typesafe"]);
+    const provider = h("select", {}, ...vendors.map((p) => h("option", { value: p }, p)));
     const value = h("input", { type: "password", placeholder: "paste key — memory only, cleared on TTL/restart", autocomplete: "off" });
     const ttl = h("input", { type: "number", value: "3600", title: "TTL seconds" });
     const status = h("div", { class: "row" });

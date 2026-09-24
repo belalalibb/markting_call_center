@@ -141,8 +141,41 @@ function outboundCard(activities: ActivitySummary[]): HTMLElement {
 }
 
 function compLabel(c: CompositionSummary): string {
-  const cred = c.credential_source && c.credential_source !== "none" ? `cred:${c.credential_source}` : "no credential";
-  return `${c.composition_id}${c["default"] ? " (default)" : ""} — ${cred}`;
+  // F-14: mock = simulation, needs no key; real providers say whether a key is present
+  const state = c.simulated ? "simulated (no key needed)"
+    : c.ready ? `real provider · key: ${c.credential_source}` : "real provider · KEY MISSING → Admin";
+  return `${c.composition_id}${c["default"] ? " (default)" : ""} — ${state}`;
+}
+
+/** F-14: actionable text for runtime error codes (what happened + what to do). */
+export function explainError(code: string, text: string): string {
+  switch (code) {
+    case "provider_credential_missing":
+      return "No provider key for this composition. Open Admin → Ephemeral test key, paste the key, then Connect again.";
+    case "provider_failure":
+      return `The voice provider failed (${text}). Check the key in Admin and your network, then reconnect.`;
+    case "provider_request_rejected":
+      return `The provider rejected one request (${text}); the session continues.`;
+    default:
+      return text;
+  }
+}
+
+/** F-14: the browser's getUserMedia error names → what the operator should do. */
+export function explainMicError(e: unknown): string {
+  const name = e instanceof DOMException ? e.name : e instanceof Error ? e.name : "";
+  switch (name) {
+    case "NotAllowedError":
+    case "SecurityError":
+      return "Microphone blocked. Click the lock/camera icon in the address bar → allow Microphone, then press Mic again. (Needs https or localhost.)";
+    case "NotFoundError":
+    case "OverconstrainedError":
+      return "No microphone found. Plug one in or pick an input device in your OS settings.";
+    case "NotReadableError":
+      return "The microphone is in use by another app. Close it and try again.";
+    default:
+      return `Microphone unavailable: ${errMsg(e)}. You can still use the text channel.`;
+  }
 }
 
 function chatCard(activities: ActivitySummary[], compositions: CompositionSummary[]): HTMLElement {
@@ -191,8 +224,9 @@ function chatCard(activities: ActivitySummary[], compositions: CompositionSummar
       voice = v;
       micBtn.textContent = "🎙 Mic on";
     } catch (e) {
-      toast(`microphone unavailable: ${errMsg(e)}`, "bad");
-      voiceStatus.textContent = "mic unavailable — text channel only";
+      const why = explainMicError(e);
+      toast(why, "bad");
+      voiceStatus.textContent = why;
     }
   };
   micBtn.addEventListener("click", () => void (voice ? micOff() : micOn()));
@@ -286,7 +320,16 @@ function chatCard(activities: ActivitySummary[], compositions: CompositionSummar
           break;
         }
         case "state": stateRedraw(m); break;
-        case "error": add("sys", `error: ${m.text}${m.payload["code"] ? ` [${String(m.payload["code"])}]` : ""}`); break;
+        case "error": {
+          const code = String(m.payload["code"] ?? "");
+          const row = h("div", { class: "msg sys bad" }, `⚠ ${explainError(code, String(m.text ?? ""))}`);
+          if (code.startsWith("provider_credential") || code === "provider_failure") {
+            row.append(" ", h("a", { href: "#/admin" }, "Open Admin →"));
+          }
+          chat.append(row);
+          chat.scrollTop = chat.scrollHeight;
+          break;
+        }
         case "bye": add("sys", "agent closed the session"); break;
         default: break;
       }

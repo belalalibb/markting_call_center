@@ -94,6 +94,9 @@ export interface CompositionSummary {
   turn_adapter?: string;
   decision_adapter?: string;
   credential_source?: string | null;
+  simulated?: boolean;
+  needs_credential?: boolean;
+  ready?: boolean;
   [k: string]: unknown;
 }
 
@@ -144,6 +147,7 @@ export const api = {
     req<ContactDecision>("GET", `/api/activities/${encodeURIComponent(key)}/contact-check/${encodeURIComponent(ref)}`),
   outboundAttempts: () => req<OutboundAttempt[]>("GET", "/api/outbound/attempts"),
   compositions: () => req<CompositionSummary[]>("GET", "/api/compositions"),
+  credentialVendors: () => req<string[]>("GET", "/api/credential-vendors"),
   tenants: () => req<Json[]>("GET", "/api/tenants"),
   createTenant: (body: Json) => req("POST", "/api/tenants", body),
   activities: () => req<ActivitySummary[]>("GET", "/api/activities"),
