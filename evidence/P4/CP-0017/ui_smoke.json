@@ -9,9 +9,9 @@
   "first_run_dismissed": true,
   "admin_vendors_real_only": true,
   "mobile_header_not_overlapping": true,
-  "mobile_no_horizontal_overflow": false,
+  "mobile_no_horizontal_overflow": true,
   "no_console_errors": true
  },
- "passed": false,
+ "passed": true,
  "console_errors": []
 }
