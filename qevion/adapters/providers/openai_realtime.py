@@ -182,6 +182,8 @@ class OpenAIRealtimeSession:
         if self._closed:
             return
         self._closed = True
+        for t in self._stall_tasks:
+            t.cancel()
         await self._sock.close()
         if self._pump:
             self._pump.cancel()
