@@ -28,6 +28,8 @@ import asyncio
 import base64
 import contextlib
 import json
+import os
+import time
 from collections.abc import AsyncIterator, Awaitable, Callable
 from typing import Any, Protocol
 
@@ -146,16 +148,26 @@ class OpenAIRealtimeSession:
         self._current_response: str | None = None
         # F-06: response_id → assistant audio item_id (needed for conversation.item.truncate)
         self._audio_items: dict[str, str] = {}
+        # Latency diagnostics (opt-in, QEVION_LATENCY_TRACE=1): wall-clock epoch ms of provider-boundary moments.
+        # Observation only — no behaviour depends on it. Entries: (epoch_ms, kind, ref).
+        self.trace: list[tuple[float, str, str]] | None = [] if os.environ.get("QEVION_LATENCY_TRACE") == "1" else None
+        self._traced_first_audio: set[str] = set()
 
     # ------------------------------------------------------------- lifecycle
     def start(self) -> None:
         self._pump = asyncio.create_task(self._pump_loop())
+
+    def _mark(self, kind: str, ref: str = "") -> None:
+        if self.trace is not None:
+            self.trace.append((time.time() * 1000, kind, ref))
 
     async def _send(self, obj: dict[str, Any]) -> None:
         if self._closed:
             return
         self.sent.append({"type": obj["type"], "bytes": len(json.dumps(obj))})
         await self._sock.send(json.dumps(obj))
+        if self.trace is not None and obj["type"] != "input_audio_buffer.append":
+            self._mark("sent:" + obj["type"], str(obj.get("item", {}).get("call_id", "")) if "item" in obj else "")
 
     async def close(self) -> None:
         if self._closed:
@@ -285,6 +297,8 @@ class OpenAIRealtimeSession:
                     msg = json.loads(raw)
                 except json.JSONDecodeError:
                     continue
+                if self.trace is not None:
+                    self._trace_recv(msg)
                 self.handle_provider_message(msg)
         finally:
             if not self._closed:
@@ -292,6 +306,24 @@ class OpenAIRealtimeSession:
                 self._events.put_nowait(S2SEvent(type=S2SEventType.CLOSED, raw_type="socket_eof"))
                 self._events.put_nowait(None)
                 self._audio.put_nowait(None)
+
+    def _trace_recv(self, msg: dict[str, Any]) -> None:
+        t = str(msg.get("type", ""))
+        rid = str(msg.get("response_id") or (msg.get("response") or {}).get("id") or "")
+        if t in ("response.audio.delta", "response.output_audio.delta"):
+            if rid not in self._traced_first_audio:
+                self._traced_first_audio.add(rid)
+                self._mark("recv:first_audio_delta", rid)
+            return
+        if t in (
+            "input_audio_buffer.committed",
+            "response.created",
+            "response.done",
+            "response.function_call_arguments.done",
+            "conversation.item.input_audio_transcription.completed",
+            "error",
+        ):
+            self._mark("recv:" + t, str(msg.get("call_id") or rid))
 
     def handle_provider_message(self, msg: dict[str, Any]) -> S2SEvent | None:
         """Pure translation (sync, testable). Enqueues neutral events/audio; returns the event or None."""

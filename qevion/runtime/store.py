@@ -116,6 +116,7 @@ class LiveSession:
     close_reason: str = ""
     heartbeat: dict[str, Any] = field(default_factory=dict)  # sent / last_rtt_ms / dropped_audio_frames
     tenant_id: str = ""
+    latency_trace: list[tuple[float, str, str]] | None = None
 
 
 class RuntimeStore:
@@ -126,6 +127,7 @@ class RuntimeStore:
         # development; set QEVION_OPERATOR_TRANSCRIPTS=0 for deployments where operators must not see caller text.
         self.operator_transcripts = os.environ.get("QEVION_OPERATOR_TRANSCRIPTS", "1") != "0"
         self.mock_fast_generation = False
+        self.latency_trace = os.environ.get("QEVION_LATENCY_TRACE") == "1"
         self.tenants: dict[str, Tenant] = {}
         self.activities: dict[str, ActivityRecord] = {}
         self.knowledge = KnowledgeStore()
@@ -434,6 +436,10 @@ class RuntimeStore:
         voice = None
         if bp.locale.voice_profile_ref and bp.locale.voice_profile_ref in self.voice_profiles:
             voice = self.voice_profiles[bp.locale.voice_profile_ref].provider_voice_map.get(s2s_b.adapter)
+        if self.latency_trace:
+            # Opt-in diagnostics: one epoch-ms mark list shared by Core, the decision port and the provider adapter.
+            live.latency_trace = []
+            decision = _TimedDecision(decision, live.latency_trace)
         turn_det = turn_ad.new_detector()
         turn_det.configure(comp.turn)
         live.turn_detector = str(getattr(turn_det, "detector_name", type(turn_det).__name__))
@@ -468,6 +474,8 @@ class RuntimeStore:
         # Same id on the wire (ServerMessage.session_id), in events, and in the REST registry — otherwise a client
         # cannot look up its own session (found live 2026-09-23: WS id != /api/sessions id).
         live.session = Session(deps, session_id=session_id)
+        if live.latency_trace is not None:
+            live.session.ltrace = live.latency_trace
         self.sessions[session_id] = live
         self.prune_sessions()
         return live
@@ -505,6 +513,27 @@ class RuntimeStore:
             if finished:
                 del self.sessions[sid]
                 excess -= 1
+
+
+class _TimedDecision:
+    """Diagnostics-only wrapper (QEVION_LATENCY_TRACE=1): records decision start/end around the real port."""
+
+    def __init__(self, inner: Any, trace: list[tuple[float, str, str]]) -> None:
+        self._inner = inner
+        self._trace = trace
+
+    def capabilities(self) -> Any:
+        return self._inner.capabilities()
+
+    async def decide(self, request: Any) -> Any:
+        kind = str(getattr(request, "kind", ""))
+        self._trace.append((time.time() * 1000, "decision:start", kind))
+        res = await self._inner.decide(request)
+        self._trace.append((time.time() * 1000, "decision:end", f"{kind}:{getattr(res, 'source', '')}"))
+        return res
+
+    def __getattr__(self, name: str) -> Any:
+        return getattr(self._inner, name)
 
 
 def _load_dir(path: Path, model: type[Any], key: str) -> dict[str, Any]:

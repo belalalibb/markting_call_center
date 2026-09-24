@@ -190,6 +190,9 @@ class SessionCore:
         self._pending_confirm: dict[str, asyncio.Future[bool | None]] = {}
         self._playout_stopped = asyncio.Event()
         self._close_task: asyncio.Future[InteractionRecord] | None = None
+        # Opt-in latency diagnostics (runtime sets a list when QEVION_LATENCY_TRACE=1). Epoch-ms marks at Core
+        # boundaries; observation only, never read by Core logic.
+        self.ltrace: list[tuple[float, str, str]] | None = None
         self._closed = False
         self._instructions_fp: str | None = None
 
@@ -310,6 +313,10 @@ class SessionCore:
 
     def _all_flags(self) -> set[str]:
         return self.facts.flags | flags_from_tools(self.pipeline.history)
+
+    def _lt(self, kind: str, ref: str = "") -> None:
+        if self.ltrace is not None:
+            self.ltrace.append((time.time() * 1000, kind, ref))
 
     def _latency(self, segment: str, a: Watermark, b: Watermark, value_ms: int) -> None:
         self.latency.append(
@@ -443,6 +450,7 @@ class SessionTools(SessionLifecycle):
 
     async def run_tool(self, call_id: str, tool_id: str, arguments: dict[str, Any]) -> ToolOutcome:
         bp = self.deps.blueprint
+        self._lt("core:tool_start", f"{call_id}:{tool_id}")
         out = await self.pipeline.run(
             ToolCallRequest(call_id=call_id, tool_id=tool_id, arguments=arguments),
             session_id=self.session_id,
@@ -451,8 +459,10 @@ class SessionTools(SessionLifecycle):
             turn_id=self.turn_id,
             ts_ms=self.clock(),
         )
+        self._lt("core:tool_done", f"{call_id}:{tool_id}")
         await self._apply_tool_outcome(out, arguments)
         if self._provider and out.error != "confirmation pending":
+            self._lt("core:tool_result_submit", call_id)
             await self._provider.send_tool_result(
                 ToolCallResult(call_id=call_id, output={**out.output, "status": out.status.value}, error=out.error)
             )
@@ -820,12 +830,14 @@ class Session(SessionInterruption):
         src = f"turn:{tev.detector}"
         match tev.type:
             case TurnEventType.SPEECH_START:
+                self._lt("core:speech_start")
                 self._speech_onset_ms = tev.ts_ms
                 await self.emit(EventType.USER_SPEECH_STARTED, {"detector": tev.detector}, source=src)
             case TurnEventType.BARGE_IN:
                 await self.emit(EventType.USER_SPEECH_STARTED, {"detector": tev.detector, "barge_in": True}, source=src)
                 await self.interrupt(onset_ms=self._speech_onset_ms or tev.ts_ms, detected_ms=tev.ts_ms)
             case TurnEventType.END_OF_TURN:
+                self._lt("core:end_of_turn", f"speech_ms={tev.speech_ms};silence_ms={tev.silence_ms}")
                 if self._speech_onset_ms is not None:
                     self._latency(
                         "speech_onset_to_commit",
@@ -838,6 +850,7 @@ class Session(SessionInterruption):
                 await self.dialog_fire("end_of_turn")
                 await self._after_user_turn()
                 if self._provider:
+                    self._lt("core:commit_call")
                     await self._provider.commit_input()
             case TurnEventType.NOISE_REJECTED:
                 await self.emit(EventType.USER_SPEECH_DISCARDED, {"reason": "noise"}, source=src)
@@ -1013,11 +1026,15 @@ class Session(SessionInterruption):
                     return
 
         async def pump_audio_out() -> None:
+            first_sent: set[str] = set()
             async for _ref, pcm in provider.audio_out():
                 rid = self._current_response
                 if rid and not self._responses[rid].cancelled:
                     try:
                         await self.deps.transport.send_audio(rid, pcm)
+                        if self.ltrace is not None and rid not in first_sent:
+                            first_sent.add(rid)
+                            self._lt("core:first_audio_to_client", rid)
                     except ConnectionError:
                         return
 

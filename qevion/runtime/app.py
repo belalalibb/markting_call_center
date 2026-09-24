@@ -553,6 +553,20 @@ def create_app(store: RuntimeStore | None = None) -> FastAPI:
             raise HTTPException(404, sid)  # never confirm another tenant's session exists
         return {**_live(s), "events": [e.model_dump(mode="json", by_alias=True) for e in s.events[-200:]]}
 
+    @app.get("/api/sessions/{sid}/latency-trace")
+    async def latency_trace(sid: str, request: Request) -> dict[str, Any]:
+        """Opt-in diagnostics (QEVION_LATENCY_TRACE=1): merged epoch-ms marks from Core, decision port and the
+        provider adapter (if it records them). Marks only — no audio, no transcript text."""
+        s = store.sessions.get(sid)
+        scoped = _scope_tenant(request)
+        if s is None or (scoped is not None and s.tenant_id != scoped):
+            raise HTTPException(404, sid)
+        marks = list(s.latency_trace or [])
+        prov = getattr(s.session, "_provider", None)
+        marks += list(getattr(prov, "trace", None) or [])
+        marks.sort(key=lambda m: m[0])
+        return {"enabled": s.latency_trace is not None, "marks": marks}
+
     @app.get("/api/events")
     async def events(
         request: Request, since: int = 0, limit: int = 200, session_id: str | None = None, tenant: str | None = None
