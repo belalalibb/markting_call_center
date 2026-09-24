@@ -162,6 +162,8 @@ class OpenAIRealtimeSession:
         self._continued: set[str] = set()
         self._stall_tasks: list[asyncio.Future[None]] = []
         self._pending_marked: set[str] = set()  # calls given an explicit `result_pending` output by the guard
+        self._barriers: set[str] = set(config.extra.get("batch_barriers") or [])
+        self._unbatched: set[str] = set()  # responses containing a barrier call → default path
 
     # ------------------------------------------------------------- lifecycle
     def start(self) -> None:
@@ -258,7 +260,7 @@ class OpenAIRealtimeSession:
             return
         self._answered.add(result.call_id)
         rid = self._call_rid.get(result.call_id)
-        if rid is None:  # unknown origin → behave exactly like the default path
+        if rid is None or rid in self._unbatched:  # unknown origin / barrier present → default path
             await self._send({"type": "response.create"})
             return
         await self._maybe_continue(rid)
@@ -266,6 +268,8 @@ class OpenAIRealtimeSession:
     async def _maybe_continue(self, rid: str) -> None:
         """Continue once the response that requested the calls has finished AND every call in it is answered."""
         calls = self._calls.get(rid, set())
+        if rid in self._unbatched:
+            return
         if rid in self._continued or rid not in self._done or not calls or not calls <= self._answered:
             return
         self._continued.add(rid)
@@ -345,6 +349,10 @@ class OpenAIRealtimeSession:
             cid = str(msg.get("call_id"))
             self._calls.setdefault(rid, set()).add(cid)
             self._call_rid[cid] = rid
+            if str(msg.get("name")) in self._barriers:
+                # Barrier tools (confirmation-gated / write / escalation other than record_field) are never
+                # combined: the whole response falls back to the default one-continuation-per-result path.
+                self._unbatched.add(rid)
         elif t == "response.done" and rid:
             self._done.add(rid)
             # results may already be in (Core answers in ~1 ms); the event reaches Core after this bookkeeping,
@@ -360,7 +368,7 @@ class OpenAIRealtimeSession:
         (`status: result_pending`, `executed: false`) saying the action has NOT happened and must not be claimed.
         The real result, when it arrives later, is still delivered (and triggers its own continuation)."""
         await asyncio.sleep(after_s)
-        if rid in self._continued or self._closed:
+        if rid in self._continued or self._closed or rid in self._unbatched:
             return
         calls = self._calls.get(rid, set())
         missing = sorted(calls - self._answered)

@@ -166,13 +166,13 @@ class InstructionComposer:
         if "parallel_tools" not in self.options or not (self.blueprint.tools.required or self.blueprint.tools.optional):
             return ""
         tb = self.blueprint.tools
-        barriers = sorted(
-            tid
-            for tid, perm in tb.permissions.items()
-            if perm.confirmation == "confirm_before_execute"
-            or (self.tool_declarations.get(tid) is not None and self.tool_declarations[tid].impact.value != "read")
-            and tid != "record_field"
-        )
+        barriers = []
+        for tid, perm in tb.permissions.items():
+            d = self.tool_declarations.get(tid)
+            impact = d.impact.value if d is not None else str(perm.impact)
+            if perm.confirmation == "confirm_before_execute" or (impact != "read" and tid != "record_field"):
+                barriers.append(tid)
+        barriers.sort()
         lines = [
             "When several tool calls are independent (none needs another's result), make them ALL in the same "
             "response instead of one after another — e.g. one record_field call per detail the user just gave, "

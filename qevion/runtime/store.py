@@ -454,7 +454,11 @@ class RuntimeStore:
                 extra={
                     **{k: v for k, v in s2s_b.config.items() if k in ("transcription_model",)},
                     # option B: provider adapter continues once per batch of independent calls
-                    **({"parallel_tools": True} if "parallel_tools" in _instruction_options(s2s_b.config) else {}),
+                    **(
+                        {"parallel_tools": True, "batch_barriers": _batch_barriers(bp, self.tool_declarations)}
+                        if "parallel_tools" in _instruction_options(s2s_b.config)
+                        else {}
+                    ),
                 },
                 tools=[
                     d.model_dump(mode="json")
@@ -526,6 +530,18 @@ def _flag(config: dict[str, Any], key: str, env: str) -> bool:
     if v in ("0", "1"):
         return v == "1"
     return bool(config.get(key, False))
+
+
+def _batch_barriers(bp: Any, decls: dict[str, Any]) -> list[str]:
+    """Option B barrier set, derived from Blueprint permissions + tool declarations (never hard-coded business):
+    confirmation-gated tools, and any non-read tool except record_field (independent per-field writes)."""
+    out = []
+    for tid, perm in bp.tools.permissions.items():
+        d = decls.get(tid)
+        impact = d.impact.value if d is not None else str(perm.impact)
+        if perm.confirmation == "confirm_before_execute" or (impact != "read" and tid != "record_field"):
+            out.append(tid)
+    return sorted(out)
 
 
 def _instruction_options(config: dict[str, Any]) -> frozenset[str]:
