@@ -1,0 +1,8416 @@
+{
+ "summary": {
+  "all": {
+   "T1_T3_endpoint": {
+    "n": 22,
+    "min": 462.7,
+    "p50": 521.4,
+    "p95": 542.8,
+    "max": 543.1,
+    "mean": 517.3,
+    "outliers": 0
+   },
+   "T3_T4_commit": {
+    "n": 22,
+    "min": 0.9,
+    "p50": 1.8,
+    "p95": 2.8,
+    "max": 3.1,
+    "mean": 1.9,
+    "outliers": 2
+   },
+   "T4_T5_provider_ack": {
+    "n": 22,
+    "min": 54.0,
+    "p50": 66.4,
+    "p95": 79.9,
+    "max": 93.0,
+    "mean": 67.3,
+    "outliers": 0
+   },
+   "T4_T6_response_created": {
+    "n": 22,
+    "min": 63.9,
+    "p50": 75.0,
+    "p95": 91.6,
+    "max": 98.5,
+    "mean": 75.7,
+    "outliers": 0
+   },
+   "T6_T7_first_audio": {
+    "n": 21,
+    "min": 341.4,
+    "p50": 867.9,
+    "p95": 2849.9,
+    "max": 2966.0,
+    "mean": 1264.5,
+    "outliers": 0
+   },
+   "T4_T7_provider_ttfa": {
+    "n": 21,
+    "min": 406.8,
+    "p50": 943.2,
+    "p95": 2932.2,
+    "max": 3048.9,
+    "mean": 1340.3,
+    "outliers": 0
+   },
+   "T7_T8_qevion_forward": {
+    "n": 21,
+    "min": 0.5,
+    "p50": 1.1,
+    "p95": 1.3,
+    "max": 1.3,
+    "mean": 1.1,
+    "outliers": 0
+   },
+   "T8_T9_ws_delivery": {
+    "n": 21,
+    "min": 0.3,
+    "p50": 0.5,
+    "p95": 0.7,
+    "max": 0.7,
+    "mean": 0.5,
+    "outliers": 0
+   },
+   "T1_T9_user_to_first_audio_client": {
+    "n": 21,
+    "min": 932.1,
+    "p50": 1409.4,
+    "p95": 3478.4,
+    "max": 3514.6,
+    "mean": 1859.9,
+    "outliers": 0
+   },
+   "T1_T9a_user_to_answer_audio_client": {
+    "n": 21,
+    "min": 932.1,
+    "p50": 1409.4,
+    "p95": 3478.4,
+    "max": 3514.6,
+    "mean": 1859.9,
+    "outliers": 0
+   },
+   "T12_T13_tool_dispatch": {
+    "n": 10,
+    "min": 0.5,
+    "p50": 0.7,
+    "p95": 1.1,
+    "max": 1.1,
+    "mean": 0.7,
+    "outliers": 0
+   },
+   "T13_T14_tool_exec": {
+    "n": 10,
+    "min": 0.8,
+    "p50": 0.9,
+    "p95": 1.4,
+    "max": 1.4,
+    "mean": 1.0,
+    "outliers": 1
+   },
+   "T15_T16_post_tool_created": {
+    "n": 10,
+    "min": 55.5,
+    "p50": 61.8,
+    "p95": 80.2,
+    "max": 80.2,
+    "mean": 65.3,
+    "outliers": 0
+   },
+   "T15_T17_post_tool_ttfa": {
+    "n": 10,
+    "min": 334.2,
+    "p50": 401.9,
+    "p95": 528.6,
+    "max": 528.6,
+    "mean": 418.5,
+    "outliers": 0
+   },
+   "T3_T18_turn_total": {
+    "n": 22,
+    "min": 290.0,
+    "p50": 2680.8,
+    "p95": 4586.8,
+    "max": 4756.7,
+    "mean": 2993.1,
+    "outliers": 0
+   }
+  },
+  "no_tool": {
+   "T1_T3_endpoint": {
+    "n": 12,
+    "min": 501.8,
+    "p50": 521.4,
+    "p95": 542.4,
+    "max": 543.1,
+    "mean": 521.3,
+    "outliers": 0
+   },
+   "T3_T4_commit": {
+    "n": 12,
+    "min": 1.1,
+    "p50": 1.9,
+    "p95": 2.8,
+    "max": 3.1,
+    "mean": 2.0,
+    "outliers": 2
+   },
+   "T4_T5_provider_ack": {
+    "n": 12,
+    "min": 57.4,
+    "p50": 68.6,
+    "p95": 79.9,
+    "max": 93.0,
+    "mean": 69.2,
+    "outliers": 1
+   },
+   "T4_T6_response_created": {
+    "n": 12,
+    "min": 64.8,
+    "p50": 76.7,
+    "p95": 91.6,
+    "max": 98.5,
+    "mean": 77.7,
+    "outliers": 2
+   },
+   "T6_T7_first_audio": {
+    "n": 11,
+    "min": 341.4,
+    "p50": 500.3,
+    "p95": 964.5,
+    "max": 964.5,
+    "mean": 517.8,
+    "outliers": 1
+   },
+   "T4_T7_provider_ttfa": {
+    "n": 11,
+    "min": 406.8,
+    "p50": 572.2,
+    "p95": 1043.1,
+    "max": 1043.1,
+    "mean": 596.0,
+    "outliers": 1
+   },
+   "T7_T8_qevion_forward": {
+    "n": 11,
+    "min": 0.5,
+    "p50": 1.1,
+    "p95": 1.3,
+    "max": 1.3,
+    "mean": 1.0,
+    "outliers": 0
+   },
+   "T8_T9_ws_delivery": {
+    "n": 11,
+    "min": 0.4,
+    "p50": 0.5,
+    "p95": 0.7,
+    "max": 0.7,
+    "mean": 0.5,
+    "outliers": 0
+   },
+   "T1_T9_user_to_first_audio_client": {
+    "n": 11,
+    "min": 932.1,
+    "p50": 1116.8,
+    "p95": 1552.1,
+    "max": 1552.1,
+    "mean": 1119.0,
+    "outliers": 1
+   },
+   "T1_T9a_user_to_answer_audio_client": {
+    "n": 11,
+    "min": 932.1,
+    "p50": 1116.8,
+    "p95": 1552.1,
+    "max": 1552.1,
+    "mean": 1119.0,
+    "outliers": 1
+   },
+   "T12_T13_tool_dispatch": {
+    "n": 0
+   },
+   "T13_T14_tool_exec": {
+    "n": 0
+   },
+   "T15_T16_post_tool_created": {
+    "n": 0
+   },
+   "T15_T17_post_tool_ttfa": {
+    "n": 0
+   },
+   "T3_T18_turn_total": {
+    "n": 12,
+    "min": 290.0,
+    "p50": 2325.6,
+    "p95": 3047.2,
+    "max": 3334.9,
+    "mean": 2218.4,
+    "outliers": 0
+   }
+  },
+  "one_tool": {
+   "T1_T3_endpoint": {
+    "n": 1,
+    "min": 462.9,
+    "p50": 462.9,
+    "p95": 462.9,
+    "max": 462.9,
+    "mean": 462.9,
+    "outliers": 0
+   },
+   "T3_T4_commit": {
+    "n": 1,
+    "min": 1.8,
+    "p50": 1.8,
+    "p95": 1.8,
+    "max": 1.8,
+    "mean": 1.8,
+    "outliers": 0
+   },
+   "T4_T5_provider_ack": {
+    "n": 1,
+    "min": 66.4,
+    "p50": 66.4,
+    "p95": 66.4,
+    "max": 66.4,
+    "mean": 66.4,
+    "outliers": 0
+   },
+   "T4_T6_response_created": {
+    "n": 1,
+    "min": 75.4,
+    "p50": 75.4,
+    "p95": 75.4,
+    "max": 75.4,
+    "mean": 75.4,
+    "outliers": 0
+   },
+   "T6_T7_first_audio": {
+    "n": 1,
+    "min": 867.9,
+    "p50": 867.9,
+    "p95": 867.9,
+    "max": 867.9,
+    "mean": 867.9,
+    "outliers": 0
+   },
+   "T4_T7_provider_ttfa": {
+    "n": 1,
+    "min": 943.2,
+    "p50": 943.2,
+    "p95": 943.2,
+    "max": 943.2,
+    "mean": 943.2,
+    "outliers": 0
+   },
+   "T7_T8_qevion_forward": {
+    "n": 1,
+    "min": 1.2,
+    "p50": 1.2,
+    "p95": 1.2,
+    "max": 1.2,
+    "mean": 1.2,
+    "outliers": 0
+   },
+   "T8_T9_ws_delivery": {
+    "n": 1,
+    "min": 0.3,
+    "p50": 0.3,
+    "p95": 0.3,
+    "max": 0.3,
+    "mean": 0.3,
+    "outliers": 0
+   },
+   "T1_T9_user_to_first_audio_client": {
+    "n": 1,
+    "min": 1409.4,
+    "p50": 1409.4,
+    "p95": 1409.4,
+    "max": 1409.4,
+    "mean": 1409.4,
+    "outliers": 0
+   },
+   "T1_T9a_user_to_answer_audio_client": {
+    "n": 1,
+    "min": 1409.4,
+    "p50": 1409.4,
+    "p95": 1409.4,
+    "max": 1409.4,
+    "mean": 1409.4,
+    "outliers": 0
+   },
+   "T12_T13_tool_dispatch": {
+    "n": 1,
+    "min": 0.9,
+    "p50": 0.9,
+    "p95": 0.9,
+    "max": 0.9,
+    "mean": 0.9,
+    "outliers": 0
+   },
+   "T13_T14_tool_exec": {
+    "n": 1,
+    "min": 0.8,
+    "p50": 0.8,
+    "p95": 0.8,
+    "max": 0.8,
+    "mean": 0.8,
+    "outliers": 0
+   },
+   "T15_T16_post_tool_created": {
+    "n": 1,
+    "min": 80.2,
+    "p50": 80.2,
+    "p95": 80.2,
+    "max": 80.2,
+    "mean": 80.2,
+    "outliers": 0
+   },
+   "T15_T17_post_tool_ttfa": {
+    "n": 1,
+    "min": 348.6,
+    "p50": 348.6,
+    "p95": 348.6,
+    "max": 348.6,
+    "mean": 348.6,
+    "outliers": 0
+   },
+   "T3_T18_turn_total": {
+    "n": 1,
+    "min": 2191.5,
+    "p50": 2191.5,
+    "p95": 2191.5,
+    "max": 2191.5,
+    "mean": 2191.5,
+    "outliers": 0
+   }
+  },
+  "multi_tool": {
+   "T1_T3_endpoint": {
+    "n": 9,
+    "min": 462.7,
+    "p50": 523.0,
+    "p95": 542.8,
+    "max": 542.8,
+    "mean": 518.1,
+    "outliers": 0
+   },
+   "T3_T4_commit": {
+    "n": 9,
+    "min": 0.9,
+    "p50": 1.8,
+    "p95": 2.0,
+    "max": 2.0,
+    "mean": 1.7,
+    "outliers": 2
+   },
+   "T4_T5_provider_ack": {
+    "n": 9,
+    "min": 54.0,
+    "p50": 62.1,
+    "p95": 76.0,
+    "max": 76.0,
+    "mean": 65.0,
+    "outliers": 0
+   },
+   "T4_T6_response_created": {
+    "n": 9,
+    "min": 63.9,
+    "p50": 68.6,
+    "p95": 83.3,
+    "max": 83.3,
+    "mean": 73.1,
+    "outliers": 0
+   },
+   "T6_T7_first_audio": {
+    "n": 9,
+    "min": 1590.4,
+    "p50": 2109.2,
+    "p95": 2966.0,
+    "max": 2966.0,
+    "mean": 2221.1,
+    "outliers": 0
+   },
+   "T4_T7_provider_ttfa": {
+    "n": 9,
+    "min": 1656.3,
+    "p50": 2177.0,
+    "p95": 3048.9,
+    "max": 3048.9,
+    "mean": 2294.2,
+    "outliers": 0
+   },
+   "T7_T8_qevion_forward": {
+    "n": 9,
+    "min": 0.8,
+    "p50": 1.1,
+    "p95": 1.3,
+    "max": 1.3,
+    "mean": 1.1,
+    "outliers": 2
+   },
+   "T8_T9_ws_delivery": {
+    "n": 9,
+    "min": 0.4,
+    "p50": 0.5,
+    "p95": 0.7,
+    "max": 0.7,
+    "mean": 0.5,
+    "outliers": 0
+   },
+   "T1_T9_user_to_first_audio_client": {
+    "n": 9,
+    "min": 2182.5,
+    "p50": 2683.6,
+    "p95": 3514.6,
+    "max": 3514.6,
+    "mean": 2815.6,
+    "outliers": 0
+   },
+   "T1_T9a_user_to_answer_audio_client": {
+    "n": 9,
+    "min": 2182.5,
+    "p50": 2683.6,
+    "p95": 3514.6,
+    "max": 3514.6,
+    "mean": 2815.6,
+    "outliers": 0
+   },
+   "T12_T13_tool_dispatch": {
+    "n": 9,
+    "min": 0.5,
+    "p50": 0.7,
+    "p95": 1.1,
+    "max": 1.1,
+    "mean": 0.7,
+    "outliers": 0
+   },
+   "T13_T14_tool_exec": {
+    "n": 9,
+    "min": 0.9,
+    "p50": 0.9,
+    "p95": 1.4,
+    "max": 1.4,
+    "mean": 1.0,
+    "outliers": 1
+   },
+   "T15_T16_post_tool_created": {
+    "n": 9,
+    "min": 55.5,
+    "p50": 61.8,
+    "p95": 80.0,
+    "max": 80.0,
+    "mean": 63.6,
+    "outliers": 0
+   },
+   "T15_T17_post_tool_ttfa": {
+    "n": 9,
+    "min": 334.2,
+    "p50": 436.9,
+    "p95": 528.6,
+    "max": 528.6,
+    "mean": 426.3,
+    "outliers": 0
+   },
+   "T3_T18_turn_total": {
+    "n": 9,
+    "min": 3198.4,
+    "p50": 4330.9,
+    "p95": 4756.7,
+    "max": 4756.7,
+    "mean": 4115.2,
+    "outliers": 0
+   }
+  },
+  "counts": {
+   "all": 22,
+   "no_tool": 12,
+   "one_tool": 1,
+   "multi_tool": 9
+  },
+  "fragmented_turns": 3,
+  "premature_eot_total": 11,
+  "failed_sessions": 0,
+  "decisions": {
+   "count": 229,
+   "by_source": {
+    "RULE": {
+     "n": 229,
+     "min": 0.0,
+     "p50": 0.0,
+     "p95": 0.1,
+     "max": 0.3,
+     "mean": 0.0,
+     "outliers": 2
+    }
+   }
+  }
+ },
+ "rows": [
+  {
+   "session": "ses_123919b6ad7448a7",
+   "clip": "u_short",
+   "tool_calls": 0,
+   "provider_responses": 1,
+   "eot_commits": 1,
+   "premature_eot": 0,
+   "premature_eot_at_ms": [],
+   "cancelled_responses": 0,
+   "T1_T3_endpoint": 504.8,
+   "T3_T4_commit": 3.1,
+   "T4_T5_provider_ack": 93.0,
+   "T4_T6_response_created": 98.5,
+   "T6_T7_first_audio": 394.0,
+   "T4_T7_provider_ttfa": 492.5,
+   "T7_T8_qevion_forward": 1.3,
+   "T8_T9_ws_delivery": 0.7,
+   "T1_T9_user_to_first_audio_client": 1002.3,
+   "T1_T9a_user_to_answer_audio_client": 1002.3,
+   "ack_spoken": false,
+   "ack_texts": [],
+   "tool_cycles": 0,
+   "T12_T13_tool_dispatch": null,
+   "T13_T14_tool_exec": null,
+   "T15_T16_post_tool_created": null,
+   "T15_T17_post_tool_ttfa": null,
+   "T3_T18_turn_total": 2134.7,
+   "first_audio_after_tool": false,
+   "decisions": [
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.3,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    }
+   ]
+  },
+  {
+   "session": "ses_123919b6ad7448a7",
+   "clip": "u1_order",
+   "tool_calls": 3,
+   "provider_responses": 4,
+   "eot_commits": 1,
+   "premature_eot": 0,
+   "premature_eot_at_ms": [],
+   "cancelled_responses": 0,
+   "T1_T3_endpoint": 522.7,
+   "T3_T4_commit": 2.0,
+   "T4_T5_provider_ack": 62.1,
+   "T4_T6_response_created": 68.6,
+   "T6_T7_first_audio": 2672.7,
+   "T4_T7_provider_ttfa": 2741.3,
+   "T7_T8_qevion_forward": 1.1,
+   "T8_T9_ws_delivery": 0.6,
+   "T1_T9_user_to_first_audio_client": 3267.8,
+   "T1_T9a_user_to_answer_audio_client": 3267.8,
+   "ack_spoken": false,
+   "ack_texts": [],
+   "tool_cycles": 3,
+   "T12_T13_tool_dispatch": 0.8,
+   "T13_T14_tool_exec": 1.1,
+   "T15_T16_post_tool_created": 76.1,
+   "T15_T17_post_tool_ttfa": 475.9,
+   "T3_T18_turn_total": 4330.9,
+   "first_audio_after_tool": true,
+   "decisions": [
+    {
+     "kind": "validate_field",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "validate_field",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    }
+   ]
+  },
+  {
+   "session": "ses_123919b6ad7448a7",
+   "clip": "u_follow",
+   "tool_calls": 0,
+   "provider_responses": 1,
+   "eot_commits": 1,
+   "premature_eot": 0,
+   "premature_eot_at_ms": [],
+   "cancelled_responses": 0,
+   "T1_T3_endpoint": 505.7,
+   "T3_T4_commit": 1.8,
+   "T4_T5_provider_ack": 68.6,
+   "T4_T6_response_created": 78.5,
+   "T6_T7_first_audio": 964.5,
+   "T4_T7_provider_ttfa": 1043.1,
+   "T7_T8_qevion_forward": 1.1,
+   "T8_T9_ws_delivery": 0.4,
+   "T1_T9_user_to_first_audio_client": 1552.1,
+   "T1_T9a_user_to_answer_audio_client": 1552.1,
+   "ack_spoken": false,
+   "ack_texts": [],
+   "tool_cycles": 0,
+   "T12_T13_tool_dispatch": null,
+   "T13_T14_tool_exec": null,
+   "T15_T16_post_tool_created": null,
+   "T15_T17_post_tool_ttfa": null,
+   "T3_T18_turn_total": 3334.9,
+   "first_audio_after_tool": false,
+   "decisions": [
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    }
+   ]
+  },
+  {
+   "session": "ses_123919b6ad7448a7",
+   "clip": "u2_address",
+   "tool_calls": 2,
+   "provider_responses": 3,
+   "eot_commits": 1,
+   "premature_eot": 0,
+   "premature_eot_at_ms": [],
+   "cancelled_responses": 0,
+   "T1_T3_endpoint": 542.2,
+   "T3_T4_commit": 1.8,
+   "T4_T5_provider_ack": 67.2,
+   "T4_T6_response_created": 75.0,
+   "T6_T7_first_audio": 1832.1,
+   "T4_T7_provider_ttfa": 1907.1,
+   "T7_T8_qevion_forward": 1.2,
+   "T8_T9_ws_delivery": 0.7,
+   "T1_T9_user_to_first_audio_client": 2453.0,
+   "T1_T9a_user_to_answer_audio_client": 2453.0,
+   "ack_spoken": false,
+   "ack_texts": [],
+   "tool_cycles": 2,
+   "T12_T13_tool_dispatch": 0.5,
+   "T13_T14_tool_exec": 0.9,
+   "T15_T16_post_tool_created": 80.0,
+   "T15_T17_post_tool_ttfa": 528.6,
+   "T3_T18_turn_total": 3452.2,
+   "first_audio_after_tool": true,
+   "decisions": [
+    {
+     "kind": "validate_field",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    }
+   ]
+  },
+  {
+   "session": "ses_123919b6ad7448a7",
+   "clip": "u3_yes",
+   "tool_calls": 0,
+   "provider_responses": 1,
+   "eot_commits": 1,
+   "premature_eot": 0,
+   "premature_eot_at_ms": [],
+   "cancelled_responses": 0,
+   "T1_T3_endpoint": 542.4,
+   "T3_T4_commit": 1.1,
+   "T4_T5_provider_ack": 62.5,
+   "T4_T6_response_created": 71.9,
+   "T6_T7_first_audio": 500.3,
+   "T4_T7_provider_ttfa": 572.2,
+   "T7_T8_qevion_forward": 0.5,
+   "T8_T9_ws_delivery": 0.6,
+   "T1_T9_user_to_first_audio_client": 1116.8,
+   "T1_T9a_user_to_answer_audio_client": 1116.8,
+   "ack_spoken": false,
+   "ack_texts": [],
+   "tool_cycles": 0,
+   "T12_T13_tool_dispatch": null,
+   "T13_T14_tool_exec": null,
+   "T15_T16_post_tool_created": null,
+   "T15_T17_post_tool_ttfa": null,
+   "T3_T18_turn_total": 2050.1,
+   "first_audio_after_tool": false,
+   "decisions": [
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    }
+   ]
+  },
+  {
+   "session": "ses_123919b6ad7448a7",
+   "clip": "u1_order",
+   "tool_calls": 0,
+   "provider_responses": 1,
+   "eot_commits": 1,
+   "premature_eot": 0,
+   "premature_eot_at_ms": [],
+   "cancelled_responses": 0,
+   "T1_T3_endpoint": 543.1,
+   "T3_T4_commit": 2.0,
+   "T4_T5_provider_ack": 59.8,
+   "T4_T6_response_created": 72.6,
+   "T6_T7_first_audio": 551.0,
+   "T4_T7_provider_ttfa": 623.5,
+   "T7_T8_qevion_forward": 1.2,
+   "T8_T9_ws_delivery": 0.5,
+   "T1_T9_user_to_first_audio_client": 1170.3,
+   "T1_T9a_user_to_answer_audio_client": 1170.3,
+   "ack_spoken": false,
+   "ack_texts": [],
+   "tool_cycles": 0,
+   "T12_T13_tool_dispatch": null,
+   "T13_T14_tool_exec": null,
+   "T15_T16_post_tool_created": null,
+   "T15_T17_post_tool_ttfa": null,
+   "T3_T18_turn_total": 2680.8,
+   "first_audio_after_tool": false,
+   "decisions": [
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    }
+   ]
+  },
+  {
+   "session": "ses_0abd0afe623047cd",
+   "clip": "u_long",
+   "tool_calls": 2,
+   "provider_responses": 8,
+   "eot_commits": 6,
+   "premature_eot": 5,
+   "premature_eot_at_ms": [
+    1923,
+    4724,
+    7283,
+    9404,
+    11203
+   ],
+   "cancelled_responses": 5,
+   "T1_T3_endpoint": 502.8,
+   "T3_T4_commit": 2.0,
+   "T4_T5_provider_ack": 59.9,
+   "T4_T6_response_created": 67.8,
+   "T6_T7_first_audio": 2109.2,
+   "T4_T7_provider_ttfa": 2177.0,
+   "T7_T8_qevion_forward": 1.1,
+   "T8_T9_ws_delivery": 0.6,
+   "T1_T9_user_to_first_audio_client": 2683.6,
+   "T1_T9a_user_to_answer_audio_client": 2683.6,
+   "ack_spoken": false,
+   "ack_texts": [],
+   "tool_cycles": 7,
+   "T12_T13_tool_dispatch": 0.6,
+   "T13_T14_tool_exec": 0.9,
+   "T15_T16_post_tool_created": 55.5,
+   "T15_T17_post_tool_ttfa": 401.9,
+   "T3_T18_turn_total": 3374.8,
+   "first_audio_after_tool": true,
+   "decisions": [
+    {
+     "kind": "validate_field",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    }
+   ]
+  },
+  {
+   "session": "ses_0abd0afe623047cd",
+   "clip": "u7_correction",
+   "tool_calls": 4,
+   "provider_responses": 5,
+   "eot_commits": 1,
+   "premature_eot": 0,
+   "premature_eot_at_ms": [],
+   "cancelled_responses": 0,
+   "T1_T3_endpoint": 462.7,
+   "T3_T4_commit": 1.8,
+   "T4_T5_provider_ack": 76.0,
+   "T4_T6_response_created": 82.9,
+   "T6_T7_first_audio": 2966.0,
+   "T4_T7_provider_ttfa": 3048.9,
+   "T7_T8_qevion_forward": 0.8,
+   "T8_T9_ws_delivery": 0.4,
+   "T1_T9_user_to_first_audio_client": 3514.6,
+   "T1_T9a_user_to_answer_audio_client": 3514.6,
+   "ack_spoken": false,
+   "ack_texts": [],
+   "tool_cycles": 4,
+   "T12_T13_tool_dispatch": 0.7,
+   "T13_T14_tool_exec": 0.9,
+   "T15_T16_post_tool_created": 57.0,
+   "T15_T17_post_tool_ttfa": 346.4,
+   "T3_T18_turn_total": 4756.7,
+   "first_audio_after_tool": true,
+   "decisions": [
+    {
+     "kind": "validate_field",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    }
+   ]
+  },
+  {
+   "session": "ses_0abd0afe623047cd",
+   "clip": "u_ambig",
+   "tool_calls": 0,
+   "provider_responses": 1,
+   "eot_commits": 1,
+   "premature_eot": 0,
+   "premature_eot_at_ms": [],
+   "cancelled_responses": 0,
+   "T1_T3_endpoint": 501.8,
+   "T3_T4_commit": 1.9,
+   "T4_T5_provider_ack": 79.3,
+   "T4_T6_response_created": 91.6,
+   "T6_T7_first_audio": 740.8,
+   "T4_T7_provider_ttfa": 832.4,
+   "T7_T8_qevion_forward": 1.2,
+   "T8_T9_ws_delivery": 0.5,
+   "T1_T9_user_to_first_audio_client": 1337.8,
+   "T1_T9a_user_to_answer_audio_client": 1337.8,
+   "ack_spoken": false,
+   "ack_texts": [],
+   "tool_cycles": 0,
+   "T12_T13_tool_dispatch": null,
+   "T13_T14_tool_exec": null,
+   "T15_T16_post_tool_created": null,
+   "T15_T17_post_tool_ttfa": null,
+   "T3_T18_turn_total": 2597.9,
+   "first_audio_after_tool": false,
+   "decisions": [
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    }
+   ]
+  },
+  {
+   "session": "ses_0abd0afe623047cd",
+   "clip": "u_multi",
+   "tool_calls": 3,
+   "provider_responses": 4,
+   "eot_commits": 1,
+   "premature_eot": 0,
+   "premature_eot_at_ms": [],
+   "cancelled_responses": 0,
+   "T1_T3_endpoint": 542.8,
+   "T3_T4_commit": 1.7,
+   "T4_T5_provider_ack": 74.5,
+   "T4_T6_response_created": 82.3,
+   "T6_T7_first_audio": 2849.9,
+   "T4_T7_provider_ttfa": 2932.2,
+   "T7_T8_qevion_forward": 1.3,
+   "T8_T9_ws_delivery": 0.4,
+   "T1_T9_user_to_first_audio_client": 3478.4,
+   "T1_T9a_user_to_answer_audio_client": 3478.4,
+   "ack_spoken": false,
+   "ack_texts": [],
+   "tool_cycles": 3,
+   "T12_T13_tool_dispatch": 0.7,
+   "T13_T14_tool_exec": 0.9,
+   "T15_T16_post_tool_created": 61.8,
+   "T15_T17_post_tool_ttfa": 481.6,
+   "T3_T18_turn_total": 4568.3,
+   "first_audio_after_tool": true,
+   "decisions": [
+    {
+     "kind": "validate_field",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "validate_field",
+     "ms": 0.3,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    }
+   ]
+  },
+  {
+   "session": "ses_0abd0afe623047cd",
+   "clip": "u3_yes",
+   "tool_calls": 0,
+   "provider_responses": 1,
+   "eot_commits": 1,
+   "premature_eot": 0,
+   "premature_eot_at_ms": [],
+   "cancelled_responses": 0,
+   "T1_T3_endpoint": 542.3,
+   "T3_T4_commit": 1.8,
+   "T4_T5_provider_ack": 79.9,
+   "T4_T6_response_created": 85.4,
+   "T6_T7_first_audio": 544.5,
+   "T4_T7_provider_ttfa": 629.9,
+   "T7_T8_qevion_forward": 0.9,
+   "T8_T9_ws_delivery": 0.5,
+   "T1_T9_user_to_first_audio_client": 1175.3,
+   "T1_T9a_user_to_answer_audio_client": 1175.3,
+   "ack_spoken": false,
+   "ack_texts": [],
+   "tool_cycles": 0,
+   "T12_T13_tool_dispatch": null,
+   "T13_T14_tool_exec": null,
+   "T15_T16_post_tool_created": null,
+   "T15_T17_post_tool_ttfa": null,
+   "T3_T18_turn_total": 2623.6,
+   "first_audio_after_tool": false,
+   "decisions": [
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.2,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    }
+   ]
+  },
+  {
+   "session": "ses_0eca949ca5f94f91",
+   "clip": "u_short",
+   "tool_calls": 0,
+   "provider_responses": 1,
+   "eot_commits": 1,
+   "premature_eot": 0,
+   "premature_eot_at_ms": [],
+   "cancelled_responses": 0,
+   "T1_T3_endpoint": 503.0,
+   "T3_T4_commit": 2.8,
+   "T4_T5_provider_ack": 71.3,
+   "T4_T6_response_created": 76.6,
+   "T6_T7_first_audio": 350.9,
+   "T4_T7_provider_ttfa": 427.5,
+   "T7_T8_qevion_forward": 1.1,
+   "T8_T9_ws_delivery": 0.5,
+   "T1_T9_user_to_first_audio_client": 935.0,
+   "T1_T9a_user_to_answer_audio_client": 935.0,
+   "ack_spoken": false,
+   "ack_texts": [],
+   "tool_cycles": 0,
+   "T12_T13_tool_dispatch": null,
+   "T13_T14_tool_exec": null,
+   "T15_T16_post_tool_created": null,
+   "T15_T17_post_tool_ttfa": null,
+   "T3_T18_turn_total": 1539.3,
+   "first_audio_after_tool": false,
+   "decisions": [
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    }
+   ]
+  },
+  {
+   "session": "ses_0eca949ca5f94f91",
+   "clip": "u1_order",
+   "tool_calls": 2,
+   "provider_responses": 3,
+   "eot_commits": 1,
+   "premature_eot": 0,
+   "premature_eot_at_ms": [],
+   "cancelled_responses": 0,
+   "T1_T3_endpoint": 523.1,
+   "T3_T4_commit": 1.7,
+   "T4_T5_provider_ack": 60.0,
+   "T4_T6_response_created": 68.0,
+   "T6_T7_first_audio": 1744.9,
+   "T4_T7_provider_ttfa": 1812.9,
+   "T7_T8_qevion_forward": 1.1,
+   "T8_T9_ws_delivery": 0.4,
+   "T1_T9_user_to_first_audio_client": 2339.1,
+   "T1_T9a_user_to_answer_audio_client": 2339.1,
+   "ack_spoken": false,
+   "ack_texts": [],
+   "tool_cycles": 2,
+   "T12_T13_tool_dispatch": 1.1,
+   "T13_T14_tool_exec": 1.0,
+   "T15_T16_post_tool_created": 55.6,
+   "T15_T17_post_tool_ttfa": 436.9,
+   "T3_T18_turn_total": 3198.4,
+   "first_audio_after_tool": true,
+   "decisions": [
+    {
+     "kind": "validate_field",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    }
+   ]
+  },
+  {
+   "session": "ses_0eca949ca5f94f91",
+   "clip": "u_follow",
+   "tool_calls": 0,
+   "provider_responses": 1,
+   "eot_commits": 1,
+   "premature_eot": 0,
+   "premature_eot_at_ms": [],
+   "cancelled_responses": 0,
+   "T1_T3_endpoint": 504.2,
+   "T3_T4_commit": 1.9,
+   "T4_T5_provider_ack": 59.4,
+   "T4_T6_response_created": 64.8,
+   "T6_T7_first_audio": 402.1,
+   "T4_T7_provider_ttfa": 466.9,
+   "T7_T8_qevion_forward": 1.0,
+   "T8_T9_ws_delivery": 0.6,
+   "T1_T9_user_to_first_audio_client": 974.5,
+   "T1_T9a_user_to_answer_audio_client": 974.5,
+   "ack_spoken": false,
+   "ack_texts": [],
+   "tool_cycles": 0,
+   "T12_T13_tool_dispatch": null,
+   "T13_T14_tool_exec": null,
+   "T15_T16_post_tool_created": null,
+   "T15_T17_post_tool_ttfa": null,
+   "T3_T18_turn_total": 3047.2,
+   "first_audio_after_tool": false,
+   "decisions": [
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    }
+   ]
+  },
+  {
+   "session": "ses_0eca949ca5f94f91",
+   "clip": "u2_address",
+   "tool_calls": 2,
+   "provider_responses": 3,
+   "eot_commits": 1,
+   "premature_eot": 0,
+   "premature_eot_at_ms": [],
+   "cancelled_responses": 0,
+   "T1_T3_endpoint": 523.0,
+   "T3_T4_commit": 1.8,
+   "T4_T5_provider_ack": 54.0,
+   "T4_T6_response_created": 65.8,
+   "T6_T7_first_audio": 1590.4,
+   "T4_T7_provider_ttfa": 1656.3,
+   "T7_T8_qevion_forward": 1.0,
+   "T8_T9_ws_delivery": 0.5,
+   "T1_T9_user_to_first_audio_client": 2182.5,
+   "T1_T9a_user_to_answer_audio_client": 2182.5,
+   "ack_spoken": false,
+   "ack_texts": [],
+   "tool_cycles": 2,
+   "T12_T13_tool_dispatch": 0.8,
+   "T13_T14_tool_exec": 0.9,
+   "T15_T16_post_tool_created": 65.0,
+   "T15_T17_post_tool_ttfa": 375.0,
+   "T3_T18_turn_total": 4198.7,
+   "first_audio_after_tool": true,
+   "decisions": [
+    {
+     "kind": "validate_field",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    }
+   ]
+  },
+  {
+   "session": "ses_0eca949ca5f94f91",
+   "clip": "u3_yes",
+   "tool_calls": 0,
+   "provider_responses": 1,
+   "eot_commits": 1,
+   "premature_eot": 0,
+   "premature_eot_at_ms": [],
+   "cancelled_responses": 0,
+   "T1_T3_endpoint": 541.8,
+   "T3_T4_commit": 1.8,
+   "T4_T5_provider_ack": 67.9,
+   "T4_T6_response_created": 76.7,
+   "T6_T7_first_audio": 505.9,
+   "T4_T7_provider_ttfa": 582.5,
+   "T7_T8_qevion_forward": 1.1,
+   "T8_T9_ws_delivery": 0.4,
+   "T1_T9_user_to_first_audio_client": 1127.7,
+   "T1_T9a_user_to_answer_audio_client": 1127.7,
+   "ack_spoken": false,
+   "ack_texts": [],
+   "tool_cycles": 0,
+   "T12_T13_tool_dispatch": null,
+   "T13_T14_tool_exec": null,
+   "T15_T16_post_tool_created": null,
+   "T15_T17_post_tool_ttfa": null,
+   "T3_T18_turn_total": 1760.6,
+   "first_audio_after_tool": false,
+   "decisions": [
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    }
+   ]
+  },
+  {
+   "session": "ses_0eca949ca5f94f91",
+   "clip": "u1_order",
+   "tool_calls": 0,
+   "provider_responses": 2,
+   "eot_commits": 2,
+   "premature_eot": 1,
+   "premature_eot_at_ms": [
+    2004
+   ],
+   "cancelled_responses": 1,
+   "T1_T3_endpoint": 521.4,
+   "T3_T4_commit": 2.0,
+   "T4_T5_provider_ack": 57.4,
+   "T4_T6_response_created": 65.4,
+   "T6_T7_first_audio": 341.4,
+   "T4_T7_provider_ttfa": 406.8,
+   "T7_T8_qevion_forward": 1.2,
+   "T8_T9_ws_delivery": 0.6,
+   "T1_T9_user_to_first_audio_client": 932.1,
+   "T1_T9a_user_to_answer_audio_client": 932.1,
+   "ack_spoken": false,
+   "ack_texts": [],
+   "tool_cycles": 1,
+   "T12_T13_tool_dispatch": null,
+   "T13_T14_tool_exec": null,
+   "T15_T16_post_tool_created": null,
+   "T15_T17_post_tool_ttfa": null,
+   "T3_T18_turn_total": 2325.6,
+   "first_audio_after_tool": false,
+   "decisions": [
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    }
+   ]
+  },
+  {
+   "session": "ses_0e24b935254b44f2",
+   "clip": "u_long",
+   "tool_calls": 2,
+   "provider_responses": 8,
+   "eot_commits": 6,
+   "premature_eot": 5,
+   "premature_eot_at_ms": [
+    1924,
+    4724,
+    7284,
+    9403,
+    11203
+   ],
+   "cancelled_responses": 5,
+   "T1_T3_endpoint": 501.7,
+   "T3_T4_commit": 0.9,
+   "T4_T5_provider_ack": 55.7,
+   "T4_T6_response_created": 63.9,
+   "T6_T7_first_audio": 1805.6,
+   "T4_T7_provider_ttfa": 1869.6,
+   "T7_T8_qevion_forward": 1.1,
+   "T8_T9_ws_delivery": 0.6,
+   "T1_T9_user_to_first_audio_client": 2373.8,
+   "T1_T9a_user_to_answer_audio_client": 2373.8,
+   "ack_spoken": false,
+   "ack_texts": [],
+   "tool_cycles": 7,
+   "T12_T13_tool_dispatch": 0.6,
+   "T13_T14_tool_exec": 1.4,
+   "T15_T16_post_tool_created": 55.9,
+   "T15_T17_post_tool_ttfa": 334.2,
+   "T3_T18_turn_total": 4569.7,
+   "first_audio_after_tool": true,
+   "decisions": [
+    {
+     "kind": "validate_field",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    }
+   ]
+  },
+  {
+   "session": "ses_0e24b935254b44f2",
+   "clip": "u7_correction",
+   "tool_calls": 1,
+   "provider_responses": 2,
+   "eot_commits": 1,
+   "premature_eot": 0,
+   "premature_eot_at_ms": [],
+   "cancelled_responses": 0,
+   "T1_T3_endpoint": 462.9,
+   "T3_T4_commit": 1.8,
+   "T4_T5_provider_ack": 66.4,
+   "T4_T6_response_created": 75.4,
+   "T6_T7_first_audio": 867.9,
+   "T4_T7_provider_ttfa": 943.2,
+   "T7_T8_qevion_forward": 1.2,
+   "T8_T9_ws_delivery": 0.3,
+   "T1_T9_user_to_first_audio_client": 1409.4,
+   "T1_T9a_user_to_answer_audio_client": 1409.4,
+   "ack_spoken": false,
+   "ack_texts": [],
+   "tool_cycles": 1,
+   "T12_T13_tool_dispatch": 0.9,
+   "T13_T14_tool_exec": 0.8,
+   "T15_T16_post_tool_created": 80.2,
+   "T15_T17_post_tool_ttfa": 348.6,
+   "T3_T18_turn_total": 2191.5,
+   "first_audio_after_tool": true,
+   "decisions": [
+    {
+     "kind": "validate_field",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    }
+   ]
+  },
+  {
+   "session": "ses_0e24b935254b44f2",
+   "clip": "u_ambig",
+   "tool_calls": 0,
+   "provider_responses": 1,
+   "eot_commits": 1,
+   "premature_eot": 0,
+   "premature_eot_at_ms": [],
+   "cancelled_responses": 0,
+   "T1_T3_endpoint": 503.1,
+   "T3_T4_commit": 2.0,
+   "T4_T5_provider_ack": 69.9,
+   "T4_T6_response_created": 78.0,
+   "T6_T7_first_audio": 400.8,
+   "T4_T7_provider_ttfa": 478.8,
+   "T7_T8_qevion_forward": 0.8,
+   "T8_T9_ws_delivery": 0.4,
+   "T1_T9_user_to_first_audio_client": 985.1,
+   "T1_T9a_user_to_answer_audio_client": 985.1,
+   "ack_spoken": false,
+   "ack_texts": [],
+   "tool_cycles": 0,
+   "T12_T13_tool_dispatch": null,
+   "T13_T14_tool_exec": null,
+   "T15_T16_post_tool_created": null,
+   "T15_T17_post_tool_ttfa": null,
+   "T3_T18_turn_total": 2236.2,
+   "first_audio_after_tool": false,
+   "decisions": [
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    }
+   ]
+  },
+  {
+   "session": "ses_0e24b935254b44f2",
+   "clip": "u_multi",
+   "tool_calls": 3,
+   "provider_responses": 4,
+   "eot_commits": 1,
+   "premature_eot": 0,
+   "premature_eot_at_ms": [],
+   "cancelled_responses": 0,
+   "T1_T3_endpoint": 541.7,
+   "T3_T4_commit": 1.8,
+   "T4_T5_provider_ack": 75.3,
+   "T4_T6_response_created": 83.3,
+   "T6_T7_first_audio": 2419.2,
+   "T4_T7_provider_ttfa": 2502.5,
+   "T7_T8_qevion_forward": 1.1,
+   "T8_T9_ws_delivery": 0.5,
+   "T1_T9_user_to_first_audio_client": 3047.7,
+   "T1_T9a_user_to_answer_audio_client": 3047.7,
+   "ack_spoken": false,
+   "ack_texts": [],
+   "tool_cycles": 3,
+   "T12_T13_tool_dispatch": 0.7,
+   "T13_T14_tool_exec": 0.9,
+   "T15_T16_post_tool_created": 65.9,
+   "T15_T17_post_tool_ttfa": 456.1,
+   "T3_T18_turn_total": 4586.8,
+   "first_audio_after_tool": true,
+   "decisions": [
+    {
+     "kind": "validate_field",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "validate_field",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    }
+   ]
+  },
+  {
+   "session": "ses_0e24b935254b44f2",
+   "clip": "u3_yes",
+   "tool_calls": 0,
+   "provider_responses": 1,
+   "eot_commits": 1,
+   "premature_eot": 0,
+   "premature_eot_at_ms": [],
+   "cancelled_responses": 0,
+   "T1_T3_endpoint": 541.7,
+   "T3_T4_commit": 1.8,
+   "T4_T5_provider_ack": 61.4,
+   "T4_T6_response_created": 71.9,
+   "T6_T7_first_audio": null,
+   "T4_T7_provider_ttfa": null,
+   "T7_T8_qevion_forward": null,
+   "T8_T9_ws_delivery": null,
+   "T1_T9_user_to_first_audio_client": null,
+   "T1_T9a_user_to_answer_audio_client": null,
+   "ack_spoken": false,
+   "ack_texts": [],
+   "tool_cycles": 0,
+   "T12_T13_tool_dispatch": null,
+   "T13_T14_tool_exec": null,
+   "T15_T16_post_tool_created": null,
+   "T15_T17_post_tool_ttfa": null,
+   "T3_T18_turn_total": 290.0,
+   "first_audio_after_tool": false,
+   "decisions": [
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.1,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    },
+    {
+     "kind": "evaluate_rule",
+     "ms": 0.0,
+     "source": "RULE"
+    }
+   ]
+  }
+ ],
+ "sessions": [
+  {
+   "session_id": "ses_123919b6ad7448a7",
+   "t_ws_connect_start": 1790219519784.3323,
+   "turns": [
+    {
+     "clip": "u_short",
+     "t_clip_start": 1790219521317.912,
+     "t1": 1790219522159.1162,
+     "t_clip_end": 1790219531700.5059
+    },
+    {
+     "clip": "u1_order",
+     "t_clip_start": 1790219532501.6296,
+     "t1": 1790219538043.5193,
+     "t_clip_end": 1790219549754.9272
+    },
+    {
+     "clip": "u_follow",
+     "t_clip_start": 1790219550555.552,
+     "t1": 1790219553336.1833,
+     "t_clip_end": 1790219566624.9968
+    },
+    {
+     "clip": "u2_address",
+     "t_clip_start": 1790219567426.1528,
+     "t1": 1790219573087.4224,
+     "t_clip_end": 1790219583835.2092
+    },
+    {
+     "clip": "u3_yes",
+     "t_clip_start": 1790219584636.1428,
+     "t1": 1790219587237.283,
+     "t_clip_end": 1790219596097.9932
+    },
+    {
+     "clip": "u1_order",
+     "t_clip_start": 1790219596899.1177,
+     "t1": 1790219602439.9795,
+     "t_clip_end": 1790219613904.305
+    }
+   ],
+   "client_marks": [
+    [
+     1790219519817.2356,
+     "client:ws_open",
+     ""
+    ],
+    [
+     1790219520108.2183,
+     "client:ready",
+     ""
+    ],
+    [
+     1790219523161.3994,
+     "client:first_audio_frame",
+     "resp_ERUAMKWdvd8Va9qbV341p"
+    ],
+    [
+     1790219524801.2078,
+     "client:audio_end",
+     "resp_ERUAMKWdvd8Va9qbV341p"
+    ],
+    [
+     1790219539418.236,
+     "client:audio_end",
+     "resp_ERUAcalGgCt34vHik0421"
+    ],
+    [
+     1790219540342.7422,
+     "client:audio_end",
+     "resp_ERUAdUm0ugpX4Tc1WQsvW"
+    ],
+    [
+     1790219540840.134,
+     "client:audio_end",
+     "resp_ERUAeZ6ursRMb9EnOpdHy"
+    ],
+    [
+     1790219541311.2712,
+     "client:first_audio_frame",
+     "resp_ERUAeZ5VM4wIKZpiQ7rrL"
+    ],
+    [
+     1790219542899.3213,
+     "client:audio_end",
+     "resp_ERUAeZ5VM4wIKZpiQ7rrL"
+    ],
+    [
+     1790219554888.3027,
+     "client:first_audio_frame",
+     "resp_ERUArc6Gpd2Y1S3d0gSgR"
+    ],
+    [
+     1790219557179.2905,
+     "client:audio_end",
+     "resp_ERUArc6Gpd2Y1S3d0gSgR"
+    ],
+    [
+     1790219574411.8757,
+     "client:audio_end",
+     "resp_ERUBBwOmgmsgDzpRuEbGc"
+    ],
+    [
+     1790219575017.351,
+     "client:audio_end",
+     "resp_ERUBC204fb63MzFHTO9Az"
+    ],
+    [
+     1790219575540.4253,
+     "client:first_audio_frame",
+     "resp_ERUBDmsSEDiHl8737Cpfb"
+    ],
+    [
+     1790219577084.1921,
+     "client:audio_end",
+     "resp_ERUBDmsSEDiHl8737Cpfb"
+    ],
+    [
+     1790219588354.118,
+     "client:first_audio_frame",
+     "resp_ERUBPZh8H7cIjs6wd0lsh"
+    ],
+    [
+     1790219589832.1675,
+     "client:audio_end",
+     "resp_ERUBPZh8H7cIjs6wd0lsh"
+    ],
+    [
+     1790219603610.2776,
+     "client:first_audio_frame",
+     "resp_ERUBfxmJZ5r0F1NSDfK4G"
+    ],
+    [
+     1790219605665.9597,
+     "client:audio_end",
+     "resp_ERUBfxmJZ5r0F1NSDfK4G"
+    ]
+   ],
+   "server_marks": [
+    [
+     1790219520105.621,
+     "sent:session.update",
+     ""
+    ],
+    [
+     1790219521481.237,
+     "core:speech_start",
+     ""
+    ],
+    [
+     1790219522663.9111,
+     "core:end_of_turn",
+     "speech_ms=780;silence_ms=500"
+    ],
+    [
+     1790219522666.8157,
+     "sent:session.update",
+     ""
+    ],
+    [
+     1790219522666.8306,
+     "core:commit_call",
+     ""
+    ],
+    [
+     1790219522666.9795,
+     "sent:input_audio_buffer.commit",
+     ""
+    ],
+    [
+     1790219522667.119,
+     "sent:response.create",
+     ""
+    ],
+    [
+     1790219522759.988,
+     "recv:input_audio_buffer.committed",
+     ""
+    ],
+    [
+     1790219522765.4917,
+     "recv:response.created",
+     "resp_ERUAMKWdvd8Va9qbV341p"
+    ],
+    [
+     1790219523159.4531,
+     "recv:first_audio_delta",
+     "resp_ERUAMKWdvd8Va9qbV341p"
+    ],
+    [
+     1790219523160.748,
+     "core:first_audio_to_client",
+     "resp_ERUAMKWdvd8Va9qbV341p"
+    ],
+    [
+     1790219523329.8838,
+     "recv:conversation.item.input_audio_transcription.completed",
+     ""
+    ],
+    [
+     1790219524798.5635,
+     "recv:response.done",
+     "resp_ERUAMKWdvd8Va9qbV341p"
+    ],
+    [
+     1790219524799.7156,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219524799.8247,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219524799.8755,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219524800.2031,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219524800.244,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219524800.2844,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219524800.3176,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219524800.3618,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219532964.292,
+     "core:speech_start",
+     ""
+    ],
+    [
+     1790219538566.2646,
+     "core:end_of_turn",
+     "speech_ms=4560;silence_ms=510"
+    ],
+    [
+     1790219538567.9978,
+     "core:commit_call",
+     ""
+    ],
+    [
+     1790219538568.2786,
+     "sent:input_audio_buffer.commit",
+     ""
+    ],
+    [
+     1790219538568.47,
+     "sent:response.create",
+     ""
+    ],
+    [
+     1790219538630.3555,
+     "recv:input_audio_buffer.committed",
+     ""
+    ],
+    [
+     1790219538636.8965,
+     "recv:response.created",
+     "resp_ERUAcalGgCt34vHik0421"
+    ],
+    [
+     1790219539334.3887,
+     "recv:conversation.item.input_audio_transcription.completed",
+     ""
+    ],
+    [
+     1790219539408.6582,
+     "recv:response.function_call_arguments.done",
+     "call_Pewr1zfQKsDFQuvg"
+    ],
+    [
+     1790219539409.433,
+     "core:tool_start",
+     "call_Pewr1zfQKsDFQuvg:record_field"
+    ],
+    [
+     1790219539410.5103,
+     "core:tool_done",
+     "call_Pewr1zfQKsDFQuvg:record_field"
+    ],
+    [
+     1790219539410.5762,
+     "decision:start",
+     "validate_field"
+    ],
+    [
+     1790219539410.6243,
+     "decision:end",
+     "validate_field:RULE"
+    ],
+    [
+     1790219539411.3813,
+     "core:tool_result_submit",
+     "call_Pewr1zfQKsDFQuvg"
+    ],
+    [
+     1790219539411.7793,
+     "sent:conversation.item.create",
+     "call_Pewr1zfQKsDFQuvg"
+    ],
+    [
+     1790219539411.909,
+     "sent:response.create",
+     ""
+    ],
+    [
+     1790219539415.2075,
+     "recv:response.done",
+     "resp_ERUAcalGgCt34vHik0421"
+    ],
+    [
+     1790219539415.9895,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219539416.0923,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219539416.1267,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219539416.177,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219539416.2078,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219539416.2363,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219539416.265,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219539416.291,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219539417.7544,
+     "sent:session.update",
+     ""
+    ],
+    [
+     1790219539488.7266,
+     "recv:response.created",
+     "resp_ERUAdUm0ugpX4Tc1WQsvW"
+    ],
+    [
+     1790219540335.8103,
+     "recv:response.function_call_arguments.done",
+     "call_gOchUrH6KiSlQjml"
+    ],
+    [
+     1790219540336.563,
+     "core:tool_start",
+     "call_gOchUrH6KiSlQjml:verify_field"
+    ],
+    [
+     1790219540337.3735,
+     "core:tool_done",
+     "call_gOchUrH6KiSlQjml:verify_field"
+    ],
+    [
+     1790219540337.5125,
+     "core:tool_result_submit",
+     "call_gOchUrH6KiSlQjml"
+    ],
+    [
+     1790219540337.8418,
+     "sent:conversation.item.create",
+     "call_gOchUrH6KiSlQjml"
+    ],
+    [
+     1790219540338.0547,
+     "sent:response.create",
+     ""
+    ],
+    [
+     1790219540339.6653,
+     "recv:response.done",
+     "resp_ERUAdUm0ugpX4Tc1WQsvW"
+    ],
+    [
+     1790219540340.6404,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219540340.714,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219540340.7476,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219540340.798,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219540340.8274,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219540340.8567,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219540340.885,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219540340.911,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219540342.3691,
+     "sent:session.update",
+     ""
+    ],
+    [
+     1790219540412.1738,
+     "recv:response.created",
+     "resp_ERUAeZ6ursRMb9EnOpdHy"
+    ],
+    [
+     1790219540830.9944,
+     "recv:response.function_call_arguments.done",
+     "call_asROuiR09gLEjVOo"
+    ],
+    [
+     1790219540831.637,
+     "core:tool_start",
+     "call_asROuiR09gLEjVOo:record_field"
+    ],
+    [
+     1790219540832.7126,
+     "core:tool_done",
+     "call_asROuiR09gLEjVOo:record_field"
+    ],
+    [
+     1790219540832.7722,
+     "decision:start",
+     "validate_field"
+    ],
+    [
+     1790219540832.846,
+     "decision:end",
+     "validate_field:RULE"
+    ],
+    [
+     1790219540833.7039,
+     "core:tool_result_submit",
+     "call_asROuiR09gLEjVOo"
+    ],
+    [
+     1790219540834.0442,
+     "sent:conversation.item.create",
+     "call_asROuiR09gLEjVOo"
+    ],
+    [
+     1790219540834.2056,
+     "sent:response.create",
+     ""
+    ],
+    [
+     1790219540837.1792,
+     "recv:response.done",
+     "resp_ERUAeZ6ursRMb9EnOpdHy"
+    ],
+    [
+     1790219540837.867,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219540837.9456,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219540837.9792,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219540838.0508,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219540838.0889,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219540838.1196,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219540838.149,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219540838.175,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219540839.7043,
+     "sent:session.update",
+     ""
+    ],
+    [
+     1790219540909.756,
+     "recv:response.created",
+     "resp_ERUAeZ5VM4wIKZpiQ7rrL"
+    ],
+    [
+     1790219541309.5977,
+     "recv:first_audio_delta",
+     "resp_ERUAeZ5VM4wIKZpiQ7rrL"
+    ],
+    [
+     1790219541310.7126,
+     "core:first_audio_to_client",
+     "resp_ERUAeZ5VM4wIKZpiQ7rrL"
+    ],
+    [
+     1790219542897.148,
+     "recv:response.done",
+     "resp_ERUAeZ5VM4wIKZpiQ7rrL"
+    ],
+    [
+     1790219542898.1611,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219542898.2363,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219542898.27,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219542898.3223,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219542898.3528,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219542898.3826,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219542898.4119,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219542898.4377,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219550799.1492,
+     "core:speech_start",
+     ""
+    ],
+    [
+     1790219553841.9314,
+     "core:end_of_turn",
+     "speech_ms=2260;silence_ms=500"
+    ],
+    [
+     1790219553843.4783,
+     "core:commit_call",
+     ""
+    ],
+    [
+     1790219553843.7095,
+     "sent:input_audio_buffer.commit",
+     ""
+    ],
+    [
+     1790219553843.835,
+     "sent:response.create",
+     ""
+    ],
+    [
+     1790219553912.3093,
+     "recv:input_audio_buffer.committed",
+     ""
+    ],
+    [
+     1790219553922.241,
+     "recv:response.created",
+     "resp_ERUArc6Gpd2Y1S3d0gSgR"
+    ],
+    [
+     1790219554561.1055,
+     "recv:conversation.item.input_audio_transcription.completed",
+     ""
+    ],
+    [
+     1790219554886.777,
+     "recv:first_audio_delta",
+     "resp_ERUArc6Gpd2Y1S3d0gSgR"
+    ],
+    [
+     1790219554887.8777,
+     "core:first_audio_to_client",
+     "resp_ERUArc6Gpd2Y1S3d0gSgR"
+    ],
+    [
+     1790219557176.8103,
+     "recv:response.done",
+     "resp_ERUArc6Gpd2Y1S3d0gSgR"
+    ],
+    [
+     1790219557178.0532,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219557178.133,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219557178.169,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219557178.2207,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219557178.251,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219557178.2798,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219557178.309,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219557178.335,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219567568.7732,
+     "core:speech_start",
+     ""
+    ],
+    [
+     1790219573629.6404,
+     "core:end_of_turn",
+     "speech_ms=4640;silence_ms=510"
+    ],
+    [
+     1790219573631.1492,
+     "core:commit_call",
+     ""
+    ],
+    [
+     1790219573631.4329,
+     "sent:input_audio_buffer.commit",
+     ""
+    ],
+    [
+     1790219573631.577,
+     "sent:response.create",
+     ""
+    ],
+    [
+     1790219573698.6401,
+     "recv:input_audio_buffer.committed",
+     ""
+    ],
+    [
+     1790219573706.4531,
+     "recv:response.created",
+     "resp_ERUBBwOmgmsgDzpRuEbGc"
+    ],
+    [
+     1790219574397.2585,
+     "recv:conversation.item.input_audio_transcription.completed",
+     ""
+    ],
+    [
+     1790219574404.8254,
+     "recv:response.function_call_arguments.done",
+     "call_5gGomN4poPr6pqgL"
+    ],
+    [
+     1790219574405.3694,
+     "core:tool_start",
+     "call_5gGomN4poPr6pqgL:record_field"
+    ],
+    [
+     1790219574406.2634,
+     "core:tool_done",
+     "call_5gGomN4poPr6pqgL:record_field"
+    ],
+    [
+     1790219574406.3052,
+     "decision:start",
+     "validate_field"
+    ],
+    [
+     1790219574406.3733,
+     "decision:end",
+     "validate_field:RULE"
+    ],
+    [
+     1790219574406.9976,
+     "core:tool_result_submit",
+     "call_5gGomN4poPr6pqgL"
+    ],
+    [
+     1790219574407.4275,
+     "sent:conversation.item.create",
+     "call_5gGomN4poPr6pqgL"
+    ],
+    [
+     1790219574407.56,
+     "sent:response.create",
+     ""
+    ],
+    [
+     1790219574408.9253,
+     "recv:response.done",
+     "resp_ERUBBwOmgmsgDzpRuEbGc"
+    ],
+    [
+     1790219574409.6565,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219574409.7297,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219574409.7644,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219574409.8132,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219574409.8445,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219574409.873,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219574409.9014,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219574409.9272,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219574411.453,
+     "sent:session.update",
+     ""
+    ],
+    [
+     1790219574480.9753,
+     "recv:response.created",
+     "resp_ERUBC204fb63MzFHTO9Az"
+    ],
+    [
+     1790219575008.438,
+     "recv:response.function_call_arguments.done",
+     "call_wAxerWRo9tDHwPRB"
+    ],
+    [
+     1790219575009.0542,
+     "core:tool_start",
+     "call_wAxerWRo9tDHwPRB:verify_field"
+    ],
+    [
+     1790219575009.7615,
+     "core:tool_done",
+     "call_wAxerWRo9tDHwPRB:verify_field"
+    ],
+    [
+     1790219575009.901,
+     "core:tool_result_submit",
+     "call_wAxerWRo9tDHwPRB"
+    ],
+    [
+     1790219575010.259,
+     "sent:conversation.item.create",
+     "call_wAxerWRo9tDHwPRB"
+    ],
+    [
+     1790219575010.3867,
+     "sent:response.create",
+     ""
+    ],
+    [
+     1790219575014.0522,
+     "recv:response.done",
+     "resp_ERUBC204fb63MzFHTO9Az"
+    ],
+    [
+     1790219575014.821,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219575014.9133,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219575014.9604,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219575015.0608,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219575015.0981,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219575015.1301,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219575015.1616,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219575015.188,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219575016.8596,
+     "sent:session.update",
+     ""
+    ],
+    [
+     1790219575089.9028,
+     "recv:response.created",
+     "resp_ERUBDmsSEDiHl8737Cpfb"
+    ],
+    [
+     1790219575538.5435,
+     "recv:first_audio_delta",
+     "resp_ERUBDmsSEDiHl8737Cpfb"
+    ],
+    [
+     1790219575539.7356,
+     "core:first_audio_to_client",
+     "resp_ERUBDmsSEDiHl8737Cpfb"
+    ],
+    [
+     1790219577081.848,
+     "recv:response.done",
+     "resp_ERUBDmsSEDiHl8737Cpfb"
+    ],
+    [
+     1790219577082.8984,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219577082.979,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219577083.0178,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219577083.088,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219577083.136,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219577083.168,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219577083.1985,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219577083.2249,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219584819.0845,
+     "core:speech_start",
+     ""
+    ],
+    [
+     1790219587779.7163,
+     "core:end_of_turn",
+     "speech_ms=2140;silence_ms=510"
+    ],
+    [
+     1790219587780.6462,
+     "core:commit_call",
+     ""
+    ],
+    [
+     1790219587780.809,
+     "sent:input_audio_buffer.commit",
+     ""
+    ],
+    [
+     1790219587780.872,
+     "sent:response.create",
+     ""
+    ],
+    [
+     1790219587843.3154,
+     "recv:input_audio_buffer.committed",
+     ""
+    ],
+    [
+     1790219587852.7173,
+     "recv:response.created",
+     "resp_ERUBPZh8H7cIjs6wd0lsh"
+    ],
+    [
+     1790219588352.9863,
+     "recv:first_audio_delta",
+     "resp_ERUBPZh8H7cIjs6wd0lsh"
+    ],
+    [
+     1790219588353.531,
+     "core:first_audio_to_client",
+     "resp_ERUBPZh8H7cIjs6wd0lsh"
+    ],
+    [
+     1790219588544.5984,
+     "recv:conversation.item.input_audio_transcription.completed",
+     ""
+    ],
+    [
+     1790219589829.8655,
+     "recv:response.done",
+     "resp_ERUBPZh8H7cIjs6wd0lsh"
+    ],
+    [
+     1790219589830.8362,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219589830.924,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219589830.979,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219589831.0535,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219589831.0981,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219589831.145,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219589831.2095,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219589831.2773,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219597362.9658,
+     "core:speech_start",
+     ""
+    ],
+    [
+     1790219602983.0886,
+     "core:end_of_turn",
+     "speech_ms=4580;silence_ms=510"
+    ],
+    [
+     1790219602984.7493,
+     "core:commit_call",
+     ""
+    ],
+    [
+     1790219602985.0464,
+     "sent:input_audio_buffer.commit",
+     ""
+    ],
+    [
+     1790219602985.2903,
+     "sent:response.create",
+     ""
+    ],
+    [
+     1790219603044.884,
+     "recv:input_audio_buffer.committed",
+     ""
+    ],
+    [
+     1790219603057.6084,
+     "recv:response.created",
+     "resp_ERUBfxmJZ5r0F1NSDfK4G"
+    ],
+    [
+     1790219603608.5955,
+     "recv:first_audio_delta",
+     "resp_ERUBfxmJZ5r0F1NSDfK4G"
+    ],
+    [
+     1790219603609.799,
+     "core:first_audio_to_client",
+     "resp_ERUBfxmJZ5r0F1NSDfK4G"
+    ],
+    [
+     1790219603915.9043,
+     "recv:conversation.item.input_audio_transcription.completed",
+     ""
+    ],
+    [
+     1790219605663.8445,
+     "recv:response.done",
+     "resp_ERUBfxmJZ5r0F1NSDfK4G"
+    ],
+    [
+     1790219605664.869,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219605664.945,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219605664.9832,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219605665.034,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219605665.067,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219605665.0962,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219605665.126,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219605665.1523,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219614706.5269,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219614706.607,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219614706.644,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219614706.6997,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219614706.7312,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219614706.7615,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219614706.792,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219614706.8184,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219616749.237,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219616749.2917,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219616749.306,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219616749.332,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219616749.343,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219616749.354,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219616749.3647,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219616749.3738,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ]
+   ],
+   "error": null,
+   "outcome": "abandoned",
+   "spoken": [
+    {
+     "t": 1790219524801.2078,
+     "rid": "resp_ERUAMKWdvd8Va9qbV341p",
+     "audio_ms": 8550,
+     "text": "أهلاًوسهلاًبحضرتك!عايزأوضحإنالمكالمةديلتسجيلطلبكوتأكيده.ممكنتقولليإيهالأصنافالليعاوزهانبدأبيها؟"
+    },
+    {
+     "t": 1790219539418.236,
+     "rid": "resp_ERUAcalGgCt34vHik0421",
+     "audio_ms": 0,
+     "text": null
+    },
+    {
+     "t": 1790219540342.7422,
+     "rid": "resp_ERUAdUm0ugpX4Tc1WQsvW",
+     "audio_ms": 0,
+     "text": null
+    },
+    {
+     "t": 1790219540840.134,
+     "rid": "resp_ERUAeZ6ursRMb9EnOpdHy",
+     "audio_ms": 0,
+     "text": null
+    },
+    {
+     "t": 1790219542899.3213,
+     "rid": "resp_ERUAeZ5VM4wIKZpiQ7rrL",
+     "audio_ms": 8450,
+     "text": "تمام،إحناعندنافيالطلب:اثنينبيتزامارجريتاكبيرةوواحدبيبسي.ممكنتدينيعنوانالتوصيلبالكامللوسمحت؟"
+    },
+    {
+     "t": 1790219557179.2905,
+     "rid": "resp_ERUArc6Gpd2Y1S3d0gSgR",
+     "audio_ms": 11750,
+     "text": "أناماعنديشمعلومةمؤكدةحالياًعنزمنالتوصيل.بعدمانأكدالعنوانوالطلببالكامل،ممكننعرفوقتالتوصيلالتقريبي.خلينانبدأبالعنوانعلشاننتحركلقدام."
+    },
+    {
+     "t": 1790219574411.8757,
+     "rid": "resp_ERUBBwOmgmsgDzpRuEbGc",
+     "audio_ms": 0,
+     "text": null
+    },
+    {
+     "t": 1790219575017.351,
+     "rid": "resp_ERUBC204fb63MzFHTO9Az",
+     "audio_ms": 0,
+     "text": null
+    },
+    {
+     "t": 1790219577084.1921,
+     "rid": "resp_ERUBDmsSEDiHl8737Cpfb",
+     "audio_ms": 8300,
+     "text": "تمتأكيدالعنوان:23شارعالتحرير،الدقي،الدورالخامس.ممكنبسرقمالموبايلعلشاننكملالطلب؟"
+    },
+    {
+     "t": 1790219589832.1675,
+     "rid": "resp_ERUBPZh8H7cIjs6wd0lsh",
+     "audio_ms": 7750,
+     "text": "لسهمحتاجينرقمالموبايلعلشاننقدرنكملالطلب.ياريتتدينيالرقم11رقمويبدأبـ01."
+    },
+    {
+     "t": 1790219605665.9597,
+     "rid": "resp_ERUBfxmJZ5r0F1NSDfK4G",
+     "audio_ms": 10300,
+     "text": "أنابالفعلسجلتالطلببتاعك:اثنينبيتزامارجريتاكبيرةوواحدبيبسي.حالياًالليناقصهورقمالموبايل.تقدرتدينيرقمكعلشاننكملالطلب؟"
+    }
+   ],
+   "flags": {
+    "QEVION_TOOL_ACK": "0",
+    "QEVION_PARALLEL_TOOLS": "0"
+   }
+  },
+  {
+   "session_id": "ses_0abd0afe623047cd",
+   "t_ws_connect_start": 1790219617772.083,
+   "turns": [
+    {
+     "clip": "u_long",
+     "t_clip_start": 1790219619280.613,
+     "t1": 1790219634482.0198,
+     "t_clip_end": 1790219664894.8264
+    },
+    {
+     "clip": "u7_correction",
+     "t_clip_start": 1790219665696.0383,
+     "t1": 1790219670217.45,
+     "t_clip_end": 1790219700914.0342
+    },
+    {
+     "clip": "u_ambig",
+     "t_clip_start": 1790219701714.7268,
+     "t1": 1790219704795.883,
+     "t_clip_end": 1790219735884.6333
+    },
+    {
+     "clip": "u_multi",
+     "t_clip_start": 1790219736685.267,
+     "t1": 1790219746406.058,
+     "t_clip_end": 1790219776864.3306
+    },
+    {
+     "clip": "u3_yes",
+     "t_clip_start": 1790219777665.13,
+     "t1": 1790219780265.998,
+     "t_clip_end": 1790219810744.5823
+    }
+   ],
+   "client_marks": [
+    [
+     1790219617779.934,
+     "client:ws_open",
+     ""
+    ],
+    [
+     1790219618028.1887,
+     "client:ready",
+     ""
+    ],
+    [
+     1790219624458.4294,
+     "client:first_audio_frame",
+     "resp_ERUC0EZKmNRJRTQAdd7KY"
+    ],
+    [
+     1790219636222.7324,
+     "client:audio_end",
+     "resp_ERUCBfE7vUxDvPh9c2T9p"
+    ],
+    [
+     1790219636767.8171,
+     "client:audio_end",
+     "resp_ERUCCn5lQP3hX96zqCbwt"
+    ],
+    [
+     1790219637165.5857,
+     "client:first_audio_frame",
+     "resp_ERUCCmQbSjnVkyt37DyR7"
+    ],
+    [
+     1790219638361.7283,
+     "client:audio_end",
+     "resp_ERUCCmQbSjnVkyt37DyR7"
+    ],
+    [
+     1790219671983.1807,
+     "client:audio_end",
+     "resp_ERUCkMD4htO4BhSVQjYrj"
+    ],
+    [
+     1790219672514.7249,
+     "client:audio_end",
+     "resp_ERUCmnwcwDzQH7SlGvUG9"
+    ],
+    [
+     1790219672966.1895,
+     "client:audio_end",
+     "resp_ERUCmy6AzUC7VoaQdvRT6"
+    ],
+    [
+     1790219673390.5217,
+     "client:audio_end",
+     "resp_ERUCmDf9KCfnLiUHNZEwv"
+    ],
+    [
+     1790219673732.0208,
+     "client:first_audio_frame",
+     "resp_ERUCn1jQyXtAPEquH357d"
+    ],
+    [
+     1790219675439.7732,
+     "client:audio_end",
+     "resp_ERUCn1jQyXtAPEquH357d"
+    ],
+    [
+     1790219706133.6821,
+     "client:first_audio_frame",
+     "resp_ERUDJ0R4PbgVD26qpvkto"
+    ],
+    [
+     1790219707898.5386,
+     "client:audio_end",
+     "resp_ERUDJ0R4PbgVD26qpvkto"
+    ],
+    [
+     1790219747755.2996,
+     "client:audio_end",
+     "resp_ERUDy3ifvfRycZGmJPS4v"
+    ],
+    [
+     1790219748787.6672,
+     "client:audio_end",
+     "resp_ERUDzz9F8oEz1ygYktcMl"
+    ],
+    [
+     1790219749404.686,
+     "client:audio_end",
+     "resp_ERUE0G6sDmRPB8rrXzCTy"
+    ],
+    [
+     1790219749884.4426,
+     "client:first_audio_frame",
+     "resp_ERUE1wHFMwB5MMuGABT9d"
+    ],
+    [
+     1790219751519.317,
+     "client:audio_end",
+     "resp_ERUE1wHFMwB5MMuGABT9d"
+    ],
+    [
+     1790219781441.2742,
+     "client:first_audio_frame",
+     "resp_ERUEWwFOk3RJvMvmsRiOk"
+    ],
+    [
+     1790219783434.3687,
+     "client:audio_end",
+     "resp_ERUEWwFOk3RJvMvmsRiOk"
+    ]
+   ],
+   "server_marks": [
+    [
+     1790219618026.3398,
+     "sent:session.update",
+     ""
+    ],
+    [
+     1790219619884.1843,
+     "core:speech_start",
+     ""
+    ],
+    [
+     1790219621203.5571,
+     "core:end_of_turn",
+     "speech_ms=940;silence_ms=500"
+    ],
+    [
+     1790219621206.2747,
+     "sent:session.update",
+     ""
+    ],
+    [
+     1790219621206.2925,
+     "core:commit_call",
+     ""
+    ],
+    [
+     1790219621206.4617,
+     "sent:input_audio_buffer.commit",
+     ""
+    ],
+    [
+     1790219621206.5847,
+     "sent:response.create",
+     ""
+    ],
+    [
+     1790219621293.6057,
+     "recv:input_audio_buffer.committed",
+     ""
+    ],
+    [
+     1790219621297.4114,
+     "recv:response.created",
+     "resp_ERUBxR1Wh0uAWV77jdvgN"
+    ],
+    [
+     1790219621424.3833,
+     "core:speech_start",
+     ""
+    ],
+    [
+     1790219621504.393,
+     "sent:response.cancel",
+     ""
+    ],
+    [
+     1790219621555.273,
+     "recv:response.done",
+     "resp_ERUBxR1Wh0uAWV77jdvgN"
+    ],
+    [
+     1790219621798.0703,
+     "recv:conversation.item.input_audio_transcription.completed",
+     ""
+    ],
+    [
+     1790219624004.223,
+     "core:end_of_turn",
+     "speech_ms=2200;silence_ms=500"
+    ],
+    [
+     1790219624005.9968,
+     "core:commit_call",
+     ""
+    ],
+    [
+     1790219624006.2412,
+     "sent:input_audio_buffer.commit",
+     ""
+    ],
+    [
+     1790219624006.4106,
+     "sent:response.create",
+     ""
+    ],
+    [
+     1790219624065.287,
+     "recv:input_audio_buffer.committed",
+     ""
+    ],
+    [
+     1790219624069.744,
+     "recv:response.created",
+     "resp_ERUC0EZKmNRJRTQAdd7KY"
+    ],
+    [
+     1790219624423.461,
+     "core:speech_start",
+     ""
+    ],
+    [
+     1790219624456.8252,
+     "recv:first_audio_delta",
+     "resp_ERUC0EZKmNRJRTQAdd7KY"
+    ],
+    [
+     1790219624457.9536,
+     "core:first_audio_to_client",
+     "resp_ERUC0EZKmNRJRTQAdd7KY"
+    ],
+    [
+     1790219624504.22,
+     "sent:response.cancel",
+     ""
+    ],
+    [
+     1790219624506.171,
+     "sent:conversation.item.truncate",
+     ""
+    ],
+    [
+     1790219624570.8606,
+     "recv:response.done",
+     "resp_ERUC0EZKmNRJRTQAdd7KY"
+    ],
+    [
+     1790219624580.3682,
+     "recv:conversation.item.input_audio_transcription.completed",
+     ""
+    ],
+    [
+     1790219626563.8164,
+     "core:end_of_turn",
+     "speech_ms=1760;silence_ms=500"
+    ],
+    [
+     1790219626565.6484,
+     "core:commit_call",
+     ""
+    ],
+    [
+     1790219626565.9802,
+     "sent:input_audio_buffer.commit",
+     ""
+    ],
+    [
+     1790219626566.186,
+     "sent:response.create",
+     ""
+    ],
+    [
+     1790219626624.5369,
+     "recv:input_audio_buffer.committed",
+     ""
+    ],
+    [
+     1790219626633.7344,
+     "recv:response.created",
+     "resp_ERUC2vmzpajd8SPsIT6pA"
+    ],
+    [
+     1790219626824.0266,
+     "core:speech_start",
+     ""
+    ],
+    [
+     1790219626904.0947,
+     "sent:response.cancel",
+     ""
+    ],
+    [
+     1790219626959.1113,
+     "recv:response.done",
+     "resp_ERUC2vmzpajd8SPsIT6pA"
+    ],
+    [
+     1790219627170.5234,
+     "recv:conversation.item.input_audio_transcription.completed",
+     ""
+    ],
+    [
+     1790219628684.7073,
+     "core:end_of_turn",
+     "speech_ms=1480;silence_ms=500"
+    ],
+    [
+     1790219628686.6636,
+     "core:commit_call",
+     ""
+    ],
+    [
+     1790219628686.8943,
+     "sent:input_audio_buffer.commit",
+     ""
+    ],
+    [
+     1790219628687.037,
+     "sent:response.create",
+     ""
+    ],
+    [
+     1790219628742.6826,
+     "recv:input_audio_buffer.committed",
+     ""
+    ],
+    [
+     1790219628751.625,
+     "recv:response.created",
+     "resp_ERUC4nRgIkwTb8C7m7Nly"
+    ],
+    [
+     1790219628822.9077,
+     "core:speech_start",
+     ""
+    ],
+    [
+     1790219628904.9897,
+     "sent:response.cancel",
+     ""
+    ],
+    [
+     1790219628954.2312,
+     "recv:response.done",
+     "resp_ERUC4nRgIkwTb8C7m7Nly"
+    ],
+    [
+     1790219629244.9802,
+     "recv:conversation.item.input_audio_transcription.completed",
+     ""
+    ],
+    [
+     1790219630483.818,
+     "core:end_of_turn",
+     "speech_ms=1280;silence_ms=500"
+    ],
+    [
+     1790219630485.772,
+     "core:commit_call",
+     ""
+    ],
+    [
+     1790219630486.017,
+     "sent:input_audio_buffer.commit",
+     ""
+    ],
+    [
+     1790219630486.1663,
+     "sent:response.create",
+     ""
+    ],
+    [
+     1790219630539.4949,
+     "recv:input_audio_buffer.committed",
+     ""
+    ],
+    [
+     1790219630546.1973,
+     "recv:response.created",
+     "resp_ERUC6I1EByR0kps9vcNiP"
+    ],
+    [
+     1790219631023.5764,
+     "core:speech_start",
+     ""
+    ],
+    [
+     1790219631104.1777,
+     "sent:response.cancel",
+     ""
+    ],
+    [
+     1790219631160.754,
+     "recv:response.function_call_arguments.done",
+     "call_CH7Xvv0aWp6j0Obi"
+    ],
+    [
+     1790219631164.4553,
+     "recv:response.done",
+     "resp_ERUC6I1EByR0kps9vcNiP"
+    ],
+    [
+     1790219631170.8438,
+     "recv:conversation.item.input_audio_transcription.completed",
+     ""
+    ],
+    [
+     1790219634984.7942,
+     "core:end_of_turn",
+     "speech_ms=3220;silence_ms=500"
+    ],
+    [
+     1790219634986.5405,
+     "core:commit_call",
+     ""
+    ],
+    [
+     1790219634986.7925,
+     "sent:input_audio_buffer.commit",
+     ""
+    ],
+    [
+     1790219634986.929,
+     "sent:response.create",
+     ""
+    ],
+    [
+     1790219635046.6553,
+     "recv:input_audio_buffer.committed",
+     ""
+    ],
+    [
+     1790219635054.6309,
+     "recv:response.created",
+     "resp_ERUCBfE7vUxDvPh9c2T9p"
+    ],
+    [
+     1790219635693.7815,
+     "recv:conversation.item.input_audio_transcription.completed",
+     ""
+    ],
+    [
+     1790219636212.377,
+     "recv:response.function_call_arguments.done",
+     "call_bt9Lii7r7bgXhI7X"
+    ],
+    [
+     1790219636212.9492,
+     "core:tool_start",
+     "call_bt9Lii7r7bgXhI7X:record_field"
+    ],
+    [
+     1790219636213.8247,
+     "core:tool_done",
+     "call_bt9Lii7r7bgXhI7X:record_field"
+    ],
+    [
+     1790219636213.8694,
+     "decision:start",
+     "validate_field"
+    ],
+    [
+     1790219636213.9143,
+     "decision:end",
+     "validate_field:RULE"
+    ],
+    [
+     1790219636214.5269,
+     "core:tool_result_submit",
+     "call_bt9Lii7r7bgXhI7X"
+    ],
+    [
+     1790219636214.9001,
+     "sent:conversation.item.create",
+     "call_bt9Lii7r7bgXhI7X"
+    ],
+    [
+     1790219636215.0247,
+     "sent:response.create",
+     ""
+    ],
+    [
+     1790219636219.5603,
+     "recv:response.done",
+     "resp_ERUCBfE7vUxDvPh9c2T9p"
+    ],
+    [
+     1790219636220.3657,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219636220.439,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219636220.4717,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219636220.5234,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219636220.552,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219636220.58,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219636220.6067,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219636220.6313,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219636222.2695,
+     "sent:session.update",
+     ""
+    ],
+    [
+     1790219636273.424,
+     "recv:response.created",
+     "resp_ERUCCn5lQP3hX96zqCbwt"
+    ],
+    [
+     1790219636760.5364,
+     "recv:response.function_call_arguments.done",
+     "call_td81WrcLgiMhOfzT"
+    ],
+    [
+     1790219636761.1218,
+     "core:tool_start",
+     "call_td81WrcLgiMhOfzT:lookup_knowledge"
+    ],
+    [
+     1790219636761.8545,
+     "core:tool_done",
+     "call_td81WrcLgiMhOfzT:lookup_knowledge"
+    ],
+    [
+     1790219636761.8733,
+     "core:tool_result_submit",
+     "call_td81WrcLgiMhOfzT"
+    ],
+    [
+     1790219636762.2158,
+     "sent:conversation.item.create",
+     "call_td81WrcLgiMhOfzT"
+    ],
+    [
+     1790219636762.3628,
+     "sent:response.create",
+     ""
+    ],
+    [
+     1790219636766.0293,
+     "recv:response.done",
+     "resp_ERUCCn5lQP3hX96zqCbwt"
+    ],
+    [
+     1790219636766.7368,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219636766.8083,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219636766.841,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219636766.89,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219636766.918,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219636766.9443,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219636766.9722,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219636766.9966,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219636817.3652,
+     "recv:response.created",
+     "resp_ERUCCmQbSjnVkyt37DyR7"
+    ],
+    [
+     1790219637163.8125,
+     "recv:first_audio_delta",
+     "resp_ERUCCmQbSjnVkyt37DyR7"
+    ],
+    [
+     1790219637164.9548,
+     "core:first_audio_to_client",
+     "resp_ERUCCmQbSjnVkyt37DyR7"
+    ],
+    [
+     1790219638359.6028,
+     "recv:response.done",
+     "resp_ERUCCmQbSjnVkyt37DyR7"
+    ],
+    [
+     1790219638360.5967,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219638360.6714,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219638360.7039,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219638360.7537,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219638360.7827,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219638360.8113,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219638360.8389,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219638360.8655,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219666377.8958,
+     "core:speech_start",
+     ""
+    ],
+    [
+     1790219670680.1455,
+     "core:end_of_turn",
+     "speech_ms=3540;silence_ms=500"
+    ],
+    [
+     1790219670681.7188,
+     "core:commit_call",
+     ""
+    ],
+    [
+     1790219670681.9448,
+     "sent:input_audio_buffer.commit",
+     ""
+    ],
+    [
+     1790219670682.0776,
+     "sent:response.create",
+     ""
+    ],
+    [
+     1790219670757.961,
+     "recv:input_audio_buffer.committed",
+     ""
+    ],
+    [
+     1790219670764.7969,
+     "recv:response.created",
+     "resp_ERUCkMD4htO4BhSVQjYrj"
+    ],
+    [
+     1790219671632.0386,
+     "recv:conversation.item.input_audio_transcription.completed",
+     ""
+    ],
+    [
+     1790219671976.154,
+     "recv:response.function_call_arguments.done",
+     "call_Irv0iPk9BgMqaPUy"
+    ],
+    [
+     1790219671976.8252,
+     "core:tool_start",
+     "call_Irv0iPk9BgMqaPUy:record_field"
+    ],
+    [
+     1790219671977.6978,
+     "core:tool_done",
+     "call_Irv0iPk9BgMqaPUy:record_field"
+    ],
+    [
+     1790219671977.7417,
+     "decision:start",
+     "validate_field"
+    ],
+    [
+     1790219671977.7827,
+     "decision:end",
+     "validate_field:RULE"
+    ],
+    [
+     1790219671978.5789,
+     "core:tool_result_submit",
+     "call_Irv0iPk9BgMqaPUy"
+    ],
+    [
+     1790219671979.1094,
+     "sent:conversation.item.create",
+     "call_Irv0iPk9BgMqaPUy"
+    ],
+    [
+     1790219671979.2402,
+     "sent:response.create",
+     ""
+    ],
+    [
+     1790219671981.3022,
+     "recv:response.done",
+     "resp_ERUCkMD4htO4BhSVQjYrj"
+    ],
+    [
+     1790219671982.038,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219671982.1313,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219671982.1665,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219671982.2183,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219671982.2476,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219671982.2795,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219671982.308,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219671982.3345,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219672041.7441,
+     "recv:response.created",
+     "resp_ERUCmnwcwDzQH7SlGvUG9"
+    ],
+    [
+     1790219672508.55,
+     "recv:response.function_call_arguments.done",
+     "call_aZHGkGSSY4xKtpqD"
+    ],
+    [
+     1790219672509.1223,
+     "core:tool_start",
+     "call_aZHGkGSSY4xKtpqD:lookup_knowledge"
+    ],
+    [
+     1790219672509.9568,
+     "core:tool_done",
+     "call_aZHGkGSSY4xKtpqD:lookup_knowledge"
+    ],
+    [
+     1790219672509.9753,
+     "core:tool_result_submit",
+     "call_aZHGkGSSY4xKtpqD"
+    ],
+    [
+     1790219672510.426,
+     "sent:conversation.item.create",
+     "call_aZHGkGSSY4xKtpqD"
+    ],
+    [
+     1790219672510.5688,
+     "sent:response.create",
+     ""
+    ],
+    [
+     1790219672512.9395,
+     "recv:response.done",
+     "resp_ERUCmnwcwDzQH7SlGvUG9"
+    ],
+    [
+     1790219672513.6426,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219672513.7158,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219672513.7485,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219672513.7974,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219672513.8264,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219672513.8542,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219672513.8835,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219672513.9094,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219672569.9773,
+     "recv:response.created",
+     "resp_ERUCmy6AzUC7VoaQdvRT6"
+    ],
+    [
+     1790219672954.0999,
+     "recv:response.function_call_arguments.done",
+     "call_wEQfnGYCusaLzxZO"
+    ],
+    [
+     1790219672954.7927,
+     "core:tool_start",
+     "call_wEQfnGYCusaLzxZO:lookup_knowledge"
+    ],
+    [
+     1790219672955.5571,
+     "core:tool_done",
+     "call_wEQfnGYCusaLzxZO:lookup_knowledge"
+    ],
+    [
+     1790219672955.5808,
+     "core:tool_result_submit",
+     "call_wEQfnGYCusaLzxZO"
+    ],
+    [
+     1790219672955.8975,
+     "sent:conversation.item.create",
+     "call_wEQfnGYCusaLzxZO"
+    ],
+    [
+     1790219672956.0103,
+     "sent:response.create",
+     ""
+    ],
+    [
+     1790219672964.2393,
+     "recv:response.done",
+     "resp_ERUCmy6AzUC7VoaQdvRT6"
+    ],
+    [
+     1790219672965.073,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219672965.1685,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219672965.2024,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219672965.252,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219672965.2803,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219672965.3086,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219672965.3435,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219672965.3696,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219673015.7666,
+     "recv:response.created",
+     "resp_ERUCmDf9KCfnLiUHNZEwv"
+    ],
+    [
+     1790219673382.7573,
+     "recv:response.function_call_arguments.done",
+     "call_dFhNnUnN4Qhgnd4U"
+    ],
+    [
+     1790219673383.5312,
+     "core:tool_start",
+     "call_dFhNnUnN4Qhgnd4U:lookup_knowledge"
+    ],
+    [
+     1790219673384.4011,
+     "core:tool_done",
+     "call_dFhNnUnN4Qhgnd4U:lookup_knowledge"
+    ],
+    [
+     1790219673384.42,
+     "core:tool_result_submit",
+     "call_dFhNnUnN4Qhgnd4U"
+    ],
+    [
+     1790219673384.7717,
+     "sent:conversation.item.create",
+     "call_dFhNnUnN4Qhgnd4U"
+    ],
+    [
+     1790219673384.9702,
+     "sent:response.create",
+     ""
+    ],
+    [
+     1790219673388.3894,
+     "recv:response.done",
+     "resp_ERUCmDf9KCfnLiUHNZEwv"
+    ],
+    [
+     1790219673389.3328,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219673389.42,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219673389.4531,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219673389.5032,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219673389.5322,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219673389.562,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219673389.5903,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219673389.6365,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219673441.3972,
+     "recv:response.created",
+     "resp_ERUCn1jQyXtAPEquH357d"
+    ],
+    [
+     1790219673730.8003,
+     "recv:first_audio_delta",
+     "resp_ERUCn1jQyXtAPEquH357d"
+    ],
+    [
+     1790219673731.5747,
+     "core:first_audio_to_client",
+     "resp_ERUCn1jQyXtAPEquH357d"
+    ],
+    [
+     1790219675436.8015,
+     "recv:response.done",
+     "resp_ERUCn1jQyXtAPEquH357d"
+    ],
+    [
+     1790219675438.2197,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219675438.328,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219675438.383,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219675438.4639,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219675438.5107,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219675438.5579,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219675438.6045,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219675438.6743,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219701978.4712,
+     "core:speech_start",
+     ""
+    ],
+    [
+     1790219705297.707,
+     "core:end_of_turn",
+     "speech_ms=2280;silence_ms=500"
+    ],
+    [
+     1790219705299.2659,
+     "core:commit_call",
+     ""
+    ],
+    [
+     1790219705299.5674,
+     "sent:input_audio_buffer.commit",
+     ""
+    ],
+    [
+     1790219705299.7,
+     "sent:response.create",
+     ""
+    ],
+    [
+     1790219705378.833,
+     "recv:input_audio_buffer.committed",
+     ""
+    ],
+    [
+     1790219705391.1487,
+     "recv:response.created",
+     "resp_ERUDJ0R4PbgVD26qpvkto"
+    ],
+    [
+     1790219706131.9258,
+     "recv:first_audio_delta",
+     "resp_ERUDJ0R4PbgVD26qpvkto"
+    ],
+    [
+     1790219706133.134,
+     "core:first_audio_to_client",
+     "resp_ERUDJ0R4PbgVD26qpvkto"
+    ],
+    [
+     1790219706310.023,
+     "recv:conversation.item.input_audio_transcription.completed",
+     ""
+    ],
+    [
+     1790219707895.6096,
+     "recv:response.done",
+     "resp_ERUDJ0R4PbgVD26qpvkto"
+    ],
+    [
+     1790219707896.9214,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219707897.029,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219707897.0896,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219707897.1663,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219707897.216,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219707897.2695,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219707897.345,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219707897.398,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219737008.1333,
+     "core:speech_start",
+     ""
+    ],
+    [
+     1790219746948.8752,
+     "core:end_of_turn",
+     "speech_ms=8100;silence_ms=510"
+    ],
+    [
+     1790219746950.3318,
+     "core:commit_call",
+     ""
+    ],
+    [
+     1790219746950.5564,
+     "sent:input_audio_buffer.commit",
+     ""
+    ],
+    [
+     1790219746950.6873,
+     "sent:response.create",
+     ""
+    ],
+    [
+     1790219747025.0803,
+     "recv:input_audio_buffer.committed",
+     ""
+    ],
+    [
+     1790219747032.8875,
+     "recv:response.created",
+     "resp_ERUDy3ifvfRycZGmJPS4v"
+    ],
+    [
+     1790219747746.7188,
+     "recv:response.function_call_arguments.done",
+     "call_NiRJyqRuSlhidyg8"
+    ],
+    [
+     1790219747747.3904,
+     "core:tool_start",
+     "call_NiRJyqRuSlhidyg8:record_field"
+    ],
+    [
+     1790219747748.3074,
+     "core:tool_done",
+     "call_NiRJyqRuSlhidyg8:record_field"
+    ],
+    [
+     1790219747748.3508,
+     "decision:start",
+     "validate_field"
+    ],
+    [
+     1790219747748.4128,
+     "decision:end",
+     "validate_field:RULE"
+    ],
+    [
+     1790219747749.0674,
+     "core:tool_result_submit",
+     "call_NiRJyqRuSlhidyg8"
+    ],
+    [
+     1790219747749.4124,
+     "sent:conversation.item.create",
+     "call_NiRJyqRuSlhidyg8"
+    ],
+    [
+     1790219747749.5352,
+     "sent:response.create",
+     ""
+    ],
+    [
+     1790219747752.339,
+     "recv:response.done",
+     "resp_ERUDy3ifvfRycZGmJPS4v"
+    ],
+    [
+     1790219747753.0742,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219747753.1426,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219747753.175,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219747753.2227,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219747753.2524,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219747753.279,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219747753.307,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219747753.331,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219747754.7996,
+     "sent:session.update",
+     ""
+    ],
+    [
+     1790219747824.5496,
+     "recv:response.created",
+     "resp_ERUDzz9F8oEz1ygYktcMl"
+    ],
+    [
+     1790219748485.6726,
+     "recv:conversation.item.input_audio_transcription.completed",
+     ""
+    ],
+    [
+     1790219748779.2979,
+     "recv:response.function_call_arguments.done",
+     "call_dEc2LDYYfSmjMupk"
+    ],
+    [
+     1790219748779.94,
+     "core:tool_start",
+     "call_dEc2LDYYfSmjMupk:verify_field"
+    ],
+    [
+     1790219748780.6572,
+     "core:tool_done",
+     "call_dEc2LDYYfSmjMupk:verify_field"
+    ],
+    [
+     1790219748780.7715,
+     "core:tool_result_submit",
+     "call_dEc2LDYYfSmjMupk"
+    ],
+    [
+     1790219748781.0999,
+     "sent:conversation.item.create",
+     "call_dEc2LDYYfSmjMupk"
+    ],
+    [
+     1790219748781.228,
+     "sent:response.create",
+     ""
+    ],
+    [
+     1790219748784.0974,
+     "recv:response.done",
+     "resp_ERUDzz9F8oEz1ygYktcMl"
+    ],
+    [
+     1790219748784.9868,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219748785.1006,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219748785.161,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219748785.235,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219748785.2805,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219748785.3132,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219748785.3433,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219748785.3694,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219748787.1565,
+     "sent:session.update",
+     ""
+    ],
+    [
+     1790219748864.3105,
+     "recv:response.created",
+     "resp_ERUE0G6sDmRPB8rrXzCTy"
+    ],
+    [
+     1790219749398.4417,
+     "recv:response.function_call_arguments.done",
+     "call_fox6gdHTPGhx7hjd"
+    ],
+    [
+     1790219749399.1458,
+     "core:tool_start",
+     "call_fox6gdHTPGhx7hjd:record_field"
+    ],
+    [
+     1790219749400.271,
+     "core:tool_done",
+     "call_fox6gdHTPGhx7hjd:record_field"
+    ],
+    [
+     1790219749400.3108,
+     "decision:start",
+     "validate_field"
+    ],
+    [
+     1790219749400.6382,
+     "decision:end",
+     "validate_field:RULE"
+    ],
+    [
+     1790219749401.2153,
+     "core:tool_result_submit",
+     "call_fox6gdHTPGhx7hjd"
+    ],
+    [
+     1790219749401.641,
+     "sent:conversation.item.create",
+     "call_fox6gdHTPGhx7hjd"
+    ],
+    [
+     1790219749401.8271,
+     "sent:response.create",
+     ""
+    ],
+    [
+     1790219749402.9478,
+     "recv:response.done",
+     "resp_ERUE0G6sDmRPB8rrXzCTy"
+    ],
+    [
+     1790219749403.6936,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219749403.7634,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219749403.7964,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219749403.8418,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219749403.873,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219749403.902,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219749403.9314,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219749403.9573,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219749463.0432,
+     "recv:response.created",
+     "resp_ERUE1wHFMwB5MMuGABT9d"
+    ],
+    [
+     1790219749882.7957,
+     "recv:first_audio_delta",
+     "resp_ERUE1wHFMwB5MMuGABT9d"
+    ],
+    [
+     1790219749884.0527,
+     "core:first_audio_to_client",
+     "resp_ERUE1wHFMwB5MMuGABT9d"
+    ],
+    [
+     1790219751517.138,
+     "recv:response.done",
+     "resp_ERUE1wHFMwB5MMuGABT9d"
+    ],
+    [
+     1790219751518.2056,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219751518.2815,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219751518.3162,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219751518.3657,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219751518.396,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219751518.4236,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219751518.4524,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219751518.4773,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219777848.7227,
+     "core:speech_start",
+     ""
+    ],
+    [
+     1790219780808.303,
+     "core:end_of_turn",
+     "speech_ms=2140;silence_ms=510"
+    ],
+    [
+     1790219780809.8347,
+     "core:commit_call",
+     ""
+    ],
+    [
+     1790219780810.0864,
+     "sent:input_audio_buffer.commit",
+     ""
+    ],
+    [
+     1790219780810.2546,
+     "sent:response.create",
+     ""
+    ],
+    [
+     1790219780889.943,
+     "recv:input_audio_buffer.committed",
+     ""
+    ],
+    [
+     1790219780895.4375,
+     "recv:response.created",
+     "resp_ERUEWwFOk3RJvMvmsRiOk"
+    ],
+    [
+     1790219781439.948,
+     "recv:first_audio_delta",
+     "resp_ERUEWwFOk3RJvMvmsRiOk"
+    ],
+    [
+     1790219781440.8086,
+     "core:first_audio_to_client",
+     "resp_ERUEWwFOk3RJvMvmsRiOk"
+    ],
+    [
+     1790219781697.3323,
+     "recv:conversation.item.input_audio_transcription.completed",
+     ""
+    ],
+    [
+     1790219783431.9119,
+     "recv:response.done",
+     "resp_ERUEWwFOk3RJvMvmsRiOk"
+    ],
+    [
+     1790219783432.9673,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219783433.041,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219783433.0781,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219783433.145,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219783433.1768,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219783433.2063,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219783433.2356,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219783433.4836,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219811546.6868,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219811546.766,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219811546.8047,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219811546.8594,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219811546.8909,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219811546.9211,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219811546.9753,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219811547.004,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219813586.1555,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219813586.2742,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219813586.3113,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219813586.3662,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219813586.3975,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219813586.4263,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219813586.4563,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219813586.4824,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ]
+   ],
+   "error": null,
+   "outcome": "abandoned",
+   "spoken": [
+    {
+     "t": 1790219636222.7324,
+     "rid": "resp_ERUCBfE7vUxDvPh9c2T9p",
+     "audio_ms": 0,
+     "text": null
+    },
+    {
+     "t": 1790219636767.8171,
+     "rid": "resp_ERUCCn5lQP3hX96zqCbwt",
+     "audio_ms": 0,
+     "text": null
+    },
+    {
+     "t": 1790219638361.7283,
+     "rid": "resp_ERUCCmQbSjnVkyt37DyR7",
+     "audio_ms": 5900,
+     "text": "حالياًمشمتوفرعنديمعلومةعنعروضعلىالحلويات.ممكنأساعدكفيأيحاجةتانيةفيالطلب؟"
+    },
+    {
+     "t": 1790219671983.1807,
+     "rid": "resp_ERUCkMD4htO4BhSVQjYrj",
+     "audio_ms": 0,
+     "text": null
+    },
+    {
+     "t": 1790219672514.7249,
+     "rid": "resp_ERUCmnwcwDzQH7SlGvUG9",
+     "audio_ms": 0,
+     "text": null
+    },
+    {
+     "t": 1790219672966.1895,
+     "rid": "resp_ERUCmy6AzUC7VoaQdvRT6",
+     "audio_ms": 0,
+     "text": null
+    },
+    {
+     "t": 1790219673390.5217,
+     "rid": "resp_ERUCmDf9KCfnLiUHNZEwv",
+     "audio_ms": 0,
+     "text": null
+    },
+    {
+     "t": 1790219675439.7732,
+     "rid": "resp_ERUCn1jQyXtAPEquH357d",
+     "audio_ms": 8100,
+     "text": "تمام،لسهماعنديشأسعارموثوقةللمنتجاتالليطلبتها.ممكننكمّلالطلب.دلوقتيممكنتدينيعنوانالتوصيلبالكامل؟"
+    },
+    {
+     "t": 1790219707898.5386,
+     "rid": "resp_ERUDJ0R4PbgVD26qpvkto",
+     "audio_ms": 8750,
+     "text": "أناهناأساعدكفيتسجيلالطلب.لوتقدرتدينيالعنوانبالتفصيل،زياسمالشارعوالمنطقة،كدهنوثقالتوصيلبشكلصحيح."
+    },
+    {
+     "t": 1790219747755.2996,
+     "rid": "resp_ERUDy3ifvfRycZGmJPS4v",
+     "audio_ms": 0,
+     "text": null
+    },
+    {
+     "t": 1790219748787.6672,
+     "rid": "resp_ERUDzz9F8oEz1ygYktcMl",
+     "audio_ms": 0,
+     "text": null
+    },
+    {
+     "t": 1790219749404.686,
+     "rid": "resp_ERUE0G6sDmRPB8rrXzCTy",
+     "audio_ms": 0,
+     "text": null
+    },
+    {
+     "t": 1790219751519.317,
+     "rid": "resp_ERUE1wHFMwB5MMuGABT9d",
+     "audio_ms": 7900,
+     "text": "رقمالتليفونالليعنديناقصشوية.المفروضيكون11رقمويبدأبـ01.ممكنتدلنيعلىبقيةالأرقام؟"
+    },
+    {
+     "t": 1790219783434.3687,
+     "rid": "resp_ERUEWwFOk3RJvMvmsRiOk",
+     "audio_ms": 10700,
+     "text": "أنامحتاجمنكرقمالتليفونكامل.الرقملازميكون11رقم.ممكنتقولليالأرقامالناقصةبعد01012345؟"
+    }
+   ],
+   "flags": {
+    "QEVION_TOOL_ACK": "0",
+    "QEVION_PARALLEL_TOOLS": "0"
+   }
+  },
+  {
+   "session_id": "ses_0eca949ca5f94f91",
+   "t_ws_connect_start": 1790219814614.3025,
+   "turns": [
+    {
+     "clip": "u_short",
+     "t_clip_start": 1790219816122.6992,
+     "t1": 1790219816963.9744,
+     "t_clip_end": 1790219823300.1228
+    },
+    {
+     "clip": "u1_order",
+     "t_clip_start": 1790219824100.8608,
+     "t1": 1790219829642.199,
+     "t_clip_end": 1790219839225.7642
+    },
+    {
+     "clip": "u_follow",
+     "t_clip_start": 1790219840026.357,
+     "t1": 1790219842807.3767,
+     "t_clip_end": 1790219857273.2002
+    },
+    {
+     "clip": "u2_address",
+     "t_clip_start": 1790219858073.8984,
+     "t1": 1790219863734.773,
+     "t_clip_end": 1790219879104.026
+    },
+    {
+     "clip": "u3_yes",
+     "t_clip_start": 1790219879904.4353,
+     "t1": 1790219882505.382,
+     "t_clip_end": 1790219889563.977
+    },
+    {
+     "clip": "u1_order",
+     "t_clip_start": 1790219890364.524,
+     "t1": 1790219895905.688,
+     "t_clip_end": 1790219926345.109
+    }
+   ],
+   "client_marks": [
+    [
+     1790219814621.4785,
+     "client:ws_open",
+     ""
+    ],
+    [
+     1790219815075.7969,
+     "client:ready",
+     ""
+    ],
+    [
+     1790219817898.9387,
+     "client:first_audio_frame",
+     "resp_ERUF784Wukpd033WFAIiQ"
+    ],
+    [
+     1790219819008.5396,
+     "client:audio_end",
+     "resp_ERUF784Wukpd033WFAIiQ"
+    ],
+    [
+     1790219831050.2083,
+     "client:audio_end",
+     "resp_ERUFKIMklJ5q4LEcHgDK8"
+    ],
+    [
+     1790219831547.8794,
+     "client:audio_end",
+     "resp_ERUFL5bHOtKluqRT1C41H"
+    ],
+    [
+     1790219831981.3064,
+     "client:first_audio_frame",
+     "resp_ERUFLWr2MzymZ5axs1iTq"
+    ],
+    [
+     1790219833365.8423,
+     "client:audio_end",
+     "resp_ERUFLWr2MzymZ5axs1iTq"
+    ],
+    [
+     1790219843781.8452,
+     "client:first_audio_frame",
+     "resp_ERUFXNPL3EP2C3BG2iHxR"
+    ],
+    [
+     1790219846361.485,
+     "client:audio_end",
+     "resp_ERUFXNPL3EP2C3BG2iHxR"
+    ],
+    [
+     1790219865018.9214,
+     "client:audio_end",
+     "resp_ERUFsImTB34o5AE0dqvQI"
+    ],
+    [
+     1790219865546.6848,
+     "client:audio_end",
+     "resp_ERUFtN0QtZJVLgGGInj3h"
+    ],
+    [
+     1790219865917.3032,
+     "client:first_audio_frame",
+     "resp_ERUFtiEH9rrDUEkSjgf29"
+    ],
+    [
+     1790219868458.67,
+     "client:audio_end",
+     "resp_ERUFtiEH9rrDUEkSjgf29"
+    ],
+    [
+     1790219883633.118,
+     "client:first_audio_frame",
+     "resp_ERUGBFPbF97VcKQQakHmR"
+    ],
+    [
+     1790219884809.88,
+     "client:audio_end",
+     "resp_ERUGBFPbF97VcKQQakHmR"
+    ],
+    [
+     1790219896837.776,
+     "client:first_audio_frame",
+     "resp_ERUGOhBb5zJhcK2q4rZAd"
+    ],
+    [
+     1790219898754.8923,
+     "client:audio_end",
+     "resp_ERUGOhBb5zJhcK2q4rZAd"
+    ]
+   ],
+   "server_marks": [
+    [
+     1790219815073.2449,
+     "sent:session.update",
+     ""
+    ],
+    [
+     1790219816286.6548,
+     "core:speech_start",
+     ""
+    ],
+    [
+     1790219817467.0134,
+     "core:end_of_turn",
+     "speech_ms=800;silence_ms=500"
+    ],
+    [
+     1790219817469.6858,
+     "sent:session.update",
+     ""
+    ],
+    [
+     1790219817469.6978,
+     "core:commit_call",
+     ""
+    ],
+    [
+     1790219817469.8384,
+     "sent:input_audio_buffer.commit",
+     ""
+    ],
+    [
+     1790219817469.95,
+     "sent:response.create",
+     ""
+    ],
+    [
+     1790219817541.1526,
+     "recv:input_audio_buffer.committed",
+     ""
+    ],
+    [
+     1790219817546.438,
+     "recv:response.created",
+     "resp_ERUF784Wukpd033WFAIiQ"
+    ],
+    [
+     1790219817897.3337,
+     "recv:first_audio_delta",
+     "resp_ERUF784Wukpd033WFAIiQ"
+    ],
+    [
+     1790219817898.4006,
+     "core:first_audio_to_client",
+     "resp_ERUF784Wukpd033WFAIiQ"
+    ],
+    [
+     1790219818032.8276,
+     "recv:conversation.item.input_audio_transcription.completed",
+     ""
+    ],
+    [
+     1790219819006.2764,
+     "recv:response.done",
+     "resp_ERUF784Wukpd033WFAIiQ"
+    ],
+    [
+     1790219819007.2612,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219819007.389,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219819007.4421,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219819007.5173,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219819007.5505,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219819007.5825,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219819007.6099,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219819007.6362,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219824562.9937,
+     "core:speech_start",
+     ""
+    ],
+    [
+     1790219830165.3171,
+     "core:end_of_turn",
+     "speech_ms=4560;silence_ms=510"
+    ],
+    [
+     1790219830166.7498,
+     "core:commit_call",
+     ""
+    ],
+    [
+     1790219830166.988,
+     "sent:input_audio_buffer.commit",
+     ""
+    ],
+    [
+     1790219830167.1194,
+     "sent:response.create",
+     ""
+    ],
+    [
+     1790219830226.99,
+     "recv:input_audio_buffer.committed",
+     ""
+    ],
+    [
+     1790219830234.9534,
+     "recv:response.created",
+     "resp_ERUFKIMklJ5q4LEcHgDK8"
+    ],
+    [
+     1790219830888.2998,
+     "recv:conversation.item.input_audio_transcription.completed",
+     ""
+    ],
+    [
+     1790219831042.4824,
+     "recv:response.function_call_arguments.done",
+     "call_EqQFWMnx4hQR5ccL"
+    ],
+    [
+     1790219831043.5967,
+     "core:tool_start",
+     "call_EqQFWMnx4hQR5ccL:record_field"
+    ],
+    [
+     1790219831044.5845,
+     "core:tool_done",
+     "call_EqQFWMnx4hQR5ccL:record_field"
+    ],
+    [
+     1790219831044.6306,
+     "decision:start",
+     "validate_field"
+    ],
+    [
+     1790219831044.6714,
+     "decision:end",
+     "validate_field:RULE"
+    ],
+    [
+     1790219831045.3208,
+     "core:tool_result_submit",
+     "call_EqQFWMnx4hQR5ccL"
+    ],
+    [
+     1790219831045.763,
+     "sent:conversation.item.create",
+     "call_EqQFWMnx4hQR5ccL"
+    ],
+    [
+     1790219831045.9265,
+     "sent:response.create",
+     ""
+    ],
+    [
+     1790219831047.0835,
+     "recv:response.done",
+     "resp_ERUFKIMklJ5q4LEcHgDK8"
+    ],
+    [
+     1790219831047.9014,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219831047.9824,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219831048.014,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219831048.0637,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219831048.0916,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219831048.12,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219831048.1738,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219831048.2166,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219831049.8628,
+     "sent:session.update",
+     ""
+    ],
+    [
+     1790219831114.6296,
+     "recv:response.created",
+     "resp_ERUFL5bHOtKluqRT1C41H"
+    ],
+    [
+     1790219831541.652,
+     "recv:response.function_call_arguments.done",
+     "call_JHTLKB0ZMDrVDacG"
+    ],
+    [
+     1790219831542.2224,
+     "core:tool_start",
+     "call_JHTLKB0ZMDrVDacG:lookup_knowledge"
+    ],
+    [
+     1790219831542.9143,
+     "core:tool_done",
+     "call_JHTLKB0ZMDrVDacG:lookup_knowledge"
+    ],
+    [
+     1790219831542.93,
+     "core:tool_result_submit",
+     "call_JHTLKB0ZMDrVDacG"
+    ],
+    [
+     1790219831543.2793,
+     "sent:conversation.item.create",
+     "call_JHTLKB0ZMDrVDacG"
+    ],
+    [
+     1790219831543.4607,
+     "sent:response.create",
+     ""
+    ],
+    [
+     1790219831545.9854,
+     "recv:response.done",
+     "resp_ERUFL5bHOtKluqRT1C41H"
+    ],
+    [
+     1790219831546.8184,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219831546.8901,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219831546.9236,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219831546.9727,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219831547.0012,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219831547.0298,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219831547.0566,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219831547.082,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219831598.4824,
+     "recv:response.created",
+     "resp_ERUFLWr2MzymZ5axs1iTq"
+    ],
+    [
+     1790219831979.8533,
+     "recv:first_audio_delta",
+     "resp_ERUFLWr2MzymZ5axs1iTq"
+    ],
+    [
+     1790219831980.9153,
+     "core:first_audio_to_client",
+     "resp_ERUFLWr2MzymZ5axs1iTq"
+    ],
+    [
+     1790219833363.7441,
+     "recv:response.done",
+     "resp_ERUFLWr2MzymZ5axs1iTq"
+    ],
+    [
+     1790219833364.6917,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219833364.7668,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219833364.8013,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219833364.8513,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219833364.8792,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219833364.9053,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219833364.933,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219833364.9585,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219840270.3274,
+     "core:speech_start",
+     ""
+    ],
+    [
+     1790219843311.5823,
+     "core:end_of_turn",
+     "speech_ms=2220;silence_ms=500"
+    ],
+    [
+     1790219843313.1672,
+     "core:commit_call",
+     ""
+    ],
+    [
+     1790219843313.4395,
+     "sent:input_audio_buffer.commit",
+     ""
+    ],
+    [
+     1790219843313.5696,
+     "sent:response.create",
+     ""
+    ],
+    [
+     1790219843372.8577,
+     "recv:input_audio_buffer.committed",
+     ""
+    ],
+    [
+     1790219843378.2322,
+     "recv:response.created",
+     "resp_ERUFXNPL3EP2C3BG2iHxR"
+    ],
+    [
+     1790219843780.3018,
+     "recv:first_audio_delta",
+     "resp_ERUFXNPL3EP2C3BG2iHxR"
+    ],
+    [
+     1790219843781.2913,
+     "core:first_audio_to_client",
+     "resp_ERUFXNPL3EP2C3BG2iHxR"
+    ],
+    [
+     1790219844126.7778,
+     "recv:conversation.item.input_audio_transcription.completed",
+     ""
+    ],
+    [
+     1790219846358.7773,
+     "recv:response.done",
+     "resp_ERUFXNPL3EP2C3BG2iHxR"
+    ],
+    [
+     1790219846359.995,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219846360.096,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219846360.1328,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219846360.186,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219846360.216,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219846360.2454,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219846360.274,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219846360.2998,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219858217.9102,
+     "core:speech_start",
+     ""
+    ],
+    [
+     1790219864257.802,
+     "core:end_of_turn",
+     "speech_ms=4680;silence_ms=510"
+    ],
+    [
+     1790219864259.2507,
+     "core:commit_call",
+     ""
+    ],
+    [
+     1790219864259.5576,
+     "sent:input_audio_buffer.commit",
+     ""
+    ],
+    [
+     1790219864259.6995,
+     "sent:response.create",
+     ""
+    ],
+    [
+     1790219864313.5315,
+     "recv:input_audio_buffer.committed",
+     ""
+    ],
+    [
+     1790219864325.4016,
+     "recv:response.created",
+     "resp_ERUFsImTB34o5AE0dqvQI"
+    ],
+    [
+     1790219864984.9568,
+     "recv:conversation.item.input_audio_transcription.completed",
+     ""
+    ],
+    [
+     1790219865010.2456,
+     "recv:response.function_call_arguments.done",
+     "call_XSmf3erP2hyACe4P"
+    ],
+    [
+     1790219865011.0889,
+     "core:tool_start",
+     "call_XSmf3erP2hyACe4P:record_field"
+    ],
+    [
+     1790219865011.97,
+     "core:tool_done",
+     "call_XSmf3erP2hyACe4P:record_field"
+    ],
+    [
+     1790219865012.0112,
+     "decision:start",
+     "validate_field"
+    ],
+    [
+     1790219865012.0925,
+     "decision:end",
+     "validate_field:RULE"
+    ],
+    [
+     1790219865012.7,
+     "core:tool_result_submit",
+     "call_XSmf3erP2hyACe4P"
+    ],
+    [
+     1790219865013.0557,
+     "sent:conversation.item.create",
+     "call_XSmf3erP2hyACe4P"
+    ],
+    [
+     1790219865013.1877,
+     "sent:response.create",
+     ""
+    ],
+    [
+     1790219865016.1934,
+     "recv:response.done",
+     "resp_ERUFsImTB34o5AE0dqvQI"
+    ],
+    [
+     1790219865016.8657,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219865016.9348,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219865016.967,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219865017.0154,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219865017.0654,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219865017.0942,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219865017.1218,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219865017.1472,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219865018.581,
+     "sent:session.update",
+     ""
+    ],
+    [
+     1790219865066.8833,
+     "recv:response.created",
+     "resp_ERUFtN0QtZJVLgGGInj3h"
+    ],
+    [
+     1790219865539.1047,
+     "recv:response.function_call_arguments.done",
+     "call_X80Jn1En0N88T5dS"
+    ],
+    [
+     1790219865539.733,
+     "core:tool_start",
+     "call_X80Jn1En0N88T5dS:verify_field"
+    ],
+    [
+     1790219865540.6458,
+     "core:tool_done",
+     "call_X80Jn1En0N88T5dS:verify_field"
+    ],
+    [
+     1790219865540.797,
+     "core:tool_result_submit",
+     "call_X80Jn1En0N88T5dS"
+    ],
+    [
+     1790219865541.1519,
+     "sent:conversation.item.create",
+     "call_X80Jn1En0N88T5dS"
+    ],
+    [
+     1790219865541.2793,
+     "sent:response.create",
+     ""
+    ],
+    [
+     1790219865543.6455,
+     "recv:response.done",
+     "resp_ERUFtN0QtZJVLgGGInj3h"
+    ],
+    [
+     1790219865544.383,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219865544.4534,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219865544.4878,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219865544.5378,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219865544.5684,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219865544.5952,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219865544.624,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219865544.6494,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219865546.3198,
+     "sent:session.update",
+     ""
+    ],
+    [
+     1790219865605.8223,
+     "recv:response.created",
+     "resp_ERUFtiEH9rrDUEkSjgf29"
+    ],
+    [
+     1790219865915.8281,
+     "recv:first_audio_delta",
+     "resp_ERUFtiEH9rrDUEkSjgf29"
+    ],
+    [
+     1790219865916.8364,
+     "core:first_audio_to_client",
+     "resp_ERUFtiEH9rrDUEkSjgf29"
+    ],
+    [
+     1790219868456.4966,
+     "recv:response.done",
+     "resp_ERUFtiEH9rrDUEkSjgf29"
+    ],
+    [
+     1790219868457.484,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219868457.558,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219868457.5928,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219868457.6418,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219868457.6787,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219868457.7087,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219868457.7383,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219868457.7637,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219880087.9797,
+     "core:speech_start",
+     ""
+    ],
+    [
+     1790219883047.21,
+     "core:end_of_turn",
+     "speech_ms=2140;silence_ms=510"
+    ],
+    [
+     1790219883048.7751,
+     "core:commit_call",
+     ""
+    ],
+    [
+     1790219883049.043,
+     "sent:input_audio_buffer.commit",
+     ""
+    ],
+    [
+     1790219883049.1887,
+     "sent:response.create",
+     ""
+    ],
+    [
+     1790219883116.9338,
+     "recv:input_audio_buffer.committed",
+     ""
+    ],
+    [
+     1790219883125.7092,
+     "recv:response.created",
+     "resp_ERUGBFPbF97VcKQQakHmR"
+    ],
+    [
+     1790219883631.5596,
+     "recv:first_audio_delta",
+     "resp_ERUGBFPbF97VcKQQakHmR"
+    ],
+    [
+     1790219883632.6804,
+     "core:first_audio_to_client",
+     "resp_ERUGBFPbF97VcKQQakHmR"
+    ],
+    [
+     1790219883712.04,
+     "recv:conversation.item.input_audio_transcription.completed",
+     ""
+    ],
+    [
+     1790219884807.7993,
+     "recv:response.done",
+     "resp_ERUGBFPbF97VcKQQakHmR"
+    ],
+    [
+     1790219884808.775,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219884808.8628,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219884808.8982,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219884808.9492,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219884808.9792,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219884809.007,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219884809.0564,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219884809.0837,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219890809.1128,
+     "core:speech_start",
+     ""
+    ],
+    [
+     1790219892368.4207,
+     "core:end_of_turn",
+     "speech_ms=1180;silence_ms=500"
+    ],
+    [
+     1790219892369.9507,
+     "core:commit_call",
+     ""
+    ],
+    [
+     1790219892370.188,
+     "sent:input_audio_buffer.commit",
+     ""
+    ],
+    [
+     1790219892370.3289,
+     "sent:response.create",
+     ""
+    ],
+    [
+     1790219892423.689,
+     "recv:input_audio_buffer.committed",
+     ""
+    ],
+    [
+     1790219892432.922,
+     "recv:response.created",
+     "resp_ERUGKnBTfu7vQRLcqKXdi"
+    ],
+    [
+     1790219892507.6865,
+     "core:speech_start",
+     ""
+    ],
+    [
+     1790219892588.512,
+     "sent:response.cancel",
+     ""
+    ],
+    [
+     1790219892638.9558,
+     "recv:response.done",
+     "resp_ERUGKnBTfu7vQRLcqKXdi"
+    ],
+    [
+     1790219892949.4087,
+     "recv:conversation.item.input_audio_transcription.completed",
+     ""
+    ],
+    [
+     1790219896427.0828,
+     "core:end_of_turn",
+     "speech_ms=3360;silence_ms=510"
+    ],
+    [
+     1790219896428.8423,
+     "core:commit_call",
+     ""
+    ],
+    [
+     1790219896429.1277,
+     "sent:input_audio_buffer.commit",
+     ""
+    ],
+    [
+     1790219896429.2625,
+     "sent:response.create",
+     ""
+    ],
+    [
+     1790219896486.5667,
+     "recv:input_audio_buffer.committed",
+     ""
+    ],
+    [
+     1790219896494.554,
+     "recv:response.created",
+     "resp_ERUGOhBb5zJhcK2q4rZAd"
+    ],
+    [
+     1790219896835.9253,
+     "recv:first_audio_delta",
+     "resp_ERUGOhBb5zJhcK2q4rZAd"
+    ],
+    [
+     1790219896837.159,
+     "core:first_audio_to_client",
+     "resp_ERUGOhBb5zJhcK2q4rZAd"
+    ],
+    [
+     1790219897049.1606,
+     "recv:conversation.item.input_audio_transcription.completed",
+     ""
+    ],
+    [
+     1790219898752.6436,
+     "recv:response.done",
+     "resp_ERUGOhBb5zJhcK2q4rZAd"
+    ],
+    [
+     1790219898753.69,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219898753.7822,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219898753.8206,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219898753.8716,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219898753.9016,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219898753.9297,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219898753.959,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219898753.9841,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219927146.835,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219927146.9124,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219927146.95,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219927147.004,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219927147.0815,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219927147.112,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219927147.144,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219927147.172,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219929183.227,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219929183.3103,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219929183.406,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219929183.4648,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219929183.497,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219929183.5276,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219929183.5588,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219929183.6064,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ]
+   ],
+   "error": null,
+   "outcome": "abandoned",
+   "spoken": [
+    {
+     "t": 1790219819008.5396,
+     "rid": "resp_ERUF784Wukpd033WFAIiQ",
+     "audio_ms": 5400,
+     "text": "أهلاًوسهلاً!دهخطالطلباتالتليفونية.ياريتتقوليليإيهالليحاببتطلبه؟"
+    },
+    {
+     "t": 1790219831050.2083,
+     "rid": "resp_ERUFKIMklJ5q4LEcHgDK8",
+     "audio_ms": 0,
+     "text": null
+    },
+    {
+     "t": 1790219831547.8794,
+     "rid": "resp_ERUFL5bHOtKluqRT1C41H",
+     "audio_ms": 0,
+     "text": null
+    },
+    {
+     "t": 1790219833365.8423,
+     "rid": "resp_ERUFLWr2MzymZ5axs1iTq",
+     "audio_ms": 7250,
+     "text": "ممكنتوضحليالحجمالليتقصدهبالضبطللبيبسي؟يعنيعلبةولالتر؟عشانأتأكدمنكلالتفاصيل."
+    },
+    {
+     "t": 1790219846361.485,
+     "rid": "resp_ERUFXNPL3EP2C3BG2iHxR",
+     "audio_ms": 13500,
+     "text": "للأسف،ماعنديشمعلومةحاليةعنوقتالتوصيلبالظبط.ممكنبسنكملالطلبونتأكدمنالعنوان،وبعدكدهنقدرنعرفالوقتالمتوقعللتوصيل.ممكنتدينيعنوانالتوصيلكامل؟"
+    },
+    {
+     "t": 1790219865018.9214,
+     "rid": "resp_ERUFsImTB34o5AE0dqvQI",
+     "audio_ms": 0,
+     "text": null
+    },
+    {
+     "t": 1790219865546.6848,
+     "rid": "resp_ERUFtN0QtZJVLgGGInj3h",
+     "audio_ms": 0,
+     "text": null
+    },
+    {
+     "t": 1790219868458.67,
+     "rid": "resp_ERUFtiEH9rrDUEkSjgf29",
+     "audio_ms": 13200,
+     "text": "تمام،أناأكدتالعنوان:23شارعالتحرير،الدقي،الدورالخامس.دلوقتيممكنتقوليليرقمالتليفونالليهيتمالتواصلعليه؟لازميكون11رقمويبدأبـ01."
+    },
+    {
+     "t": 1790219884809.88,
+     "rid": "resp_ERUGBFPbF97VcKQQakHmR",
+     "audio_ms": 5950,
+     "text": "لسهمحتاجينرقمالتليفونعشاننكملالطلب.ممكنتدينيالرقمدلوقتيلوسمحت؟"
+    },
+    {
+     "t": 1790219898754.8923,
+     "rid": "resp_ERUGOhBb5zJhcK2q4rZAd",
+     "audio_ms": 9450,
+     "text": "حاضر،أناسجلت:2بيتزامارجريتاكبيرةوبيبسي.محتاجأعرفحجمالبيبسي:علبةولالتر؟عشاننأكدطلبكبشكلمضبوط."
+    }
+   ],
+   "flags": {
+    "QEVION_TOOL_ACK": "0",
+    "QEVION_PARALLEL_TOOLS": "0"
+   }
+  },
+  {
+   "session_id": "ses_0e24b935254b44f2",
+   "t_ws_connect_start": 1790219930208.968,
+   "turns": [
+    {
+     "clip": "u_long",
+     "t_clip_start": 1790219931717.1812,
+     "t1": 1790219946918.6025,
+     "t_clip_end": 1790219977347.307
+    },
+    {
+     "clip": "u7_correction",
+     "t_clip_start": 1790219978147.6768,
+     "t1": 1790219982668.3132,
+     "t_clip_end": 1790220013365.1501
+    },
+    {
+     "clip": "u_ambig",
+     "t_clip_start": 1790220014166.2825,
+     "t1": 1790220017247.0984,
+     "t_clip_end": 1790220048350.0808
+    },
+    {
+     "clip": "u_multi",
+     "t_clip_start": 1790220049151.245,
+     "t1": 1790220058872.3066,
+     "t_clip_end": 1790220089334.1067
+    },
+    {
+     "clip": "u3_yes",
+     "t_clip_start": 1790220090134.856,
+     "t1": 1790220092736.2815,
+     "t_clip_end": 1790220123218.3362
+    }
+   ],
+   "client_marks": [
+    [
+     1790219930216.0457,
+     "client:ws_open",
+     ""
+    ],
+    [
+     1790219931232.6467,
+     "client:ready",
+     ""
+    ],
+    [
+     1790219936796.8862,
+     "client:first_audio_frame",
+     "resp_ERUH22QggvPQUQCQ8xegt"
+    ],
+    [
+     1790219948492.4312,
+     "client:audio_end",
+     "resp_ERUHDWBvU2PH9Wt7gv2Dm"
+    ],
+    [
+     1790219948963.0618,
+     "client:audio_end",
+     "resp_ERUHEVCZEh0Z0IIqzzzY0"
+    ],
+    [
+     1790219949292.4163,
+     "client:first_audio_frame",
+     "resp_ERUHEpF1hMLcZmMagpJWu"
+    ],
+    [
+     1790219951992.35,
+     "client:audio_end",
+     "resp_ERUHEpF1hMLcZmMagpJWu"
+    ],
+    [
+     1790219983731.9,
+     "client:audio_end",
+     "resp_ERUHnnGvQcKxYWmNqd23I"
+    ],
+    [
+     1790219984077.7373,
+     "client:first_audio_frame",
+     "resp_ERUHnCLoOxEeCFEXCeQ0F"
+    ],
+    [
+     1790219985324.8196,
+     "client:audio_end",
+     "resp_ERUHnCLoOxEeCFEXCeQ0F"
+    ],
+    [
+     1790220018232.2415,
+     "client:first_audio_frame",
+     "resp_ERUILDTWIoGaH6vEXKxPK"
+    ],
+    [
+     1790220019989.2065,
+     "client:audio_end",
+     "resp_ERUILDTWIoGaH6vEXKxPK"
+    ],
+    [
+     1790220060192.2686,
+     "client:audio_end",
+     "resp_ERUJ1tgTD7ZKW5WrXAgd9"
+    ],
+    [
+     1790220060911.1443,
+     "client:audio_end",
+     "resp_ERUJ28LvUg5Eb7t30mQvZ"
+    ],
+    [
+     1790220061469.6013,
+     "client:audio_end",
+     "resp_ERUJ2915b1SzgjOEM0md4"
+    ],
+    [
+     1790220061919.9724,
+     "client:first_audio_frame",
+     "resp_ERUJ3Yvy4gGI5rDg97q17"
+    ],
+    [
+     1790220064002.846,
+     "client:audio_end",
+     "resp_ERUJ3Yvy4gGI5rDg97q17"
+    ],
+    [
+     1790220093570.0757,
+     "client:audio_end",
+     "resp_ERUJZnn1EKLXUj0CfxEKz"
+    ]
+   ],
+   "server_marks": [
+    [
+     1790219931230.4648,
+     "sent:session.update",
+     ""
+    ],
+    [
+     1790219932321.034,
+     "core:speech_start",
+     ""
+    ],
+    [
+     1790219933641.2805,
+     "core:end_of_turn",
+     "speech_ms=940;silence_ms=500"
+    ],
+    [
+     1790219933643.9941,
+     "sent:session.update",
+     ""
+    ],
+    [
+     1790219933644.0225,
+     "core:commit_call",
+     ""
+    ],
+    [
+     1790219933644.1704,
+     "sent:input_audio_buffer.commit",
+     ""
+    ],
+    [
+     1790219933644.283,
+     "sent:response.create",
+     ""
+    ],
+    [
+     1790219933722.7153,
+     "recv:input_audio_buffer.committed",
+     ""
+    ],
+    [
+     1790219933727.0342,
+     "recv:response.created",
+     "resp_ERUGzLjICkJXeyo5TP7bg"
+    ],
+    [
+     1790219933861.044,
+     "core:speech_start",
+     ""
+    ],
+    [
+     1790219933940.695,
+     "sent:response.cancel",
+     ""
+    ],
+    [
+     1790219934003.2,
+     "recv:response.done",
+     "resp_ERUGzLjICkJXeyo5TP7bg"
+    ],
+    [
+     1790219934261.6006,
+     "recv:conversation.item.input_audio_transcription.completed",
+     ""
+    ],
+    [
+     1790219936440.8713,
+     "core:end_of_turn",
+     "speech_ms=2200;silence_ms=500"
+    ],
+    [
+     1790219936442.576,
+     "core:commit_call",
+     ""
+    ],
+    [
+     1790219936442.8333,
+     "sent:input_audio_buffer.commit",
+     ""
+    ],
+    [
+     1790219936442.9783,
+     "sent:response.create",
+     ""
+    ],
+    [
+     1790219936494.3262,
+     "recv:input_audio_buffer.committed",
+     ""
+    ],
+    [
+     1790219936501.6943,
+     "recv:response.created",
+     "resp_ERUH22QggvPQUQCQ8xegt"
+    ],
+    [
+     1790219936795.1433,
+     "recv:first_audio_delta",
+     "resp_ERUH22QggvPQUQCQ8xegt"
+    ],
+    [
+     1790219936796.352,
+     "core:first_audio_to_client",
+     "resp_ERUH22QggvPQUQCQ8xegt"
+    ],
+    [
+     1790219936864.803,
+     "core:speech_start",
+     ""
+    ],
+    [
+     1790219936940.7866,
+     "sent:response.cancel",
+     ""
+    ],
+    [
+     1790219936942.7524,
+     "sent:conversation.item.truncate",
+     ""
+    ],
+    [
+     1790219937007.4893,
+     "recv:response.done",
+     "resp_ERUH22QggvPQUQCQ8xegt"
+    ],
+    [
+     1790219937075.7102,
+     "recv:conversation.item.input_audio_transcription.completed",
+     ""
+    ],
+    [
+     1790219939000.912,
+     "core:end_of_turn",
+     "speech_ms=1760;silence_ms=500"
+    ],
+    [
+     1790219939002.622,
+     "core:commit_call",
+     ""
+    ],
+    [
+     1790219939002.8599,
+     "sent:input_audio_buffer.commit",
+     ""
+    ],
+    [
+     1790219939003.0193,
+     "sent:response.create",
+     ""
+    ],
+    [
+     1790219939053.5852,
+     "recv:input_audio_buffer.committed",
+     ""
+    ],
+    [
+     1790219939062.5303,
+     "recv:response.created",
+     "resp_ERUH5ROrGkgQ3dU1D1lJs"
+    ],
+    [
+     1790219939260.7168,
+     "core:speech_start",
+     ""
+    ],
+    [
+     1790219939340.784,
+     "sent:response.cancel",
+     ""
+    ],
+    [
+     1790219939402.6414,
+     "recv:response.function_call_arguments.done",
+     "call_VdXEnl1UU1buf4fg"
+    ],
+    [
+     1790219939405.1978,
+     "recv:response.done",
+     "resp_ERUH5ROrGkgQ3dU1D1lJs"
+    ],
+    [
+     1790219939617.7903,
+     "recv:conversation.item.input_audio_transcription.completed",
+     ""
+    ],
+    [
+     1790219941120.664,
+     "core:end_of_turn",
+     "speech_ms=1480;silence_ms=500"
+    ],
+    [
+     1790219941122.374,
+     "core:commit_call",
+     ""
+    ],
+    [
+     1790219941122.6255,
+     "sent:input_audio_buffer.commit",
+     ""
+    ],
+    [
+     1790219941122.8145,
+     "sent:response.create",
+     ""
+    ],
+    [
+     1790219941177.0227,
+     "recv:input_audio_buffer.committed",
+     ""
+    ],
+    [
+     1790219941186.4102,
+     "recv:response.created",
+     "resp_ERUH78fgxW4swzbc6Xuc0"
+    ],
+    [
+     1790219941259.6558,
+     "core:speech_start",
+     ""
+    ],
+    [
+     1790219941342.221,
+     "sent:response.cancel",
+     ""
+    ],
+    [
+     1790219941401.407,
+     "recv:response.done",
+     "resp_ERUH78fgxW4swzbc6Xuc0"
+    ],
+    [
+     1790219941678.3936,
+     "recv:conversation.item.input_audio_transcription.completed",
+     ""
+    ],
+    [
+     1790219942920.5417,
+     "core:end_of_turn",
+     "speech_ms=1280;silence_ms=500"
+    ],
+    [
+     1790219942922.285,
+     "core:commit_call",
+     ""
+    ],
+    [
+     1790219942922.5178,
+     "sent:input_audio_buffer.commit",
+     ""
+    ],
+    [
+     1790219942922.6594,
+     "sent:response.create",
+     ""
+    ],
+    [
+     1790219942974.8743,
+     "recv:input_audio_buffer.committed",
+     ""
+    ],
+    [
+     1790219942982.7812,
+     "recv:response.created",
+     "resp_ERUH8RK0WA2fheIjULrng"
+    ],
+    [
+     1790219943461.0137,
+     "core:speech_start",
+     ""
+    ],
+    [
+     1790219943490.2915,
+     "recv:conversation.item.input_audio_transcription.completed",
+     ""
+    ],
+    [
+     1790219943540.0332,
+     "sent:response.cancel",
+     ""
+    ],
+    [
+     1790219943594.7708,
+     "recv:response.function_call_arguments.done",
+     "call_3RcCsFqy9gsjBkYc"
+    ],
+    [
+     1790219943602.3723,
+     "recv:response.done",
+     "resp_ERUH8RK0WA2fheIjULrng"
+    ],
+    [
+     1790219947420.3284,
+     "core:end_of_turn",
+     "speech_ms=3260;silence_ms=500"
+    ],
+    [
+     1790219947421.0984,
+     "core:commit_call",
+     ""
+    ],
+    [
+     1790219947421.2083,
+     "sent:input_audio_buffer.commit",
+     ""
+    ],
+    [
+     1790219947421.2563,
+     "sent:response.create",
+     ""
+    ],
+    [
+     1790219947476.8767,
+     "recv:input_audio_buffer.committed",
+     ""
+    ],
+    [
+     1790219947485.1267,
+     "recv:response.created",
+     "resp_ERUHDWBvU2PH9Wt7gv2Dm"
+    ],
+    [
+     1790219948035.7668,
+     "recv:conversation.item.input_audio_transcription.completed",
+     ""
+    ],
+    [
+     1790219948480.1072,
+     "recv:response.function_call_arguments.done",
+     "call_7xHyzQ1NtgNL48vp"
+    ],
+    [
+     1790219948480.7327,
+     "core:tool_start",
+     "call_7xHyzQ1NtgNL48vp:record_field"
+    ],
+    [
+     1790219948482.0872,
+     "core:tool_done",
+     "call_7xHyzQ1NtgNL48vp:record_field"
+    ],
+    [
+     1790219948482.1355,
+     "decision:start",
+     "validate_field"
+    ],
+    [
+     1790219948482.1768,
+     "decision:end",
+     "validate_field:RULE"
+    ],
+    [
+     1790219948482.777,
+     "core:tool_result_submit",
+     "call_7xHyzQ1NtgNL48vp"
+    ],
+    [
+     1790219948483.1733,
+     "sent:conversation.item.create",
+     "call_7xHyzQ1NtgNL48vp"
+    ],
+    [
+     1790219948483.2976,
+     "sent:response.create",
+     ""
+    ],
+    [
+     1790219948489.4614,
+     "recv:response.done",
+     "resp_ERUHDWBvU2PH9Wt7gv2Dm"
+    ],
+    [
+     1790219948490.186,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219948490.2698,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219948490.3015,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219948490.3533,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219948490.3813,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219948490.408,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219948490.4348,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219948490.4604,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219948491.962,
+     "sent:session.update",
+     ""
+    ],
+    [
+     1790219948562.4702,
+     "recv:response.created",
+     "resp_ERUHEVCZEh0Z0IIqzzzY0"
+    ],
+    [
+     1790219948955.2048,
+     "recv:response.function_call_arguments.done",
+     "call_SddYCuSJKv9NKhlH"
+    ],
+    [
+     1790219948955.8586,
+     "core:tool_start",
+     "call_SddYCuSJKv9NKhlH:lookup_knowledge"
+    ],
+    [
+     1790219948956.592,
+     "core:tool_done",
+     "call_SddYCuSJKv9NKhlH:lookup_knowledge"
+    ],
+    [
+     1790219948956.6086,
+     "core:tool_result_submit",
+     "call_SddYCuSJKv9NKhlH"
+    ],
+    [
+     1790219948956.9236,
+     "sent:conversation.item.create",
+     "call_SddYCuSJKv9NKhlH"
+    ],
+    [
+     1790219948957.0857,
+     "sent:response.create",
+     ""
+    ],
+    [
+     1790219948961.3813,
+     "recv:response.done",
+     "resp_ERUHEVCZEh0Z0IIqzzzY0"
+    ],
+    [
+     1790219948962.1094,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219948962.1807,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219948962.213,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219948962.264,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219948962.2917,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219948962.3188,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219948962.3464,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219948962.3718,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219949012.505,
+     "recv:response.created",
+     "resp_ERUHEpF1hMLcZmMagpJWu"
+    ],
+    [
+     1790219949290.7673,
+     "recv:first_audio_delta",
+     "resp_ERUHEpF1hMLcZmMagpJWu"
+    ],
+    [
+     1790219949291.8635,
+     "core:first_audio_to_client",
+     "resp_ERUHEpF1hMLcZmMagpJWu"
+    ],
+    [
+     1790219951990.0007,
+     "recv:response.done",
+     "resp_ERUHEpF1hMLcZmMagpJWu"
+    ],
+    [
+     1790219951991.0872,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219951991.1868,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219951991.2244,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219951991.2798,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219951991.311,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219951991.3955,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219951991.4292,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219951991.4604,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219978829.3813,
+     "core:speech_start",
+     ""
+    ],
+    [
+     1790219983131.216,
+     "core:end_of_turn",
+     "speech_ms=3540;silence_ms=500"
+    ],
+    [
+     1790219983132.7551,
+     "core:commit_call",
+     ""
+    ],
+    [
+     1790219983132.9927,
+     "sent:input_audio_buffer.commit",
+     ""
+    ],
+    [
+     1790219983133.1282,
+     "sent:response.create",
+     ""
+    ],
+    [
+     1790219983199.407,
+     "recv:input_audio_buffer.committed",
+     ""
+    ],
+    [
+     1790219983208.3508,
+     "recv:response.created",
+     "resp_ERUHnnGvQcKxYWmNqd23I"
+    ],
+    [
+     1790219983724.9517,
+     "recv:response.function_call_arguments.done",
+     "call_ktQtn6qIOEf3uP2t"
+    ],
+    [
+     1790219983725.857,
+     "core:tool_start",
+     "call_ktQtn6qIOEf3uP2t:record_field"
+    ],
+    [
+     1790219983726.6843,
+     "core:tool_done",
+     "call_ktQtn6qIOEf3uP2t:record_field"
+    ],
+    [
+     1790219983726.7256,
+     "decision:start",
+     "validate_field"
+    ],
+    [
+     1790219983726.792,
+     "decision:end",
+     "validate_field:RULE"
+    ],
+    [
+     1790219983727.6018,
+     "core:tool_result_submit",
+     "call_ktQtn6qIOEf3uP2t"
+    ],
+    [
+     1790219983727.9414,
+     "sent:conversation.item.create",
+     "call_ktQtn6qIOEf3uP2t"
+    ],
+    [
+     1790219983728.073,
+     "sent:response.create",
+     ""
+    ],
+    [
+     1790219983729.026,
+     "recv:response.done",
+     "resp_ERUHnnGvQcKxYWmNqd23I"
+    ],
+    [
+     1790219983729.759,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219983729.827,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219983729.86,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219983729.9321,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219983729.9626,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219983729.9924,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219983730.0203,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219983730.0452,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219983731.6238,
+     "sent:session.update",
+     ""
+    ],
+    [
+     1790219983807.8223,
+     "recv:response.created",
+     "resp_ERUHnCLoOxEeCFEXCeQ0F"
+    ],
+    [
+     1790219984042.6802,
+     "recv:conversation.item.input_audio_transcription.completed",
+     ""
+    ],
+    [
+     1790219984076.2234,
+     "recv:first_audio_delta",
+     "resp_ERUHnCLoOxEeCFEXCeQ0F"
+    ],
+    [
+     1790219984077.3953,
+     "core:first_audio_to_client",
+     "resp_ERUHnCLoOxEeCFEXCeQ0F"
+    ],
+    [
+     1790219985322.6914,
+     "recv:response.done",
+     "resp_ERUHnCLoOxEeCFEXCeQ0F"
+    ],
+    [
+     1790219985323.7068,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219985323.78,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219985323.8157,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219985323.865,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219985323.894,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219985323.9424,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790219985323.983,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790219985324.0095,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790220014429.5593,
+     "core:speech_start",
+     ""
+    ],
+    [
+     1790220017750.2156,
+     "core:end_of_turn",
+     "speech_ms=2280;silence_ms=500"
+    ],
+    [
+     1790220017751.8845,
+     "core:commit_call",
+     ""
+    ],
+    [
+     1790220017752.2139,
+     "sent:input_audio_buffer.commit",
+     ""
+    ],
+    [
+     1790220017752.3672,
+     "sent:response.create",
+     ""
+    ],
+    [
+     1790220017822.0933,
+     "recv:input_audio_buffer.committed",
+     ""
+    ],
+    [
+     1790220017830.2168,
+     "recv:response.created",
+     "resp_ERUILDTWIoGaH6vEXKxPK"
+    ],
+    [
+     1790220018231.0266,
+     "recv:first_audio_delta",
+     "resp_ERUILDTWIoGaH6vEXKxPK"
+    ],
+    [
+     1790220018231.8674,
+     "core:first_audio_to_client",
+     "resp_ERUILDTWIoGaH6vEXKxPK"
+    ],
+    [
+     1790220018514.7717,
+     "recv:conversation.item.input_audio_transcription.completed",
+     ""
+    ],
+    [
+     1790220019986.4648,
+     "recv:response.done",
+     "resp_ERUILDTWIoGaH6vEXKxPK"
+    ],
+    [
+     1790220019987.7825,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790220019987.9146,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790220019987.9683,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790220019988.0417,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790220019988.0881,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790220019988.1323,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790220019988.1821,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790220019988.2253,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790220049474.3193,
+     "core:speech_start",
+     ""
+    ],
+    [
+     1790220059414.024,
+     "core:end_of_turn",
+     "speech_ms=8100;silence_ms=510"
+    ],
+    [
+     1790220059415.5793,
+     "core:commit_call",
+     ""
+    ],
+    [
+     1790220059415.8154,
+     "sent:input_audio_buffer.commit",
+     ""
+    ],
+    [
+     1790220059415.9492,
+     "sent:response.create",
+     ""
+    ],
+    [
+     1790220059491.075,
+     "recv:input_audio_buffer.committed",
+     ""
+    ],
+    [
+     1790220059499.0984,
+     "recv:response.created",
+     "resp_ERUJ1tgTD7ZKW5WrXAgd9"
+    ],
+    [
+     1790220060183.6094,
+     "recv:response.function_call_arguments.done",
+     "call_xsxQq1ZWI3Q3L0jE"
+    ],
+    [
+     1790220060184.2834,
+     "core:tool_start",
+     "call_xsxQq1ZWI3Q3L0jE:record_field"
+    ],
+    [
+     1790220060185.176,
+     "core:tool_done",
+     "call_xsxQq1ZWI3Q3L0jE:record_field"
+    ],
+    [
+     1790220060185.2173,
+     "decision:start",
+     "validate_field"
+    ],
+    [
+     1790220060185.27,
+     "decision:end",
+     "validate_field:RULE"
+    ],
+    [
+     1790220060185.879,
+     "core:tool_result_submit",
+     "call_xsxQq1ZWI3Q3L0jE"
+    ],
+    [
+     1790220060186.2065,
+     "sent:conversation.item.create",
+     "call_xsxQq1ZWI3Q3L0jE"
+    ],
+    [
+     1790220060186.3286,
+     "sent:response.create",
+     ""
+    ],
+    [
+     1790220060189.3853,
+     "recv:response.done",
+     "resp_ERUJ1tgTD7ZKW5WrXAgd9"
+    ],
+    [
+     1790220060190.1406,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790220060190.211,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790220060190.245,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790220060190.2932,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790220060190.324,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790220060190.3538,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790220060190.3833,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790220060190.4094,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790220060191.9712,
+     "sent:session.update",
+     ""
+    ],
+    [
+     1790220060245.031,
+     "recv:response.created",
+     "resp_ERUJ28LvUg5Eb7t30mQvZ"
+    ],
+    [
+     1790220060467.0579,
+     "recv:conversation.item.input_audio_transcription.completed",
+     ""
+    ],
+    [
+     1790220060901.9226,
+     "recv:response.function_call_arguments.done",
+     "call_AVJqfB9xo70NRvgC"
+    ],
+    [
+     1790220060902.5027,
+     "core:tool_start",
+     "call_AVJqfB9xo70NRvgC:verify_field"
+    ],
+    [
+     1790220060903.4011,
+     "core:tool_done",
+     "call_AVJqfB9xo70NRvgC:verify_field"
+    ],
+    [
+     1790220060903.523,
+     "core:tool_result_submit",
+     "call_AVJqfB9xo70NRvgC"
+    ],
+    [
+     1790220060903.8552,
+     "sent:conversation.item.create",
+     "call_AVJqfB9xo70NRvgC"
+    ],
+    [
+     1790220060903.9858,
+     "sent:response.create",
+     ""
+    ],
+    [
+     1790220060907.7524,
+     "recv:response.done",
+     "resp_ERUJ28LvUg5Eb7t30mQvZ"
+    ],
+    [
+     1790220060908.6277,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790220060908.7354,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790220060908.7937,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790220060908.8462,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790220060908.8782,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790220060908.9072,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790220060908.9368,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790220060908.9758,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790220060910.655,
+     "sent:session.update",
+     ""
+    ],
+    [
+     1790220060959.2202,
+     "recv:response.created",
+     "resp_ERUJ2915b1SzgjOEM0md4"
+    ],
+    [
+     1790220061460.1265,
+     "recv:response.function_call_arguments.done",
+     "call_vG3vdEdslUa2Hezs"
+    ],
+    [
+     1790220061460.781,
+     "core:tool_start",
+     "call_vG3vdEdslUa2Hezs:record_field"
+    ],
+    [
+     1790220061461.576,
+     "core:tool_done",
+     "call_vG3vdEdslUa2Hezs:record_field"
+    ],
+    [
+     1790220061461.6147,
+     "decision:start",
+     "validate_field"
+    ],
+    [
+     1790220061461.681,
+     "decision:end",
+     "validate_field:RULE"
+    ],
+    [
+     1790220061462.2166,
+     "core:tool_result_submit",
+     "call_vG3vdEdslUa2Hezs"
+    ],
+    [
+     1790220061462.5308,
+     "sent:conversation.item.create",
+     "call_vG3vdEdslUa2Hezs"
+    ],
+    [
+     1790220061462.6548,
+     "sent:response.create",
+     ""
+    ],
+    [
+     1790220061467.7773,
+     "recv:response.done",
+     "resp_ERUJ2915b1SzgjOEM0md4"
+    ],
+    [
+     1790220061468.5283,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790220061468.5952,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790220061468.6304,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790220061468.6758,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790220061468.7075,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790220061468.7373,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790220061468.788,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790220061468.815,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790220061528.0984,
+     "recv:response.created",
+     "resp_ERUJ3Yvy4gGI5rDg97q17"
+    ],
+    [
+     1790220061918.3376,
+     "recv:first_audio_delta",
+     "resp_ERUJ3Yvy4gGI5rDg97q17"
+    ],
+    [
+     1790220061919.446,
+     "core:first_audio_to_client",
+     "resp_ERUJ3Yvy4gGI5rDg97q17"
+    ],
+    [
+     1790220064000.78,
+     "recv:response.done",
+     "resp_ERUJ3Yvy4gGI5rDg97q17"
+    ],
+    [
+     1790220064001.7363,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790220064001.835,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790220064001.871,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790220064001.9204,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790220064001.952,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790220064001.9817,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790220064002.0115,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790220064002.0376,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790220090320.002,
+     "core:speech_start",
+     ""
+    ],
+    [
+     1790220093278.0134,
+     "core:end_of_turn",
+     "speech_ms=2140;silence_ms=510"
+    ],
+    [
+     1790220093279.535,
+     "core:commit_call",
+     ""
+    ],
+    [
+     1790220093279.805,
+     "sent:input_audio_buffer.commit",
+     ""
+    ],
+    [
+     1790220093279.9443,
+     "sent:response.create",
+     ""
+    ],
+    [
+     1790220093341.1587,
+     "recv:input_audio_buffer.committed",
+     ""
+    ],
+    [
+     1790220093351.7305,
+     "recv:response.created",
+     "resp_ERUJZnn1EKLXUj0CfxEKz"
+    ],
+    [
+     1790220093568.043,
+     "recv:response.done",
+     "resp_ERUJZnn1EKLXUj0CfxEKz"
+    ],
+    [
+     1790220093568.9788,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790220093569.0562,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790220093569.0933,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790220093569.1455,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790220093569.1758,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790220093569.2036,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790220093569.2341,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790220093569.26,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790220124019.652,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790220124019.7659,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790220124019.8074,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790220124019.8628,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790220124019.8948,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790220124019.923,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790220124019.955,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790220124019.9941,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790220126058.1807,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790220126058.2612,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790220126058.2988,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790220126058.3547,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790220126058.3875,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790220126058.42,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ],
+    [
+     1790220126058.4534,
+     "decision:start",
+     "evaluate_rule"
+    ],
+    [
+     1790220126058.4814,
+     "decision:end",
+     "evaluate_rule:RULE"
+    ]
+   ],
+   "error": null,
+   "outcome": "abandoned",
+   "spoken": [
+    {
+     "t": 1790219948492.4312,
+     "rid": "resp_ERUHDWBvU2PH9Wt7gv2Dm",
+     "audio_ms": 0,
+     "text": null
+    },
+    {
+     "t": 1790219948963.0618,
+     "rid": "resp_ERUHEVCZEh0Z0IIqzzzY0",
+     "audio_ms": 0,
+     "text": null
+    },
+    {
+     "t": 1790219951992.35,
+     "rid": "resp_ERUHEpF1hMLcZmMagpJWu",
+     "audio_ms": 13950,
+     "text": "حالياًماعنديشمعلومةمؤكدةعنوجودعرضعلىالحلويات.ممكننكملالطلبدلوقتي،وبعدمانأكدالتفاصيلكلها،أقدرأقدملكاقتراحاتإضافيةلوحابب.دلوقتي،ممكنتقولليعنوانالتوصيل؟"
+    },
+    {
+     "t": 1790219983731.9,
+     "rid": "resp_ERUHnnGvQcKxYWmNqd23I",
+     "audio_ms": 0,
+     "text": null
+    },
+    {
+     "t": 1790219985324.8196,
+     "rid": "resp_ERUHnCLoOxEeCFEXCeQ0F",
+     "audio_ms": 6500,
+     "text": "تمام،تمتسجيلإنعددالبيتزاهيكون3.دلوقتيممكنتقولليعنوانالتوصيلبالكامل؟"
+    },
+    {
+     "t": 1790220019989.2065,
+     "rid": "resp_ERUILDTWIoGaH6vEXKxPK",
+     "audio_ms": 9050,
+     "text": "أنامحتاجالعنوانبالضبطعشاننقدرنوصّلالأوردر.ممكنتقوليالشارع،رقمالبناية،وأسمالحيأوالمنطقةالليهنتوصّلفيها؟"
+    },
+    {
+     "t": 1790220060192.2686,
+     "rid": "resp_ERUJ1tgTD7ZKW5WrXAgd9",
+     "audio_ms": 0,
+     "text": null
+    },
+    {
+     "t": 1790220060911.1443,
+     "rid": "resp_ERUJ28LvUg5Eb7t30mQvZ",
+     "audio_ms": 0,
+     "text": null
+    },
+    {
+     "t": 1790220061469.6013,
+     "rid": "resp_ERUJ2915b1SzgjOEM0md4",
+     "audio_ms": 0,
+     "text": null
+    },
+    {
+     "t": 1790220064002.846,
+     "rid": "resp_ERUJ3Yvy4gGI5rDg97q17",
+     "audio_ms": 11000,
+     "text": "الرقمالليقلته010123445ناقصشويةأرقام.محتاجين11رقمكاملين.ممكنتراجعالرقموتدينيالرقمالصحيح؟"
+    },
+    {
+     "t": 1790220093570.0757,
+     "rid": "resp_ERUJZnn1EKLXUj0CfxEKz",
+     "audio_ms": 0,
+     "text": null
+    }
+   ],
+   "flags": {
+    "QEVION_TOOL_ACK": "0",
+    "QEVION_PARALLEL_TOOLS": "0"
+   }
+  }
+ ]
+}
