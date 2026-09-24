@@ -23,12 +23,94 @@ from latency_corpus import stats  # noqa: E402
 
 # Content-free acknowledgement check (A): digits, number words used by the corpus domain, prices/currency,
 # availability, and success/record claims (ar-EG + en). ≤ 8 words.
-_ACK_BAD = re.compile(
-    r"[0-9٠-٩]|واحد|اتنين|إتنين|تلات|ثلاث|اربع|أربع|خمس|ست|سبع|تمان|ثمان|تسع|عشر|مية|ميه|ألف|الف|صفر"
-    r"|جنيه|سعر|متاح|موجود|مش موجود|سجلت|سجّلت|اتسجل|تم|أكدت|اتأكد|حجزت|اتحجز|نجح"
-    r"|\b(one|two|three|four|five|price|pound|available|recorded|confirmed|booked|done|success)\b",
-    re.IGNORECASE,
-)
+_ACK_BAD_TOKENS = {
+    # quantities / numbers (ar-EG, MSA, en)
+    "واحد",
+    "واحدة",
+    "اتنين",
+    "إتنين",
+    "اثنين",
+    "تلاتة",
+    "ثلاثة",
+    "تلات",
+    "اربعة",
+    "أربعة",
+    "خمسة",
+    "ستة",
+    "سبعة",
+    "تمانية",
+    "ثمانية",
+    "تسعة",
+    "عشرة",
+    "مية",
+    "ميه",
+    "ألف",
+    "الف",
+    "صفر",
+    "ست",
+    "خمس",
+    "سبع",
+    "تسع",
+    "عشر",
+    "one",
+    "two",
+    "three",
+    "four",
+    "five",
+    "six",
+    "seven",
+    "eight",
+    "nine",
+    "ten",
+    # prices / availability
+    "جنيه",
+    "سعر",
+    "السعر",
+    "متاح",
+    "متوفر",
+    "موجود",
+    "price",
+    "pound",
+    "pounds",
+    "available",
+    "availability",
+    # success / record claims
+    "سجلت",
+    "سجّلت",
+    "اتسجل",
+    "اتسجلت",
+    "تم",
+    "أكدت",
+    "اتأكد",
+    "حجزت",
+    "اتحجز",
+    "نجح",
+    "خلاص",
+    "recorded",
+    "confirmed",
+    "booked",
+    "done",
+    "success",
+    "saved",
+}
+_DIGIT = re.compile(r"[0-9٠-٩]")
+_TOKEN = re.compile(r"[\w\u0600-\u06FF]+", re.UNICODE)
+
+
+class _AckFilter:
+    """Whole-token match (so 'تمام' is not 'تم', 'ستني' is not 'ست'); digits anywhere; leading Arabic 'و' stripped."""
+
+    def search(self, text: str) -> bool:
+        if _DIGIT.search(text):
+            return True
+        for tok in _TOKEN.findall(text.lower()):
+            if tok in _ACK_BAD_TOKENS or (tok.startswith("و") and tok[1:] in _ACK_BAD_TOKENS):
+                return True
+        return False
+
+
+_ACK_BAD = _AckFilter()
+
 T1T9 = "T1_T9_user_to_first_audio_client"
 T1T9A = "T1_T9a_user_to_answer_audio_client"
 
