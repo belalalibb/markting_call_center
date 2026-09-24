@@ -111,7 +111,6 @@ _FATAL_ERROR_CODES = {
 
 
 DEFAULT_TRANSCRIPTION_MODEL = "whisper-1"
-BATCH_STALL_S = 1.5  # option B: continue a batch with the answered calls if one call never gets a result
 
 
 def _is_fatal(error_type: str, code: object) -> bool:
@@ -153,14 +152,6 @@ class OpenAIRealtimeSession:
         # Observation only — no behaviour depends on it. Entries: (epoch_ms, kind, ref).
         self.trace: list[tuple[float, str, str]] | None = [] if os.environ.get("QEVION_LATENCY_TRACE") == "1" else None
         self._traced_first_audio: set[str] = set()
-        # Option B (opt-in `extra.parallel_tools`): one continuation per batch of calls made in the same response.
-        self._batch = bool(config.extra.get("parallel_tools"))
-        self._calls: dict[str, set[str]] = {}  # response_id → call_ids requested in it
-        self._call_rid: dict[str, str] = {}  # call_id → response_id
-        self._answered: set[str] = set()
-        self._done: set[str] = set()
-        self._continued: set[str] = set()
-        self._stall_tasks: list[asyncio.Future[None]] = []
 
     # ------------------------------------------------------------- lifecycle
     def start(self) -> None:
@@ -182,8 +173,6 @@ class OpenAIRealtimeSession:
         if self._closed:
             return
         self._closed = True
-        for t in self._stall_tasks:
-            t.cancel()
         await self._sock.close()
         if self._pump:
             self._pump.cancel()
@@ -251,22 +240,6 @@ class OpenAIRealtimeSession:
                 "item": {"type": "function_call_output", "call_id": result.call_id, "output": json.dumps(output)},
             }
         )
-        if not self._batch:
-            await self._send({"type": "response.create"})
-            return
-        self._answered.add(result.call_id)
-        rid = self._call_rid.get(result.call_id)
-        if rid is None:  # unknown origin → behave exactly like the default path
-            await self._send({"type": "response.create"})
-            return
-        await self._maybe_continue(rid)
-
-    async def _maybe_continue(self, rid: str) -> None:
-        """Continue once the response that requested the calls has finished AND every call in it is answered."""
-        calls = self._calls.get(rid, set())
-        if rid in self._continued or rid not in self._done or not calls or not calls <= self._answered:
-            return
-        self._continued.add(rid)
         await self._send({"type": "response.create"})
 
     async def truncate_response(self, response_id: str, audio_end_ms: int) -> None:
@@ -327,38 +300,12 @@ class OpenAIRealtimeSession:
                 if self.trace is not None:
                     self._trace_recv(msg)
                 self.handle_provider_message(msg)
-                if self._batch:
-                    await self._batch_bookkeeping(msg)
         finally:
             if not self._closed:
                 self._closed = True
                 self._events.put_nowait(S2SEvent(type=S2SEventType.CLOSED, raw_type="socket_eof"))
                 self._events.put_nowait(None)
                 self._audio.put_nowait(None)
-
-    async def _batch_bookkeeping(self, msg: dict[str, Any]) -> None:
-        t = str(msg.get("type", ""))
-        rid = str(msg.get("response_id") or (msg.get("response") or {}).get("id") or "")
-        if t == "response.function_call_arguments.done" and rid:
-            cid = str(msg.get("call_id"))
-            self._calls.setdefault(rid, set()).add(cid)
-            self._call_rid[cid] = rid
-        elif t == "response.done" and rid:
-            self._done.add(rid)
-            # results may already be in (Core answers in ~1 ms); the event reaches Core after this bookkeeping,
-            # so results for calls in this response are normally sent *after* done → continuation happens there.
-            await self._maybe_continue(rid)
-            if self._calls.get(rid):
-                # Safety net: a call that never gets a result (e.g. confirmation pending) must not stall the batch.
-                self._stall_tasks.append(asyncio.ensure_future(self._continue_partial(rid, BATCH_STALL_S)))
-
-    async def _continue_partial(self, rid: str, after_s: float) -> None:
-        await asyncio.sleep(after_s)
-        if rid in self._continued or self._closed:
-            return
-        if self._calls.get(rid, set()) & self._answered:
-            self._continued.add(rid)
-            await self._send({"type": "response.create"})
 
     def _trace_recv(self, msg: dict[str, Any]) -> None:
         t = str(msg.get("type", ""))

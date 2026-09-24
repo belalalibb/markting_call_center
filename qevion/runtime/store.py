@@ -451,11 +451,7 @@ class RuntimeStore:
                 model=s2s_b.model or "mock-1",
                 voice=voice,
                 language_hint=bp.locale.locale,
-                extra={
-                    **{k: v for k, v in s2s_b.config.items() if k in ("transcription_model",)},
-                    # option B: provider adapter continues once per batch of independent calls
-                    **({"parallel_tools": True} if "parallel_tools" in _instruction_options(s2s_b.config) else {}),
-                },
+                extra={k: v for k, v in s2s_b.config.items() if k in ("transcription_model",)},
                 tools=[
                     d.model_dump(mode="json")
                     for d in declarations_for_blueprint_permissions(bp.tools.permissions).values()
@@ -474,7 +470,6 @@ class RuntimeStore:
             channel=channel,
             event_sink=sink,
             operator_transcripts=self.operator_transcripts,
-            instruction_options=_instruction_options(s2s_b.config),
         )
         # Same id on the wire (ServerMessage.session_id), in events, and in the REST registry — otherwise a client
         # cannot look up its own session (found live 2026-09-23: WS id != /api/sessions id).
@@ -518,23 +513,6 @@ class RuntimeStore:
             if finished:
                 del self.sessions[sid]
                 excess -= 1
-
-
-def _flag(config: dict[str, Any], key: str, env: str) -> bool:
-    """Composition binding flag with an env override (`0`/`1`) so before/after runs use identical code."""
-    v = os.environ.get(env)
-    if v in ("0", "1"):
-        return v == "1"
-    return bool(config.get(key, False))
-
-
-def _instruction_options(config: dict[str, Any]) -> frozenset[str]:
-    opts = set()
-    if _flag(config, "tool_ack", "QEVION_TOOL_ACK"):
-        opts.add("tool_ack")
-    if _flag(config, "parallel_tools", "QEVION_PARALLEL_TOOLS"):
-        opts.add("parallel_tools")
-    return frozenset(opts)
 
 
 class _TimedDecision:

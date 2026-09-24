@@ -114,8 +114,6 @@ class SessionDeps:
     # F-13: send live user/assistant transcripts to the *connected operator client only* (ServerMessage TRANSCRIPT).
     # Never written to the event log (events keep digests only, QV-PRIV). Off → the console shows no text.
     operator_transcripts: bool = False
-    # Reversible instruction options selected by the runtime (composition config / env), e.g. {"tool_ack"}.
-    instruction_options: frozenset[str] = frozenset()
 
 
 @dataclass
@@ -167,9 +165,7 @@ class SessionCore:
             yes_phrases=list(lp.confirmation_phrases) if lp else [],
             no_phrases=list(lp.negation_phrases) if lp else [],
         )
-        self.composer = InstructionComposer(
-            bp, deps.tool_declarations, deps.locale_pack, deps.voice_profile, options=deps.instruction_options
-        )
+        self.composer = InstructionComposer(bp, deps.tool_declarations, deps.locale_pack, deps.voice_profile)
         self.outcome_engine = OutcomeEngine(bp, deps.decision)
         self.pipeline = ToolPipeline(
             declarations=deps.tool_declarations,

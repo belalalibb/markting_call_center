@@ -81,8 +81,6 @@ class InstructionComposer:
     tool_declarations: dict[str, ToolDeclaration] = field(default_factory=dict)
     locale_pack: LocalePack | None = None
     voice_profile: VoiceProfile | None = None
-    # Runtime-selected, reversible instruction options (composition config / env), e.g. {"tool_ack"}.
-    options: frozenset[str] = frozenset()
 
     # ------------------------------------------------------------------ static sections
     def _role(self) -> str:
@@ -140,47 +138,6 @@ class InstructionComposer:
             else:
                 lines.append(f"- {r.tool_id}: {r.purpose or 'see declaration'} [{perm.impact}]")
         lines.append("Never claim an action succeeded unless the tool result says so. If a result is unknown, say so.")
-        return "\n".join(lines)
-
-    def _tool_ack(self) -> str:
-        """Latency option A (2026-09-24 root-cause report): tool turns were silent for ~2 s while the model ran
-        2–3 function-call cycles. Let it speak a *content-free* acknowledgement first. It must carry no claim:
-        Core governance is unchanged, and the acknowledgement is constrained to be empty of facts."""
-        if "tool_ack" not in self.options or not (self.blueprint.tools.required or self.blueprint.tools.optional):
-            return ""
-        return "\n".join(
-            [
-                "When you need to call a tool before you can answer, first say ONE very short neutral acknowledgement "
-                "in the conversation language (2–4 words, the equivalent of 'one moment' or 'okay, let me check'), "
-                "then call the tool in the same response.",
-                "The acknowledgement must contain NO facts: no numbers, quantities, prices, names, addresses, "
-                "availability, times, and no statement that anything was recorded, confirmed, booked or succeeded. "
-                "Do not repeat back the user's details in it.",
-                "Give the real answer only after the tool results arrive.",
-            ]
-        )
-
-    def _parallel_tools(self) -> str:
-        """Latency option B: independent calls in ONE response (one provider cycle) instead of a chain. Tools that
-        need confirmation, escalate, or depend on a previous result are barriers and are called alone."""
-        if "parallel_tools" not in self.options or not (self.blueprint.tools.required or self.blueprint.tools.optional):
-            return ""
-        tb = self.blueprint.tools
-        barriers = sorted(
-            tid
-            for tid, perm in tb.permissions.items()
-            if perm.confirmation == "confirm_before_execute"
-            or (self.tool_declarations.get(tid) is not None and self.tool_declarations[tid].impact.value != "read")
-            and tid != "record_field"
-        )
-        lines = [
-            "When several tool calls are independent (none needs another's result), make them ALL in the same "
-            "response instead of one after another — e.g. one record_field call per detail the user just gave, "
-            "plus any lookup that does not depend on them.",
-            "Only call tools one after another when a later call needs an earlier call's result.",
-        ]
-        if barriers:
-            lines.append("Always call these alone, never together with other tools: " + ", ".join(barriers) + ".")
         return "\n".join(lines)
 
     def _truth(self) -> str:
@@ -264,8 +221,6 @@ class InstructionComposer:
             "language": self._language(),
             "data": self._data(),
             "tools": self._tools(),
-            "tool_ack": self._tool_ack(),
-            "parallel_tools": self._parallel_tools(),
             "truth": self._truth(),
             "coverage": self._coverage(),
             "disclosures": self._disclosures(),

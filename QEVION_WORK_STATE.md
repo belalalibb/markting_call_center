@@ -77,7 +77,9 @@
 2. Post-P6 backlog: bounded-LLM simulated customer, CRM/DNC adapter seam, Silero ONNX model fetch, real-provider latency table.
 
 ## Exact next action
-Latency root-cause investigation DONE (`docs/audit/LATENCY_ROOT_CAUSE_2026-09-24.md`): NO CONFIRMED QEVION DEFECT; provider tool-cycle bottleneck on tool turns; endpoint 500 ms = UX opportunity. Awaiting operator decision on proposals A (speak-before-tools) / B (batched tool calls). Opt-in instrumentation: `QEVION_LATENCY_TRACE=1`.
+Latency A/B gate BLOCKED by provider quota (OpenAI `insufficient_quota` after the baseline run). A and B were reverted on `main` (not proven); the code is parked on branch `latency-ab-experiment`. Once credit is back: on that branch run `bash scripts/latency_ab_all.sh`, then `scripts/latency_ab_eval.py`; merge only options marked KEEP. See `docs/audit/LATENCY_AB_RESULT_2026-09-24.md`.
+
+Previous: Latency root-cause investigation DONE (`docs/audit/LATENCY_ROOT_CAUSE_2026-09-24.md`): NO CONFIRMED QEVION DEFECT; provider tool-cycle bottleneck on tool turns; endpoint 500 ms = UX opportunity. Awaiting operator decision on proposals A (speak-before-tools) / B (batched tool calls). Opt-in instrumentation: `QEVION_LATENCY_TRACE=1`.
 
 Previous: OPS 5.5 remediation complete (CP-0013..CP-0017). Await operator review. Suggested next: human-microphone field test on a real device, RTL/Arabic UI pass, durable event sink, rotate credentials shared in chat.
 
