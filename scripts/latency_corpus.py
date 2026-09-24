@@ -225,6 +225,12 @@ def first_after(marks: list[list[Any]], kind: str, t: float, until: float | None
     return None
 
 
+def reanalyse(path: str) -> None:
+    """Recompute rows/summary from a saved raw run (analysis-only changes never need a new live run)."""
+    d = json.loads(pathlib.Path(path).read_text())
+    finish(path, d["sessions"], sum(1 for s in d["sessions"] if s.get("error")))
+
+
 def analyse(sess: dict[str, Any]) -> list[dict[str, Any]]:
     allm = sorted([list(m) for m in sess["server_marks"]] + [list(m) for m in sess["client_marks"]], key=lambda m: m[0])
     out = []
@@ -234,8 +240,12 @@ def analyse(sess: dict[str, Any]) -> list[dict[str, Any]]:
         until = turns[i + 1]["t_clip_start"] if i + 1 < len(turns) else None
         w = [m for m in allm if m[0] >= tu["t_clip_start"] and (until is None or m[0] < until)]
         g = lambda k, after=tu["t_clip_start"], w=w: first_after(w, k, after)  # noqa: E731
-        t3 = g("core:end_of_turn")
         eots = [m for m in w if m[1] == "core:end_of_turn"]
+        # the accepted END_OF_TURN for the utterance = the first one at/after the last voiced frame; earlier ones
+        # are premature commits inside the utterance (fragmentation, reported separately)
+        final = [m for m in eots if t1 is not None and m[0] >= t1]
+        premature = [m for m in eots if t1 is not None and m[0] < t1]
+        t3 = final[0][0] if final else (eots[-1][0] if eots else None)
         t4 = g("sent:input_audio_buffer.commit", t3 or 0)
         t5 = g("recv:input_audio_buffer.committed", t4 or 0)
         t4b = g("sent:response.create", t4 or 0)
@@ -271,6 +281,9 @@ def analyse(sess: dict[str, Any]) -> list[dict[str, Any]]:
                 "tool_calls": len(tools),
                 "provider_responses": n_resp,
                 "eot_commits": len(eots),
+                "premature_eot": len(premature),
+                "premature_eot_at_ms": [round(m[0] - tu["t_clip_start"]) for m in premature],
+                "cancelled_responses": sum(1 for m in w if m[1] == "sent:response.cancel"),
                 "T1_T3_endpoint": d(t1, t3),
                 "T3_T4_commit": d(t3, t4),
                 "T4_T5_provider_ack": d(t4, t5),
@@ -335,6 +348,11 @@ async def main() -> int:
                 failed += 1
                 sessions.append({"error": f"{type(e).__name__}: {e}"})
             pathlib.Path(out).write_text(json.dumps({"sessions": sessions}, ensure_ascii=False))
+    finish(out, sessions, failed)
+    return 0
+
+
+def finish(out: str, sessions: list[dict[str, Any]], failed: int) -> None:
     rows = [r for s in sessions if "turns" in s for r in analyse(s)]
     keys = [k for k in rows[0] if k.startswith("T")] if rows else []
     buckets = {
@@ -345,9 +363,9 @@ async def main() -> int:
     }
     summary = {b: {k: stats([r[k] for r in rs if r[k] is not None]) for k in keys} for b, rs in buckets.items()}
     summary["counts"] = {b: len(rs) for b, rs in buckets.items()}
+    summary["fragmented_turns"] = sum(1 for r in rows if r["premature_eot"])
+    summary["premature_eot_total"] = sum(r["premature_eot"] for r in rows)
     summary["failed_sessions"] = failed
-    summary["clip_last_voiced_ms"] = {n: (lastv[n] + 1) * 20 for n in names}
-    summary["clip_len_ms"] = {n: len(clips[n]) // 48 for n in names}
     dec_all = [d for r in rows for d in r["decisions"]]
     summary["decisions"] = {
         "count": len(dec_all),
@@ -361,8 +379,11 @@ async def main() -> int:
         s = summary["all"][k]
         if s.get("n"):
             print(f"{k:36} n={s['n']:>2} min={s['min']:>7} p50={s['p50']:>7} p95={s['p95']:>7} max={s['max']:>7}")
-    return 0
+    print("fragmented_turns", summary["fragmented_turns"], "premature_eot_total", summary["premature_eot_total"])
 
 
 if __name__ == "__main__":
-    raise SystemExit(asyncio.run(main()))
+    if "--reanalyse" in sys.argv:
+        reanalyse(sys.argv[1])
+    else:
+        raise SystemExit(asyncio.run(main()))
