@@ -5,9 +5,9 @@
 | Field | Value |
 |---|---|
 | Project phase | P5 — Simulation + Activation + Outbound |
-| Current stage | **OPS 5.5 remediation program** (approved 2026-09-23, run end-to-end without re-approval): P0 CP-0013 ✅, P1 CP-0014 ✅, P2 → CP-0015 (in progress), P3 → CP-0016, P4 → CP-0017 |
+| Current stage | **OPS 5.5 remediation program** (approved 2026-09-23, run end-to-end without re-approval): P0 CP-0013 ✅, P1 CP-0014 ✅, P2 CP-0015 ✅, P3 → CP-0016 (in progress), P4 → CP-0017 |
 | Current objective | Execute `docs/audit/OPS55_AUDIT_2026-09-23.md` plan: P2 transcription model option + F-09 Silero honesty + corpus harness + latency table; P3 F-08 tenant scoping + F-12 bounded logs; P4 UX (Normal/Advanced, mobile nav, first-run, actionable errors, admin provider list, F-14, F-15 docs) |
-| Last verified checkpoint | CP-0014 (OPS 5.5 P1: audible barge-in, truncate, transcripts) — `recovery/checkpoints/CP-0014.md`, tag `cp/CP-0014` |
+| Last verified checkpoint | CP-0015 (OPS 5.5 P2: transcription option, real Silero, barge-in ack + close fixes, latency table) — tag `cp/CP-0015` |
 | Last known good Git SHA | see `recovery/checkpoints/index.jsonl` last line (CP-0014) |
 | Approval | Operator approved full plan + decisions D1–D15 on 2026-09-22 (see `recovery/analysis/pre_approval_inspection_2026-09-22.md`) |
 
@@ -41,6 +41,7 @@
 - **Post-P6 TypeSafe integration (operator-supplied key, A5 partially lifted for the decision role):** `qevion/adapters/decision/typesafe.py` (`TypeSafeDecisionAdapter` — Jev `systemone` choice questions for `interpret_confirmation` / `classify_intent` only; https-only; floors 0.6 / 0.75; UNKNOWN on no-credential/network/low-confidence; `LayeredDecisionAdapter` rules-first, LLM only when rules UNKNOWN — ADR-0004 kept), composition `comp_mock_s2s_typesafe_v1` (decision `rules+typesafe`), store/app wiring (`decision_credential_source` per session, `?script=callback` named mock script, decision/tool events mirrored to client), `credentials._ENV_KEYS["typesafe"]=TYPESAFE_API_KEY`, 8 offline tests. **CI_LOCAL PASS 268 tests.** Live evidence (key fingerprint only): `evidence/live/typesafe_live_smoke.json` (18 cases, 16 match / 2 abstain / **0 contradictions**, core session `callback_requested` via LLM_VALIDATED confirmation, p50 202 ms, p95 292 ms) and `evidence/live/typesafe_live_ws_e2e.json` (running server + Admin ephemeral key → 3/3: ar-EG yes → LLM_VALIDATED 1.0 → granted → `schedule_callback` executed; no → RULE 0.8 → denied, no provider call; ambiguous → UNKNOWN → neither). Scripts: `scripts/typesafe_live_smoke.py`, `scripts/typesafe_live_ws.py`. Remaining: checkpoint record (CP-0010 addendum), optional console display of decision credential source. S2S real provider still A5-blocked (no OpenAI/Gemini key).
 
 ## Incidents
+- 2026-09-24 #22 (design, live-found in P2): Silero v5 context omitted (0 turns heard, health still passed → harness now requires every clip heard); serial client pump forced every audio barge-in stop at 300 ms; close() cancellable by pump teardown (lost record). All fixed with reproducing tests. Sandbox reset #46 mid-P2 (venv wiped; zero pushed work lost).
 - 2026-09-23 #21: OPS 5.5 independent audit found 15 findings (F-01 BLOCKER: session config never sent at start → provider default VAD answered before EOT). Remediation approved end-to-end; P0/P1 done with live evidence. Harness defect: `--late-bargein` triggered on silent tool-only `audio_end` → fixed to wait for voiced end.
 - 2026-09-23 #19 (field, design): browser_voice session on OpenAI died `1011 keepalive ping timeout` mid-speech; header showed the default `comp_mock_s2s_v1` while the session ran `comp_s2s_openai_v1`. Fixed in CP-0012 (see In progress). Found during diagnosis: Chromium fake mic emits sub-`min_speech_ms` beeps (correctly noise-rejected) so the browser smoke injects scripted utterances; the outbound card's second "Hang up" button made the Playwright selector ambiguous.
 - 2026-09-23 #20: sandbox resets #32–#39 during the keepalive work (venv/node_modules/Chromium wiped each time; two uncommitted files lost once each → rule reinforced: **commit every new file before its first run**). Zero pushed work lost.
@@ -76,7 +77,7 @@
 2. Post-P6 backlog: bounded-LLM simulated customer, CRM/DNC adapter seam, Silero ONNX model fetch, real-provider latency table.
 
 ## Exact next action
-P2 (CP-0015): add S2S input-transcription model option (`gpt-4o-transcribe` vs `whisper-1`), F-09 honest Silero fallback naming/capability, corpus harness + latency table from live traces, VAD split-turn (min silence) tuning. Server: `env -u OPENAI_API_KEY -u QEVION_ADMIN_TOKEN .venv/bin/python -m qevion.main`.
+P3 (CP-0016): F-08 tenant scoping of `/api/events` + `/api/sessions` (+ tests), F-12 bounded `event_log`/`sessions` pruning. Then P4 (CP-0017). After a reset: `bash scripts/fetch_models.sh` + `pip install -e '.[dev,vad]' playwright`. Server: `env -u OPENAI_API_KEY -u QEVION_ADMIN_TOKEN .venv/bin/python -m qevion.main`.
 
 Previous: CP-0012 checkpoint (record + tag + snapshot) for the keepalive fix; then backlog: live barge-in probe on OpenAI (ACC-017/018 real-provider timings), Arabizi negatives into rules lexicon, bounded-LLM simulated customer. Server: `env -u OPENAI_API_KEY .venv/bin/python -m qevion.main`; inject keys via `POST /api/admin/test-key`.
 
